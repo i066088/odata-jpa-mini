@@ -1,0 +1,130 @@
+<html>
+<head>
+<title>Test page</title>
+</head>
+<body>
+	<h1>Test page</h1>
+
+  <table border="1">
+  <tr>
+  <td>Service Document. NOT SUPPORTED.</td>
+  <td></td>
+  <td><a target="_blank"  href="resources.svc/?">/</a></td>
+  </tr>
+  
+  <tr>
+  <td>Metadata. NOT SUPPORTED.</td>
+  <td></td>
+  <td><a target="_blank"  href="resources.svc/$metadata">$metadata</a></td>
+  </tr>
+  
+  <tr>
+  <td>Entity Set (JSON)</td>
+  <td>$format NOT SUPPORTED</td>
+  <td><a target="_blank"  href="resources.svc/Foo">Foo</a><br/>
+  <a target="_blank"  href="resources.svc/Bar">Bar</a><br/>
+  </tr>
+  
+  <tr>
+  <td>Count</td>
+  <td></td>
+  <td><a target="_blank"  href="resources.svc/Foo/$count">Foo/$count</a></td>
+  </tr>
+  
+  <tr>
+  <td>Entity</td>
+  <td></td>
+  <td><a target="_blank"  href="resources.svc/Foo(1)">Foo(1)</a></td>
+  </tr>
+  
+  <tr>
+  <td>Primitive property</td>
+  <td></td>
+  <td><a target="_blank"  href="resources.svc/Foo(1)/Address">Foo(1)/Address</a></td>
+  </tr>
+  
+  <tr>
+  <td>Primitive property (RAW)</td>
+  <td>$value</td>
+  <td><a target="_blank"  href="resources.svc/Foo(1)/Address/$value">Foo(1)/Address/$value</a></td>
+  </tr>
+  
+  <tr>
+  <td>Navigation NOT SUPPORTED</td>
+  <td></td>
+  <td><a target="_blank"  href="resources.svc/Foo(1)/TipoEvento?">Foo(1)/TipoEvento</a><br/>
+  <a target="_blank"  href="resources.svc/Foo(1)/DettagliEvento?">Foo(1)/DettagliEvento</a><br/>
+  <a target="_blank"  href="resources.svc/Foo(1)/DettagliEvento(0)/Evento?">Foo(1)/DettagliEvento(0)/Evento</a></td>
+  </tr>
+  
+  <tr>
+  <td>Expand sub-items</td>
+  <td>$expand NOT SUPPORTED</td>
+  <td><a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita">Foo?$expand=TipiEvento,Entita</a><br/>
+  <a target="_blank"  href="resources.svc/Foo?&$expand=*">Foo?$expand=*</a></td>
+  </tr>
+  
+  <tr>
+  <td>WHERE</td>
+  <td>$filter TODO</td>
+  <td><a target="_blank"  href="resources.svc/Entita?&$filter=contains(Codice, 'U7RM0') and contains(Descrizione, 'ESP')">Entita?$filter=contains(Codice, 'U7RM0') and contains(Descrizione, 'ESP')</a><br/>
+  <a target="_blank"  href="resources.svc/Foo?&$filter=(Entita/Acronimo) eq 'U7SC0'">Foo?$filter=(Entita/Acronimo) eq 'U7SC0'</a><br/>
+  <a target="_blank"  href="resources.svc/Entita?&$filter=Acronimo eq 'U7SC0'">Entita?$filter=Acronimo eq'U7SC0'</a> <br/></td>
+  </tr>
+  
+  <tr>
+  <td>Foo Filter</td>
+  <td>TODO</td>
+  <td>
+  <a target="_blank"  href="resources.svc/Foo?&$filter=TipoEvento/IdTipoEvento eq 1">TipoEvento/IdTipoEvento eq 1</a>
+  <br/>
+  <a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita&$filter=Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1">Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1</a>
+  <br/>
+  <a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita&$filter=Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1 and contains(Tag,'EV')">Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1 and contains(Tag,'EV')</a>
+ <br/>
+  <a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita&$filter=Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1 and contains(Tag,'EV') and TStampEvento gt 2012-05-29T09:13:28Z">Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1 and contains(Tag,'EV') and TStampEvento gt 2012-05-29T09:13:28Z</a>
+  </td>
+  </tr>
+  
+  <tr>
+  <td>ORDER BY</td>
+  <td>$orderby</td>
+  <td><a target="_blank"  href="resources.svc/Foo?&$orderby=Name asc,Birthday desc">Foo?$orderby=Name asc,Birthday desc</a></td>
+  </tr>
+  
+  <tr>
+  <td>SELECT</td>
+  <td>$select NOT SUPPORTED</td>
+  <td><a target="_blank"  href="resources.svc/Foo?$select=Address">Foo?$select=Address</a></td>
+  </tr>
+  
+  <tr>
+  <td>Skip <i>n</i> items, top <i>n</i> items, get items count</td>
+  <td>$skip $top $count</td>
+  <td><a target="_blank"  href="resources.svc/Foo?$skip=2&$top=3&$count=true">Foo?$skip=2&$top=3&$count=true</a></td>
+  </tr>
+  
+  <tr>
+  <td>LAMBDA: ALL, ANY</td>
+  <td></td>
+  <td>NOT SUPPORTED
+  
+  <a target="_blank"  href="resources.svc/Foo?&$filter=Entita/all(x:contains(x/Acronimo,'U7'))">Foo?$filter=Entita/all(x:contains(x/Acronimo,'U7'))</a>
+  </td>
+  </tr>
+  
+  <tr>
+  <td>Literals</td>
+  <td></td>
+  <td>Numeri: 1234<br/>
+  	Stringhe: 'abc'<br/>
+  	Booleani: True<br/>
+  	Date: 2012-05-29T09:13:28<br/>
+  	Timestamp: 2018-01-10T09:24:54Z (non mostra i nanosecondi?!?)<br/>
+  </td>
+  </tr>
+  
+  </table>
+
+</body>
+</html>

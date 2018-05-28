@@ -1,0 +1,9 @@
+WARNING=DO NOT MODIFY THIS FILE IF YOU DON'T UNDERSTAND
+defaultDestination=/home/luca/glassfish4/glassfish/domains/domain1/autodeploy/odata-jpa-mini
+defaultVariables=
+eclipse.preferences.version=1
+includeTeamPrivateFiles=false
+map|0=src/test/webapp|,|,|,|,
+map|1=target/classes|/home/luca/glassfish4/glassfish/domains/domain1/autodeploy/odata-jpa-mini/WEB-INF/classes|,|,|,
+map|2=target/test-classes|/home/luca/glassfish4/glassfish/domains/domain1/autodeploy/odata-jpa-mini/WEB-INF/classes|,|,|,
+useCurrentDateForDestinationFiles=true

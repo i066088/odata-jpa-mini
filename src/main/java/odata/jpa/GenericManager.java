@@ -136,7 +136,7 @@ public class GenericManager {
 	 * Count number of rows in given table.
 	 */
 	public Long countEntities(Class<?> entity) {
-		return em.createQuery("count(*) from " + entity.getName(), Long.class).getSingleResult();
+		return em.createQuery("select count(*) from " + entity.getName(), Long.class).getSingleResult();
 	}
 
 	/**

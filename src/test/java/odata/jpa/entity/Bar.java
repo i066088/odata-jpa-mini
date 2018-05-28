@@ -3,23 +3,24 @@
 * Luca Vercelli 2017
 * Released under MIT license 
 */
-package odata.jpa;
+package odata.jpa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "EXAMPLE_FOO")
+@Table(name = "BAR")
 public class Bar {
 
 	private Long id;
 	private String description;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID")
 	public Long getId() {
 		return id;

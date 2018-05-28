@@ -37,12 +37,13 @@ import javax.ws.rs.core.Response;
  * REST syntax is inspired to OData. For handling parameters, we follow this
  * pattern: @see https://api.stackexchange.com/docs/users
  * 
- * @author Luca Vercelli 2017
+ * @author Luca Vercelli 2017-2018
  *
  */
 @Stateless
 @Path("/")
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//TODO @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+@Produces(MediaType.APPLICATION_JSON)
 public class GenericRestResources {
 
 	public static final Integer ZERO = 0;
