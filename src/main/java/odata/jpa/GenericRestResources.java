@@ -42,7 +42,7 @@ import javax.ws.rs.core.Response;
  */
 @Stateless
 @Path("/")
-//TODO @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+// TODO @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Produces(MediaType.APPLICATION_JSON)
 public class GenericRestResources {
 
@@ -56,14 +56,15 @@ public class GenericRestResources {
 	/**
 	 * Represent a JSON answer with a List inside the "data" field.
 	 */
+	// @XmlRootElement
 	public static class DataList {
-		private GenericEntity<Object> data;
+		private GenericEntity<List<Object>> data;
 
-		public GenericEntity<Object> getData() {
+		public GenericEntity<List<Object>> getData() {
 			return data;
 		}
 
-		public void setData(GenericEntity<Object> data) {
+		public void setData(GenericEntity<List<Object>> data) {
 			this.data = data;
 		}
 	}
@@ -72,8 +73,11 @@ public class GenericRestResources {
 	 * Represent a JSON answer with a List inside the "data" field, plus a
 	 * number inside the "count" field.
 	 */
+	// @XmlRootElement
 	public static class DataListCount extends DataList {
 		private Long count;
+
+		// FIXME where "type" comes from?
 
 		public Long getCount() {
 			return count;
@@ -82,6 +86,7 @@ public class GenericRestResources {
 		public void setCount(Long count) {
 			this.count = count;
 		}
+
 	}
 
 	/**
@@ -121,7 +126,7 @@ public class GenericRestResources {
 
 		// ListType and GenericEntity are needed in order to handle generics
 		Type genericType = new ListType(clazz);
-		GenericEntity<Object> genericList = new GenericEntity<Object>(list, genericType);
+		GenericEntity<List<Object>> genericList = new GenericEntity<List<Object>>((List<Object>) list, genericType);
 
 		if (count != null && count) {
 			Long numItems = manager.countEntities(clazz);
@@ -163,8 +168,10 @@ public class GenericRestResources {
 			throw new BadRequestException("Missing id");
 
 		Object obj = manager.findById(clazz, id);
+
 		if (obj == null)
 			throw new NotFoundException("");
+		System.out.println("DEBUG HERE: " + obj + " CLASS "+obj.getClass());
 
 		return Response.ok(obj).build();
 	}
@@ -186,7 +193,12 @@ public class GenericRestResources {
 
 		Map<String, ?> attributes = manager.object2bean(obj);
 
-		if (!attributes.containsKey(property))
+		String jpqlAttribute = helper.parseAttribute(property);
+		if (jpqlAttribute == null)
+			throw new BadRequestException("Cannot parse property: " + property);
+
+		// FIXME doesn't work with dots attr.attr.attr
+		if (!attributes.containsKey(jpqlAttribute))
 			throw new NotFoundException("Entity " + entity + " has no property " + property);
 
 		// FIXME toString va bene solo per i tipi primitivi ?
@@ -209,7 +221,12 @@ public class GenericRestResources {
 
 		Map<String, ?> attributes = manager.object2bean(obj);
 
-		if (!attributes.containsKey(property))
+		String jpqlAttribute = helper.parseAttribute(property);
+		if (jpqlAttribute == null)
+			throw new BadRequestException("Cannot parse property: " + property);
+
+		// FIXME doesn't work with dots attr.attr.attr
+		if (!attributes.containsKey(jpqlAttribute))
 			throw new NotFoundException("Entity " + entity + " has no property " + property);
 
 		Object value = attributes.get(property);
