@@ -1,29 +1,38 @@
 package odata.jpa;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 /**
- * @see https://developer.jboss.org/wiki/RESTEasyExceptionHandlingWithExceptionMapper?_sscc=t
- * @author Nuwan.N.Bandara
+ * I don't like the standard implementation: it gives printStackTrace() for
+ * manually launched exceptions (which is useless) and not for uncatched
+ * exceptions (which is very useful).
+ * 
+ * Response is returned in JSON. A better implementation would proceduce XML or
+ * JSON according to accepted headers.
  */
 @Provider
 public class DefaultExceptionHandler implements ExceptionMapper<Exception> {
 
 	@Override
 	public Response toResponse(Exception e) {
-		// For simplicity I am preparing error xml by hand.
-		// Ideally we should create an ErrorResponse class to hold the error
-		// info.
-		
-		e.printStackTrace();
-		
-		StringBuilder response = new StringBuilder("<response>");
-		response.append("<status>ERROR</status>");
-		response.append("<message>" + e.getMessage() + "</message>");
-		response.append("</response>");
-		return Response.serverError().entity(response.toString()).type(MediaType.APPLICATION_XML).build();
+
+		int status;
+		if (e instanceof WebApplicationException) {
+			// don't print stack trace
+			// Unluckily, someone prints it anyway.
+			status = ((WebApplicationException) e).getResponse().getStatus();
+		} else {
+			e.printStackTrace();
+			status = Status.INTERNAL_SERVER_ERROR.getStatusCode();
+		}
+
+		OdataExceptionBean errorMessage = new OdataExceptionBean(status, e.getMessage());
+
+		return Response.status(status).entity(errorMessage).type(MediaType.APPLICATION_JSON).build();
 	}
 }
