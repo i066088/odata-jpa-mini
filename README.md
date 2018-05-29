@@ -1,5 +1,4 @@
 # odata-jpa-mini
--------------------
 
 Best 60-70% of OData protocol.
  
@@ -15,16 +14,13 @@ this means to load a large number of libraries. Moreover Olingo JPA Processor is
 
 
 ## Limitations of this implementation
-----------------------------------
 * Root and metadata documents are not implemented
 * Navigation is not implemented
 * Several query options are not implemented, such as $select and $expand
 * Entity id's must all be Long! This is quite bad but I don't know how to solve it yet.
-* All limitations due to JPA
 
 
 ## Comparison between OData and JPA
------------------------------------
 
 JPA is far less powerful than OData.
 
@@ -57,6 +53,7 @@ Each entity in JPA must have one and only one key attribute.
 This attribute may be an Embedded object, thus simulating a multi-column key.
 
 
+----------------------------------------------------
 
 [1] https://github.com/apache/olingo-odata4
 
