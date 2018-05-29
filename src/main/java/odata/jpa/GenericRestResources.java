@@ -13,6 +13,8 @@ import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,6 +30,8 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.beanutils.BeanUtils;
+
 /**
  * This REST WS handles not just one entity, but all possible entities. Entites
  * can lie in different packages, however their names must be different (I argue
@@ -38,7 +42,7 @@ import javax.ws.rs.core.Response;
  * pattern: @see https://api.stackexchange.com/docs/users
  * 
  * @author Luca Vercelli 2017-2018
- *
+ * @see http://www.odata.org/getting-started/basic-tutorial/
  */
 @Stateless
 @Path("/")
@@ -56,7 +60,6 @@ public class GenericRestResources {
 	/**
 	 * Represent a JSON answer with a List inside the "data" field.
 	 */
-	// @XmlRootElement
 	public static class DataList {
 		private GenericEntity<List<Object>> data;
 
@@ -70,8 +73,8 @@ public class GenericRestResources {
 	}
 
 	/**
-	 * Represent a JSON answer with a List inside the "data" field, plus a
-	 * number inside the "count" field.
+	 * Represent a JSON answer with a List inside the "data" field, plus a number
+	 * inside the "count" field.
 	 */
 	// @XmlRootElement
 	public static class DataListCount extends DataList {
@@ -151,8 +154,8 @@ public class GenericRestResources {
 	}
 
 	/**
-	 * Retreive and return (via JSON) a single object by id. We don't know the
-	 * type of returned objects, so we must return a generic "Response".
+	 * Retreive and return (via JSON) a single object by id. We don't know the type
+	 * of returned objects, so we must return a generic "Response".
 	 * 
 	 * @param entity
 	 * @return
@@ -171,7 +174,7 @@ public class GenericRestResources {
 
 		if (obj == null)
 			throw new NotFoundException("");
-		System.out.println("DEBUG HERE: " + obj + " CLASS "+obj.getClass());
+		System.out.println("DEBUG HERE: " + obj + " CLASS " + obj.getClass());
 
 		return Response.ok(obj).build();
 	}
@@ -191,18 +194,19 @@ public class GenericRestResources {
 		if (obj == null)
 			throw new NotFoundException("");
 
-		Map<String, ?> attributes = manager.object2bean(obj);
-
 		String jpqlAttribute = helper.parseAttribute(property);
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
-		// FIXME doesn't work with dots attr.attr.attr
-		if (!attributes.containsKey(jpqlAttribute))
+		// Intended for primitive types...
+		String value;
+		try {
+			value = BeanUtils.getProperty(obj, jpqlAttribute);
+		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			throw new NotFoundException("Entity " + entity + " has no property " + property);
+		}
 
-		// FIXME toString va bene solo per i tipi primitivi ?
-		return attributes.get(property) == null ? null : attributes.get(property).toString();
+		return value;
 	}
 
 	@GET
@@ -219,18 +223,22 @@ public class GenericRestResources {
 		if (obj == null)
 			throw new NotFoundException("");
 
-		Map<String, ?> attributes = manager.object2bean(obj);
-
 		String jpqlAttribute = helper.parseAttribute(property);
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
-		// FIXME doesn't work with dots attr.attr.attr
-		if (!attributes.containsKey(jpqlAttribute))
+		// Intended for primitive types...
+		String value;
+		try {
+			value = BeanUtils.getProperty(obj, jpqlAttribute);
+		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			throw new NotFoundException("Entity " + entity + " has no property " + property);
+		}
 
-		Object value = attributes.get(property);
-		return Response.ok(value).build();
+		String context = entity + "(" + id + ")/" + property;
+		JsonObject retobj = Json.createObjectBuilder().add("@odata.context", context).add("value", value).build();
+
+		return Response.ok(retobj).build();
 	}
 
 	// TODO can @POST single property?
