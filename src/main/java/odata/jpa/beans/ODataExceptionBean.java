@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response.Status;
  * @see http://www.odata.org/documentation/odata-version-3-0/json-verbose-format/#representingerrorsinaresponse
  *
  */
-public class OdataExceptionBean {
+public class ODataExceptionBean {
 
 	public static class OdataExceptionErrorBean {
 		private String lang = "en-us";
@@ -42,24 +42,25 @@ public class OdataExceptionBean {
 	private OdataExceptionErrorBean error = new OdataExceptionErrorBean();
 	private String code;
 
-	public OdataExceptionBean() {
+	public ODataExceptionBean() {
+
 	}
 
-	public OdataExceptionBean(int status, String errorMsg) {
+	public ODataExceptionBean(int status, String errorMsg) {
 		this.code = Integer.toString(status);
 		this.error.value = errorMsg;
 	}
 
-	public OdataExceptionBean(Status status, String errorMsg) {
+	public ODataExceptionBean(Status status, String errorMsg) {
 		this(status.getStatusCode(), errorMsg);
 	}
 
-	public OdataExceptionBean(int status, String lang, String errorMsg) {
+	public ODataExceptionBean(int status, String lang, String errorMsg) {
 		this(status, errorMsg);
 		this.error.lang = lang;
 	}
 
-	public OdataExceptionBean(Status status, String lang, String errorMsg) {
+	public ODataExceptionBean(Status status, String lang, String errorMsg) {
 		this(status.getStatusCode(), errorMsg);
 		this.error.lang = lang;
 	}

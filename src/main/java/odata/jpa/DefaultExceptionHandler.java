@@ -7,7 +7,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import odata.jpa.beans.OdataExceptionBean;
+import odata.jpa.beans.ODataExceptionBean;
 
 /**
  * I don't like the standard implementation: it gives printStackTrace() for
@@ -33,7 +33,7 @@ public class DefaultExceptionHandler implements ExceptionMapper<Exception> {
 			status = Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		}
 
-		OdataExceptionBean errorMessage = new OdataExceptionBean(status, e.getMessage());
+		ODataExceptionBean errorMessage = new ODataExceptionBean(status, e.getMessage());
 
 		return Response.status(status).entity(errorMessage).type(MediaType.APPLICATION_JSON).build();
 	}
