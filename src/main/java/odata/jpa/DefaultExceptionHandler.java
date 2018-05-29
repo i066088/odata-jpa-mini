@@ -7,6 +7,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import odata.jpa.beans.OdataExceptionBean;
+
 /**
  * I don't like the standard implementation: it gives printStackTrace() for
  * manually launched exceptions (which is useless) and not for uncatched

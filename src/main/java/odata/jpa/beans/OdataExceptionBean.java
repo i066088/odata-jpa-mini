@@ -1,4 +1,4 @@
-package odata.jpa;
+package odata.jpa.beans;
 
 import javax.ws.rs.core.Response.Status;
 
