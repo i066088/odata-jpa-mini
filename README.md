@@ -1,4 +1,4 @@
-#odata-jpa-mini
+# odata-jpa-mini
 -------------------
 
 Best 60-70% of OData protocol.
@@ -11,13 +11,10 @@ Use case:
 Currently, the only way to do this is to use Olingo [1] with Olingo JPA Processor [2], however
 this means to load a large number of libraries. Moreover Olingo JPA Processor is not stable yet for production.
 
-[1] https://github.com/apache/olingo-odata4
-
-[2] https://github.com/SAP/olingo-jpa-processor-v4
 
 
 
-##Limitations of this implementation
+## Limitations of this implementation
 ----------------------------------
 * Root and metadata documents are not implemented
 * Navigation is not implemented
@@ -26,14 +23,14 @@ this means to load a large number of libraries. Moreover Olingo JPA Processor is
 * All limitations due to JPA
 
 
-##Comparison between OData and JPA
+## Comparison between OData and JPA
 -----------------------------------
 
 JPA is far less powerful than OData.
 
 | OData	        |  Java          |
 | ------------- | -------------- |
-| Primitive  Type |  See later (*) |
+| Primitive  Type |  See later [3] |
 | Enum Type    |   Enum        |
 | Entity Type   |  @Entity class |
 | Complex Type    | @Embedded class |
@@ -60,5 +57,9 @@ Each entity in JPA must have one and only one key attribute.
 This attribute may be an Embedded object, thus simulating a multi-column key.
 
 
-(*) For a mapping between Primitive Types and Java types see Olingo:
-https://olingo.apache.org/javadoc/odata4/index.html
+
+[1] https://github.com/apache/olingo-odata4
+
+[2] https://github.com/SAP/olingo-jpa-processor-v4
+
+[3] https://olingo.apache.org/javadoc/odata4/index.html 
