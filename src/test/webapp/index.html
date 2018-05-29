@@ -7,72 +7,71 @@
 
   <table border="1">
   <tr>
-  <td>Service Document. NOT SUPPORTED.</td>
-  <td></td>
+  <td>Service Document </td>
+  <td>NOT SUPPORTED</td>
   <td><a target="_blank"  href="resources.svc/?">/</a></td>
   </tr>
   
   <tr>
-  <td>Metadata. NOT SUPPORTED.</td>
-  <td></td>
+  <td>Metadata </td>
+  <td>NOT SUPPORTED</td>
   <td><a target="_blank"  href="resources.svc/$metadata">$metadata</a></td>
   </tr>
   
   <tr>
-  <td>Batch. NOT SUPPORTED.</td>
-  <td></td>
+  <td>Batch</td>
+  <td>NOT SUPPORTED</td>
   <td><a target="_blank"  href="resources.svc/$batch">$batch</a></td>
   </tr>
   
   <tr>
   <td>Entity Set (JSON)</td>
-  <td>$format NOT SUPPORTED</td>
+  <td>DON'T WORK YET. $format NOT SUPPORTED</td>
   <td><a target="_blank"  href="resources.svc/Foo">Foo</a><br/>
   <a target="_blank"  href="resources.svc/Bar">Bar</a><br/>
   </tr>
   
   <tr>
   <td>Count</td>
-  <td></td>
+  <td>OK</td>
   <td><a target="_blank"  href="resources.svc/Foo/$count">Foo/$count</a></td>
   </tr>
   
   <tr>
   <td>Entity</td>
-  <td></td>
+  <td>OK, no @odata.context yet</td>
   <td><a target="_blank"  href="resources.svc/Foo(1)">Foo(1)</a></td>
   </tr>
   
   <tr>
   <td>Primitive property</td>
-  <td></td>
+  <td>OK (what about non-primitive?)</td>
   <td><a target="_blank"  href="resources.svc/Foo(1)/Address">Foo(1)/Address</a></td>
   </tr>
   
   <tr>
   <td>Primitive property (RAW)</td>
-  <td>$value</td>
+  <td>OK</td>
   <td><a target="_blank"  href="resources.svc/Foo(1)/Address/$value">Foo(1)/Address/$value</a></td>
   </tr>
   
   <tr>
-  <td>Navigation NOT SUPPORTED</td>
-  <td></td>
+  <td>Navigation </td>
+  <td>NOT SUPPORTED</td>
   <td><a target="_blank"  href="resources.svc/Foo(1)/TipoEvento?">Foo(1)/TipoEvento</a><br/>
-  <a target="_blank"  href="resources.svc/Foo(1)/DettagliEvento?">Foo(1)/DettagliEvento</a><br/>
-  <a target="_blank"  href="resources.svc/Foo(1)/DettagliEvento(0)/Evento?">Foo(1)/DettagliEvento(0)/Evento</a></td>
+  <a target="_blank"  href="resources.svc/Foo(1)/SomeProperty(0)/SomeOtherProperty">Foo(1)/SomeProperty(0)/SomeOtherProperty</a></td>
   </tr>
   
   <tr>
   <td>Expand sub-items</td>
-  <td>$expand NOT SUPPORTED</td>
+  <td>NOT SUPPORTED</td>
   <td><a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita">Foo?$expand=TipiEvento,Entita</a><br/>
   <a target="_blank"  href="resources.svc/Foo?&$expand=*">Foo?$expand=*</a></td>
   </tr>
   
   <tr>
   <td>WHERE</td>
-  <td>$filter TODO</td>
+  <td>DON'T WORK YET</td>
   <td><a target="_blank"  href="resources.svc/Entita?&$filter=contains(Codice, 'U7RM0') and contains(Descrizione, 'ESP')">Entita?$filter=contains(Codice, 'U7RM0') and contains(Descrizione, 'ESP')</a><br/>
   <a target="_blank"  href="resources.svc/Foo?&$filter=(Entita/Acronimo) eq 'U7SC0'">Foo?$filter=(Entita/Acronimo) eq 'U7SC0'</a><br/>
   <a target="_blank"  href="resources.svc/Entita?&$filter=Acronimo eq 'U7SC0'">Entita?$filter=Acronimo eq'U7SC0'</a> <br/></td>
@@ -80,7 +79,7 @@
   
   <tr>
   <td>Foo Filter</td>
-  <td>TODO</td>
+  <td>DON'T WORK YET</td>
   <td>
   <a target="_blank"  href="resources.svc/Foo?&$filter=TipoEvento/IdTipoEvento eq 1">TipoEvento/IdTipoEvento eq 1</a>
   <br/>
@@ -93,27 +92,27 @@
   </tr>
   
   <tr>
+  <td>Skip <i>n</i> items, top <i>n</i> items, get items count</td>
+  <td>DON'T WORK YET</td>
+  <td><a target="_blank"  href="resources.svc/Foo?$skip=2&$top=3&$count=true">Foo?$skip=2&$top=3&$count=true</a></td>
+  </tr>
+  
+  <tr>
   <td>ORDER BY</td>
-  <td>$orderby</td>
+  <td>DON'T WORK YET</td>
   <td><a target="_blank"  href="resources.svc/Foo?&$orderby=Name asc,Birthday desc">Foo?$orderby=Name asc,Birthday desc</a></td>
   </tr>
   
   <tr>
   <td>SELECT</td>
-  <td>$select NOT SUPPORTED</td>
+  <td>NOT SUPPORTED (OR NOT YET)</td>
   <td><a target="_blank"  href="resources.svc/Foo?$select=Address">Foo?$select=Address</a></td>
   </tr>
   
   <tr>
   <td>JOIN</td>
-  <td>$crossjoin NOT SUPPORTED</td>
+  <td>NOT SUPPORTED (OR NOT YET)</td>
   <td><a target="_blank"  href="resources.svc/$crossjoin">$crossjoin...</a></td>
-  </tr>
-  
-  <tr>
-  <td>Skip <i>n</i> items, top <i>n</i> items, get items count</td>
-  <td>$skip $top $count</td>
-  <td><a target="_blank"  href="resources.svc/Foo?$skip=2&$top=3&$count=true">Foo?$skip=2&$top=3&$count=true</a></td>
   </tr>
   
   <tr>
