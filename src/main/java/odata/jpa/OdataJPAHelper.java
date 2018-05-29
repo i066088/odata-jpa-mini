@@ -1,8 +1,5 @@
 package odata.jpa;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.ejb.Stateless;
 
 @Stateless
@@ -21,7 +18,7 @@ public class OdataJPAHelper {
 
 		StringBuilder orderbyCondition = new StringBuilder();
 		if (orderby != null && !orderby.trim().isEmpty()) {
-			orderbyCondition.append(" order by ");
+			orderbyCondition.append(" order by");
 			String comma = "";
 			String[] orderbyPieces = orderby.split(",");
 			for (String piece : orderbyPieces) {
@@ -43,8 +40,7 @@ public class OdataJPAHelper {
 	}
 
 	/**
-	 * Convert $filter clause to JPA WHERE clause (without any semantical
-	 * check).
+	 * Convert $filter clause to JPA WHERE clause (without any semantical check).
 	 * 
 	 * @param orderby
 	 * @return
@@ -57,8 +53,6 @@ public class OdataJPAHelper {
 		return filter;
 	}
 
-	private static Pattern attributeMatcher = Pattern.compile("([a-zA-Z_]\\w*)(/[a-zA-Z_]\\w*)*");
-
 	/**
 	 * Convert an attribute from OData to JPA form. For example, Address/Street
 	 * becomes address.street .
@@ -67,14 +61,15 @@ public class OdataJPAHelper {
 	 * @return
 	 */
 	public String parseAttribute(String attribute) {
-		Matcher matcher = attributeMatcher.matcher(attribute);
-		if (!matcher.matches())
+		if (attribute == null || "".equals(attribute))
 			return null;
 
+		String[] pieces = attribute.split("/");
 		StringBuilder sb = new StringBuilder();
-		sb.append(matcher.group(1));
-		for (int i = 1; i < matcher.groupCount(); ++i) {
-			sb.append('.').append(matcher.group(i));
+		String dot = "";
+		for (String piece : pieces) {
+			sb.append(dot).append(firstToLower(piece));
+			dot = ".";
 		}
 		return sb.toString();
 	}
