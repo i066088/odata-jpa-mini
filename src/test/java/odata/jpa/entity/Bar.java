@@ -40,7 +40,7 @@ public class Bar {
 
 	@Override
 	public String toString() {
-		return "Bar" + getDescription();
+		return "Bar " + getDescription();
 	}
 
 	@Override
