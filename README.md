@@ -18,6 +18,7 @@ this means to load a large number of libraries. Moreover Olingo JPA Processor is
 * Navigation is not implemented
 * Several query options are not implemented, such as $select and $expand
 * Entity id's must all be Long! This is quite bad but I don't know how to solve it yet.
+* No OData metadata (is this really a limitation?)
 
 
 ## Comparison between OData and JPA
