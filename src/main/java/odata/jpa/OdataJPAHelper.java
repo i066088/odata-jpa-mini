@@ -18,10 +18,10 @@ public class OdataJPAHelper {
 
 		StringBuilder orderbyCondition = new StringBuilder();
 		if (orderby != null && !orderby.trim().isEmpty()) {
-			orderbyCondition.append(" order by");
 			String comma = "";
 			String[] orderbyPieces = orderby.split(",");
 			for (String piece : orderbyPieces) {
+				piece = piece.trim();
 				String[] attrAndAsc = piece.split(" ");
 				if (attrAndAsc.length > 2 || attrAndAsc.length == 0 || attrAndAsc[0] == null)
 					throw new IllegalArgumentException("Syntax error in $orderby condiction");
@@ -68,6 +68,7 @@ public class OdataJPAHelper {
 		StringBuilder sb = new StringBuilder();
 		String dot = "";
 		for (String piece : pieces) {
+			piece = piece.trim();
 			sb.append(dot).append(firstToLower(piece));
 			dot = ".";
 		}

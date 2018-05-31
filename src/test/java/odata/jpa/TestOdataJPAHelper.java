@@ -62,7 +62,7 @@ public class TestOdataJPAHelper {
 		String str = "AbcdEfg/HilmNopq desc,Paperino";
 		String str2 = helper.parseOrderByClause(str);
 		assertNotNull(str2);
-		assertEquals("order by abcdEfg.hilmNopq desc, paperino asc", str2.trim());
+		assertEquals("abcdEfg.hilmNopq desc, paperino asc", str2.trim());
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class TestOdataJPAHelper {
 		String str = "AbcdEfg/HilmNopq,Paperino asc";
 		String str2 = helper.parseOrderByClause(str);
 		assertNotNull(str2);
-		assertEquals("order by abcdEfg.hilmNopq asc, paperino asc", str2.trim());
+		assertEquals("abcdEfg.hilmNopq asc, paperino asc", str2.trim());
 	}
 
 	@Test
