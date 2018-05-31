@@ -24,16 +24,19 @@ public class DefaultExceptionHandler implements ExceptionMapper<Exception> {
 	public Response toResponse(Exception e) {
 
 		int status;
+		String message;
 		if (e instanceof WebApplicationException) {
 			// don't print stack trace
 			// Unluckily, someone prints it anyway.
 			status = ((WebApplicationException) e).getResponse().getStatus();
+			message = e.getMessage();
 		} else {
 			e.printStackTrace();
 			status = Status.INTERNAL_SERVER_ERROR.getStatusCode();
+			message = Status.INTERNAL_SERVER_ERROR.getReasonPhrase();
 		}
 
-		ODataExceptionBean errorMessage = new ODataExceptionBean(status, e.getMessage());
+		ODataExceptionBean errorMessage = new ODataExceptionBean(status, message);
 
 		return Response.status(status).entity(errorMessage).type(MediaType.APPLICATION_JSON).build();
 	}
