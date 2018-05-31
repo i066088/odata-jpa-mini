@@ -18,6 +18,9 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.IdentifiableType;
+import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -62,8 +65,22 @@ public class GenericManager {
 	}
 
 	/**
-	 * Return a new object with given attributes set. Class must have a
-	 * no-argument constructor.
+	 * Retrieve (single) identity column.
+	 * 
+	 * @see https://stackoverflow.com/questions/16909236
+	 * @param em
+	 * @param entity
+	 * @return
+	 */
+	public <T> SingularAttribute<? super T, ?> getIdAttribute(Class<T> entity) {
+		Metamodel m = em.getMetamodel();
+		IdentifiableType<T> type = (IdentifiableType<T>) m.managedType(entity);
+		return type.getId(type.getIdType().getJavaType());
+	}
+
+	/**
+	 * Return a new object with given attributes set. Class must have a no-argument
+	 * constructor.
 	 * 
 	 * @param entity
 	 * @param attributes
@@ -103,8 +120,8 @@ public class GenericManager {
 	}
 
 	/**
-	 * Save an object to database (using 'merge' instead of 'persist'). This is
-	 * ok for both INSERT and UPDATE.
+	 * Save an object to database (using 'merge' instead of 'persist'). This is ok
+	 * for both INSERT and UPDATE.
 	 */
 	public <T> T save(T tosave) {
 		return em.merge(tosave);
@@ -140,11 +157,11 @@ public class GenericManager {
 	}
 
 	/**
-	 * Load at most maxResults objects of given entity, starting from
-	 * firstResult, and with given ordering. Useful for pagination.
+	 * Load at most maxResults objects of given entity, starting from firstResult,
+	 * and with given ordering. Useful for pagination.
 	 * 
-	 * Notice that "maxResult" is in fact the size of a page, while
-	 * "firstResult" = (pageNumber-1)*pageSize
+	 * Notice that "maxResult" is in fact the size of a page, while "firstResult" =
+	 * (pageNumber-1)*pageSize
 	 * 
 	 * @param maxResult
 	 *            max number of elements to retrieve (optional)
@@ -180,8 +197,7 @@ public class GenericManager {
 	}
 
 	/**
-	 * Load all objects of given entity, such that property=value (null
-	 * supported).
+	 * Load all objects of given entity, such that property=value (null supported).
 	 */
 	public <T> List<T> findByProperty(Class<T> entity, String propertyName, Object value) {
 		if (value != null) {
@@ -194,8 +210,8 @@ public class GenericManager {
 	}
 
 	/**
-	 * Load that object of given entity, such that property=value (null
-	 * supported), or null if none.
+	 * Load that object of given entity, such that property=value (null supported),
+	 * or null if none.
 	 * 
 	 * @throws NonUniqueResultException
 	 */
@@ -215,8 +231,7 @@ public class GenericManager {
 	}
 
 	/**
-	 * Load all objects of given entity, such that property=value (null
-	 * supported).
+	 * Load all objects of given entity, such that property=value (null supported).
 	 */
 	public <T> List<T> findByProperties(Class<T> entity, Map<String, Object> properties) {
 
