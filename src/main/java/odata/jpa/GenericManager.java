@@ -40,6 +40,8 @@ public class GenericManager {
 
 	/**
 	 * Return a managed entity Class, if any, or null if entity is not managed.
+	 * 
+	 * Complex Types are ignored.
 	 */
 	public Class<?> getEntityClass(String entity) {
 

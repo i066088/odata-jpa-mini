@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.metamodel.SingularAttribute;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -143,7 +144,7 @@ public class GenericRestResources {
 		Object obj = manager.findById(clazz, id);
 
 		if (obj == null)
-			throw new NotFoundException("");
+			throw new NotFoundException("No entity with this Id");
 
 		return Response.ok(obj).build();
 	}
@@ -258,24 +259,30 @@ public class GenericRestResources {
 	 */
 	@PUT
 	@Path("{entity}({id})")
-	public Response update(@PathParam("entity") String entity, @PathParam("id") Long id, Map<String, String> attributes)
-			throws NotFoundException {
+	public <T> Response update(@PathParam("entity") String entity, @PathParam("id") Long id,
+			Map<String, String> attributes) throws NotFoundException {
 
 		// FIXME: right way?
 
-		Class<?> clazz = getEntityOrThrowException(entity);
+		@SuppressWarnings("unchecked")
+		Class<T> clazz = (Class<T>) getEntityOrThrowException(entity);
 
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		attributes.put("id", id.toString());
-		Object obj = manager.bean2object(clazz, attributes);
+		SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(clazz);
+		attributes.put(idAttr.getName(), id.toString());
+
+		T obj = manager.bean2object(clazz, attributes);
 		obj = manager.save(obj);
 		return Response.ok(obj).build();
 	}
 
 	/**
-	 * Duplicate and return (via JSON) a single object by id.
+	 * Duplicate and return (via JSON) a single object by id. The new object is not
+	 * saved on DB yet.
+	 * 
+	 * This is an example of OData Function.
 	 * 
 	 * @param entity
 	 * @return
@@ -283,20 +290,26 @@ public class GenericRestResources {
 	 */
 	@GET
 	@Path("{entity}({id})/Clone")
-	public Response duplicate(@PathParam("entity") String entity, @PathParam("id") Long id) throws NotFoundException {
+	public <T> Response duplicate(@PathParam("entity") String entity, @PathParam("id") Long id)
+			throws NotFoundException {
 
-		// FIXME: right way?
-
-		Class<?> clazz = getEntityOrThrowException(entity);
+		@SuppressWarnings("unchecked")
+		Class<T> clazz = (Class<T>) getEntityOrThrowException(entity);
 
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = manager.findById(clazz, id);
+		T obj = manager.findById(clazz, id);
+
+		if (obj == null)
+			throw new NotFoundException("No entity with this Id");
+
+		SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(clazz);
 
 		Method setter;
 		try {
-			setter = obj.getClass().getMethod("setId", Long.class);
+			// FIXME maiusc?
+			setter = obj.getClass().getMethod("set" + idAttr.getName(), Long.class);
 			setter.invoke(obj, (Long) null);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
