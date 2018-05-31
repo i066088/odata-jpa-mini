@@ -6,8 +6,7 @@
 package odata.jpa;
 
 import javax.ws.rs.ApplicationPath;
-
-import odata.jpa.jackson.JacksonApplication;
+import javax.ws.rs.core.Application;
 
 /**
  * Configures a JAX-RS endpoint.
@@ -15,6 +14,6 @@ import odata.jpa.jackson.JacksonApplication;
  * @author airhacks.com
  */
 @ApplicationPath("/resources.svc")
-public class JAXRSApplication extends JacksonApplication {
+public class JAXRSApplication extends Application {
 
 }

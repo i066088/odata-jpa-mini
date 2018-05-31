@@ -25,10 +25,22 @@
   </tr>
   
   <tr>
-  <td>Entity Set (JSON)</td>
-  <td>DON'T WORK YET. $format NOT SUPPORTED</td>
+  <td>Entity Set</td>
+  <td>OK. $format NOT SUPPORTED. Currently JSON only.</td>
   <td><a target="_blank"  href="resources.svc/Foo">Foo</a><br/>
   <a target="_blank"  href="resources.svc/Bar">Bar</a><br/>
+  </tr>
+  
+  <tr>
+  <td>Skip <i>n</i> items, top <i>n</i> items, get items count</td>
+  <td>OK</td>
+  <td><a target="_blank"  href="resources.svc/Foo?$skip=2&$top=3&$count=true">Foo?$skip=2&$top=3&$count=true</a></td>
+  </tr>
+  
+  <tr>
+  <td>ORDER BY</td>
+  <td>DON'T WORK YET</td>
+  <td><a target="_blank"  href="resources.svc/Foo?&$orderby=Name asc,Birthday desc">Foo?$orderby=Name asc,Birthday desc</a></td>
   </tr>
   
   <tr>
@@ -39,7 +51,7 @@
   
   <tr>
   <td>Entity</td>
-  <td>OK, no @odata.context yet</td>
+  <td>OK</td>
   <td><a target="_blank"  href="resources.svc/Foo(1)">Foo(1)</a></td>
   </tr>
   
@@ -92,18 +104,6 @@
   </tr>
   
   <tr>
-  <td>Skip <i>n</i> items, top <i>n</i> items, get items count</td>
-  <td>DON'T WORK YET</td>
-  <td><a target="_blank"  href="resources.svc/Foo?$skip=2&$top=3&$count=true">Foo?$skip=2&$top=3&$count=true</a></td>
-  </tr>
-  
-  <tr>
-  <td>ORDER BY</td>
-  <td>DON'T WORK YET</td>
-  <td><a target="_blank"  href="resources.svc/Foo?&$orderby=Name asc,Birthday desc">Foo?$orderby=Name asc,Birthday desc</a></td>
-  </tr>
-  
-  <tr>
   <td>SELECT</td>
   <td>NOT SUPPORTED (OR NOT YET)</td>
   <td><a target="_blank"  href="resources.svc/Foo?$select=Address">Foo?$select=Address</a></td>
@@ -127,11 +127,11 @@
   <tr>
   <td>Literals</td>
   <td></td>
-  <td>Numeri: 1234<br/>
-  	Stringhe: 'abc'<br/>
-  	Booleani: True<br/>
-  	Date: 2012-05-29T09:13:28<br/>
-  	Timestamp: 2018-01-10T09:24:54Z (non mostra i nanosecondi?!?)<br/>
+  <td>Numbers: 1234<br/>
+  	Strings: 'abc'<br/>
+  	Booleans: True<br/>
+  	Dates: 2012-05-29T09:13:28<br/>
+  	Timestamps: 2018-01-10T09:24:54Z<br/>
   </td>
   </tr>
   

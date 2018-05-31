@@ -7,14 +7,12 @@ package odata.jpa;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -26,11 +24,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.beanutils.BeanUtils;
+
+import odata.jpa.beans.ODataValueBean;
 
 /**
  * This REST WS handles not just one entity, but all possible entities. Entites
@@ -50,47 +49,18 @@ import org.apache.commons.beanutils.BeanUtils;
 @Produces(MediaType.APPLICATION_JSON)
 public class GenericRestResources {
 
+	// FIXME alla prima request viene sempre risposto un errore:
+	// javax.servlet.ServletException:
+	// org.glassfish.jersey.server.ContainerException:
+	// java.lang.NoClassDefFoundError:
+	// com/fasterxml/jackson/module/jaxb/JaxbAnnotationIntrospector
+
 	public static final Integer ZERO = 0;
 
 	@Inject
 	GenericManager manager;
 	@Inject
 	OdataJPAHelper helper;
-
-	/**
-	 * Represent a JSON answer with a List inside the "data" field.
-	 */
-	public static class DataList {
-		private GenericEntity<List<Object>> data;
-
-		public GenericEntity<List<Object>> getData() {
-			return data;
-		}
-
-		public void setData(GenericEntity<List<Object>> data) {
-			this.data = data;
-		}
-	}
-
-	/**
-	 * Represent a JSON answer with a List inside the "data" field, plus a number
-	 * inside the "count" field.
-	 */
-	// @XmlRootElement
-	public static class DataListCount extends DataList {
-		private Long count;
-
-		// FIXME where "type" comes from?
-
-		public Long getCount() {
-			return count;
-		}
-
-		public void setCount(Long count) {
-			this.count = count;
-		}
-
-	}
 
 	/**
 	 * Return the Entity Class with given name.
@@ -107,6 +77,12 @@ public class GenericRestResources {
 		return clazz;
 	}
 
+	@GET
+	@Path("${anything}")
+	public void unsupported(@PathParam("anything") String anything) {
+		throw new BadRequestException("Unknown keyword $" + anything + ".");
+	}
+
 	/**
 	 * Return a list of objects (via JSON). We don't know the type of returned
 	 * objects, so we must return a generic "Response".
@@ -117,31 +93,25 @@ public class GenericRestResources {
 	 */
 	@GET
 	@Path("{entity}")
-	public Response find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
+	public Map<String, Object> find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
 			@QueryParam("$top") Integer top, @QueryParam("$filter") String filter,
 			@QueryParam("$orderby") String orderby, @QueryParam("$count") Boolean count) throws NotFoundException {
 
-		Class<?> clazz = getEntityOrThrowException(entity);
+		Class<?> clazz = getEntityOrThrowException(entity); // this is Class<T>
 
-		List<?> list;
+		List<?> list; // this is List<T>
 
 		list = manager.find(clazz, top, skip, helper.parseFilterClause(filter), helper.parseOrderByClause(orderby));
 
-		// ListType and GenericEntity are needed in order to handle generics
-		Type genericType = new ListType(clazz);
-		GenericEntity<List<Object>> genericList = new GenericEntity<List<Object>>((List<Object>) list, genericType);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("data", list);
 
 		if (count != null && count) {
 			Long numItems = manager.countEntities(clazz);
-			DataListCount d = new DataListCount();
-			d.setData(genericList);
-			d.setCount(numItems);
-			return Response.ok(d).build();
-		} else {
-			DataList d = new DataList();
-			d.setData(genericList);
-			return Response.ok(d).build();
+			map.put("count", numItems);
 		}
+
+		return map;
 
 	}
 
@@ -174,7 +144,6 @@ public class GenericRestResources {
 
 		if (obj == null)
 			throw new NotFoundException("");
-		System.out.println("DEBUG HERE: " + obj + " CLASS " + obj.getClass());
 
 		return Response.ok(obj).build();
 	}
@@ -211,7 +180,7 @@ public class GenericRestResources {
 
 	@GET
 	@Path("{entity}({id})/{property}")
-	public Response getProperty(@PathParam("entity") String entity, @PathParam("id") Long id,
+	public ODataValueBean getProperty(@PathParam("entity") String entity, @PathParam("id") Long id,
 			@PathParam("property") String property) throws NotFoundException {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
@@ -235,10 +204,9 @@ public class GenericRestResources {
 			throw new NotFoundException("Entity " + entity + " has no property " + property);
 		}
 
-		String context = entity + "(" + id + ")/" + property;
-		JsonObject retobj = Json.createObjectBuilder().add("@odata.context", context).add("value", value).build();
+		ODataValueBean response = new ODataValueBean(value);
 
-		return Response.ok(retobj).build();
+		return response;
 	}
 
 	// TODO can @POST single property?
