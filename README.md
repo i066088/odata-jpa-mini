@@ -28,7 +28,7 @@ JPA is far less powerful than OData.
 
 | OData	        |  Java          |
 | ------------- | -------------- |
-| Primitive  Type |  See later [3] |
+| Primitive  Type |  Integer, Boolean, ... see [3] |
 | Enum Type    |   Enum        |
 | Entity Type   |  @Entity class |
 | Complex Type    | @Embedded class |
@@ -61,4 +61,4 @@ This attribute may be an Embedded object, thus simulating a multi-column key.
 
 [2] https://github.com/SAP/olingo-jpa-processor-v4
 
-[3] https://olingo.apache.org/javadoc/odata4/index.html 
+[3] https://olingo.apache.org/javadoc/odata4/org/apache/olingo/commons/api/edm/EdmPrimitiveType.html
