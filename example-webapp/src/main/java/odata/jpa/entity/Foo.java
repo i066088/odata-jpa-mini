@@ -17,6 +17,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -105,6 +107,8 @@ public class Foo {
 		this.nice = nice;
 	}
 
+	@ManyToOne
+	@JoinColumn(name = "FAVOURITE_BAR_ID")
 	public Bar getFavouriteBar() {
 		return favouriteBar;
 	}
