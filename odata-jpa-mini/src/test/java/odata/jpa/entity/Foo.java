@@ -34,8 +34,9 @@ public class Foo {
 	private String address;
 	private Double age;
 	private Date birthday;
-	private Boolean3 nice;
-	private List<Bar> bars = new ArrayList<>();
+	private Boolean3 nice; // EnumType
+	private Bar favouriteBar; // Navigation
+	private List<Bar> bars = new ArrayList<>(); // Navigation to Collection
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -104,16 +105,22 @@ public class Foo {
 		this.nice = nice;
 	}
 
+	public Bar getFavouriteBar() {
+		return favouriteBar;
+	}
+
+	public void setFavouriteBar(Bar favouriteBar) {
+		this.favouriteBar = favouriteBar;
+	}
+
 	// FIXME I have to make it EAGER otherwise serialization fails...
 	@OneToMany(fetch = FetchType.EAGER)
 	public List<Bar> getBars() {
 		return bars;
-
 	}
 
 	public void setBars(List<Bar> bars) {
 		this.bars = bars;
-
 	}
 
 	@Override

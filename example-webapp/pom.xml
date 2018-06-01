@@ -22,12 +22,6 @@
 			<artifactId>odata-jpa-mini</artifactId>
 			<version>1.0</version>
 		</dependency>
-		<dependency>
-			<groupId>odata</groupId>
-			<artifactId>odata-jpa-mini</artifactId>
-			<version>1.0</version>
-			<type>test-jar</type>
-		</dependency>
 
 		<!-- Java EE servlet stuff (only needed at compile time) -->
 		<dependency>
