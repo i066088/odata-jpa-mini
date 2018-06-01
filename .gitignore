@@ -1,4 +1,5 @@
-target/
+odata-mini-jpa/target/
+example-webapp/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
