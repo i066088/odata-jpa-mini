@@ -10,7 +10,7 @@ Use case:
 Currently, the only way to do this is to use Olingo [1] with Olingo JPA Processor [2], however
 this means to load a large number of libraries. Moreover Olingo JPA Processor is not stable yet for production.
 
-
+* Warning: requires Jackson as serializer, MOXy won't work *
 
 
 ## Limitations of this implementation
