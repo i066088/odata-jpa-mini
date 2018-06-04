@@ -17,6 +17,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -116,6 +117,18 @@ public class GenericRestResources {
 
 	}
 
+	@PUT
+	@Path("{entity}")
+	public void replaceAll() {
+		throw new ForbiddenException("Replacing the whole collection is not supported (yet?)");
+	}
+
+	@DELETE
+	@Path("{entity}")
+	public void deleteAll() {
+		throw new ForbiddenException("Deleting the whole collection is not supported (yet?)");
+	}
+
 	@GET
 	@Path("{entity}/$count")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -210,7 +223,12 @@ public class GenericRestResources {
 		return response;
 	}
 
-	// TODO can @POST single property?
+	@PUT
+	@Path("{entity}({id})/{property}")
+	public void updateProperty() {
+		throw new ForbiddenException("Updating a single property is not supported (yet?)");
+	}
+
 
 	/**
 	 * Create and return a single object (via JSON). We don't know the type of
@@ -258,6 +276,7 @@ public class GenericRestResources {
 	 * @throws NotFoundException
 	 */
 	@PUT
+	// @PATCH does not exist!
 	@Path("{entity}({id})")
 	public <T> Response update(@PathParam("entity") String entity, @PathParam("id") Long id,
 			Map<String, String> attributes) throws NotFoundException {
@@ -268,7 +287,7 @@ public class GenericRestResources {
 		Class<T> clazz = (Class<T>) getEntityOrThrowException(entity);
 
 		if (id == null)
-			throw new BadRequestException("Missing id");
+			throw new BadRequestException("Missing id. Creating an object with given id is not recommended nor supported.");
 
 		SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(clazz);
 		attributes.put(idAttr.getName(), id.toString());

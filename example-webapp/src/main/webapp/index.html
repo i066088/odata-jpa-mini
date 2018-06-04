@@ -135,7 +135,40 @@
   </td>
   </tr>
   
+  <tr>
+  <td>INSERT (POST)</td>
+  <td>NOT WORKING YET. Update is in PUT, not PATCH.</td>
+  <td><a target="_blank"  href="#" onclick="javascript:insert();return false;">resources.svc/Foo</a></td>
+  </tr>
+  
   </table>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+	function insert() {
+		var mydata = {
+			name : "Goofy" + Math.round(Math.random()*10000),
+			address : "Somewhere 44",
+			age :  Math.random()*100
+		};
+		
+		alert("Going to insert " + mydata.name);
+		
+		$.ajax({
+			url: 'resources.svc/Foo',
+			type: 'POST',
+		    contentType: 'application/json; charset=utf-8',
+		    dataType: 'json',
+			data: JSON.stringify(mydata),
+			success: function(data) {
+				alert('Load was performed. data='+JSON.stringify(data));
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				alert('Error while loading: ' + errorThrown);
+				console.log('OData error was: ' + jqXHR.responseJSON.error.value);
+			}
+			});
+	}
+</script>
 </body>
 </html>
