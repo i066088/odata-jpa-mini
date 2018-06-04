@@ -6,7 +6,6 @@
 package odata.jpa;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -229,7 +228,6 @@ public class GenericRestResources {
 		throw new ForbiddenException("Updating a single property is not supported (yet?)");
 	}
 
-
 	/**
 	 * Create and return a single object (via JSON). We don't know the type of
 	 * returned objects, so we must return a generic "Response".
@@ -287,7 +285,8 @@ public class GenericRestResources {
 		Class<T> clazz = (Class<T>) getEntityOrThrowException(entity);
 
 		if (id == null)
-			throw new BadRequestException("Missing id. Creating an object with given id is not recommended nor supported.");
+			throw new BadRequestException(
+					"Missing id. Creating an object with given id is not recommended nor supported.");
 
 		SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(clazz);
 		attributes.put(idAttr.getName(), id.toString());
@@ -318,22 +317,10 @@ public class GenericRestResources {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		T obj = manager.findById(clazz, id);
+		T obj = manager.duplicate(clazz, id);
 
 		if (obj == null)
 			throw new NotFoundException("No entity with this Id");
-
-		SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(clazz);
-
-		Method setter;
-		try {
-			// FIXME maiusc?
-			setter = obj.getClass().getMethod("set" + idAttr.getName(), Long.class);
-			setter.invoke(obj, (Long) null);
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			throw new RuntimeException(e);
-		}
 
 		return Response.ok(obj).build();
 

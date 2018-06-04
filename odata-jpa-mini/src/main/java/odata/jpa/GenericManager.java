@@ -23,6 +23,7 @@ import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 
 /**
  * Not very different from EntityManager. Just a bit more.
@@ -116,6 +117,8 @@ public class GenericManager {
 
 	/**
 	 * Find (i.e. retrieve) an object from database, by primary key.
+	 * 
+	 * @return the found entity instance or null if the entity does not exist
 	 */
 	public <T> T findById(Class<T> entity, Serializable id) {
 		return em.find(entity, id);
@@ -185,7 +188,7 @@ public class GenericManager {
 		}
 
 		if (orderby != null && !orderby.trim().isEmpty()) {
-			whereCondition = " ORDER BY " + orderby;
+			orderbyCondition = " ORDER BY " + orderby;
 		}
 
 		TypedQuery<T> query = em
@@ -268,6 +271,43 @@ public class GenericManager {
 
 		return q.getResultList();
 
+	}
+
+	/**
+	 * Find (i.e. retrieve) an object from database, by primary key, then detache it
+	 * and remove its primary key so that we have a "new" object.
+	 * 
+	 * The new object is not saved to database.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if object does not exists
+	 */
+	public <T> T duplicate(Class<T> entity, Serializable id) {
+
+		T obj = em.find(entity, id);
+
+		if (obj == null)
+			throw new IllegalArgumentException("No object with given id");
+
+		em.detach(obj);
+
+		SingularAttribute<? super T, ?> idAttr = getIdAttribute(entity);
+		if (idAttr == null) {
+			//TODO LOG instead of System.out.println 
+			System.out.println("getIdAttribute() returned null for entity:" + entity);
+			throw new IllegalArgumentException();
+		}
+
+		try {
+			PropertyUtils.setSimpleProperty(obj, idAttr.getName(), null);
+		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException exc) {
+			//TODO LOG instead of System.out.println
+			System.out.println("Misconfigured class: " + entity);
+			exc.printStackTrace();
+			throw new IllegalArgumentException("Misconfigured class: " + entity);
+		}
+
+		return obj;
 	}
 
 }
