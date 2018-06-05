@@ -70,7 +70,7 @@
   <tr>
   <td>Navigation </td>
   <td>NOT SUPPORTED</td>
-  <td><a target="_blank"  href="resources.svc/Foo(1)/TipoEvento?">Foo(1)/TipoEvento</a><br/>
+  <td><a target="_blank"  href="resources.svc/Foo(1)/FavouriteBar">Foo(1)/FavouriteBar</a> is resolved with toString()<br/>
   <a target="_blank"  href="resources.svc/Foo(1)/SomeProperty(0)/SomeOtherProperty">Foo(1)/SomeProperty(0)/SomeOtherProperty</a></td>
   </tr>
   
@@ -136,9 +136,15 @@
   </tr>
   
   <tr>
-  <td>INSERT (POST).<br/> Update is in PUT, not PATCH.</td>
+  <td>INSERT (POST).</td>
   <td>OK.</td>
-  <td><a href="resources.svc/Foo" onclick="javascript:insert();return false;">resources.svc/Foo</a></td>
+  <td><a href="resources.svc/Foo" onclick="insert();return false;">resources.svc/Foo</a></td>
+  </tr>
+  
+  <tr>
+  <td>UPDATE (PUT, not PATCH).</td>
+  <td>OK.</td>
+  <td><a href="resources.svc/Foo" onclick="update();return false;">resources.svc/Foo(1)</a></td>
   </tr>
   
   <tr>
@@ -147,34 +153,65 @@
   <td><a target="_blank"  href="resources.svc/Foo(1)/Clone" >resources.svc/Foo(1)/Clone</a></td>
   </tr>
   
+  <tr>
+  <td>Upload binary data<br/> <input type="file" name="file1"></td>
+  <td>TODO</td>
+  <td><a href="resources.svc/Foo" onclick="insert_with_binary();return false;">resources.svc/Foo</a></td>
+  </tr>
+  
   </table>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
-	function insert() {
-		var mydata = {
-			name : "Goofy" + Math.round(Math.random()*10000),
-			address : "Somewhere 44",
-			age :  Math.random()*100
-		};
-		
-		alert("Going to insert " + mydata.name);
-		
-		$.ajax({
-			url: 'resources.svc/Foo',
-			type: 'POST',
-		    contentType: 'application/json; charset=utf-8',
-		    dataType: 'json',
-			data: JSON.stringify(mydata),
-			success: function(data) {
-				alert('Load was performed. data='+JSON.stringify(data));
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				alert('Error while loading: ' + errorThrown);
-				console.log('OData error was: ' + jqXHR.responseJSON.error.value);
-			}
-			});
-	}
+function insert() {
+	var mydata = {
+		name : "Goofy" + Math.round(Math.random()*10000),
+		address : "Somewhere 44",
+		age :  Math.random()*100
+	};
+	
+	alert("Going to insert " + mydata.name);
+	
+	$.ajax({
+		url: 'resources.svc/Foo',
+		type: 'POST',
+	    contentType: 'application/json; charset=utf-8',
+	    dataType: 'json',
+		data: JSON.stringify(mydata),
+		success: function(data) {
+			alert('Load was performed. data='+JSON.stringify(data));
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			alert('Error while loading: ' + errorThrown);
+			console.log('OData error was: ' + jqXHR.responseJSON.error.value);
+		}
+		});
+}
+
+function update() {
+	var mydata = {
+		name : "Mickey" + Math.round(Math.random()*10000),
+		address : "Somewhere 44",
+		age :  Math.random()*100
+	};
+	
+	alert("Going to update record 1 with " + mydata.name);
+	
+	$.ajax({
+		url: 'resources.svc/Foo(1)',
+		type: 'PUT',
+	    contentType: 'application/json; charset=utf-8',
+	    dataType: 'json',
+		data: JSON.stringify(mydata),
+		success: function(data) {
+			alert('Load was performed. data='+JSON.stringify(data));
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			alert('Error while loading: ' + errorThrown);
+			console.log('OData error was: ' + jqXHR.responseJSON.error.value);
+		}
+		});
+}
 </script>
 </body>
 </html>
