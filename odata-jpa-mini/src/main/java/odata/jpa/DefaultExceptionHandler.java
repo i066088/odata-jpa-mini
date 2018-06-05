@@ -29,7 +29,7 @@ public class DefaultExceptionHandler implements ExceptionMapper<Exception> {
 			// don't print stack trace
 			// Unluckily, someone prints it anyway.
 			status = ((WebApplicationException) e).getResponse().getStatus();
-			message = e.getMessage();
+			message = Status.fromStatusCode(status).getReasonPhrase() + " - " + e.getMessage();
 		} else {
 			e.printStackTrace();
 			status = Status.INTERNAL_SERVER_ERROR.getStatusCode();
