@@ -385,7 +385,6 @@ public class GenericRestResources {
 			e.printStackTrace();
 			throw new InternalServerErrorException();
 		}
-		// TODO
 
 		// Now, handle content type
 		if (contentTypePropertyName != null) {
