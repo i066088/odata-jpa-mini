@@ -5,14 +5,19 @@
 */
 package odata.jpa;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
@@ -20,6 +25,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -32,6 +38,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import odata.jpa.beans.ODataValueBean;
 
@@ -347,7 +355,9 @@ public class GenericRestResources {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public <T> Response upload(@PathParam("entity") String entity, @PathParam("id") Long id,
 			@PathParam("property") String property,
-			@FormParam("contentTypePropertyName") String contentTypePropertyName) throws NotFoundException {
+			@FormDataParam("contentTypePropertyName") String contentTypePropertyName,
+			@FormDataParam("file") InputStream uploadedInputStream, @FormDataParam("file") final FormDataBodyPart body)
+			throws NotFoundException {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -362,10 +372,47 @@ public class GenericRestResources {
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
-		//TODO
+		Attribute<?, ?> blobAttrib = manager.getAttribute(clazz, jpqlAttribute);
+		if (!(blobAttrib.getJavaType().isAssignableFrom(Blob.class))) {
+			throw new BadRequestException("Property " + property + " is not uploadable/downloadable");
+		}
+
+		Blob blob = (Blob) manager.getAttributeValue(blobAttrib, obj);
+		try {
+			copy(uploadedInputStream, blob.setBinaryStream(0));
+		} catch (SQLException | IOException e) {
+			// TODO use LOG instead
+			e.printStackTrace();
+			throw new InternalServerErrorException();
+		}
+		// TODO
+
+		// Now, handle content type
+		if (contentTypePropertyName != null) {
+			String contentType = body.getMediaType().toString();
+			if (contentType == null)
+				contentType = MediaType.APPLICATION_OCTET_STREAM;
+			String jpqlAttribute2 = helper.parseAttribute(contentTypePropertyName);
+			if (jpqlAttribute2 == null)
+				throw new BadRequestException("Cannot parse property: " + contentTypePropertyName);
+
+			try {
+				BeanUtils.setProperty(obj, jpqlAttribute2, contentType);
+			} catch (IllegalAccessException | InvocationTargetException e) {
+				throw new NotFoundException("Entity " + entity + " has no property " + contentTypePropertyName);
+			}
+		}
 
 		return Response.ok(Status.CREATED).build();
 
+	}
+
+	private void copy(InputStream in, OutputStream out) throws IOException {
+		byte[] buffer = new byte[1024];
+		int len;
+		while ((len = in.read(buffer)) != -1) {
+			out.write(buffer, 0, len);
+		}
 	}
 
 	/**
@@ -378,6 +425,7 @@ public class GenericRestResources {
 	 * 
 	 * This is an example of OData Function.
 	 * 
+	 * @see https://stackoverflow.com/questions/1076972
 	 * @return
 	 * @throws NotFoundException
 	 */
@@ -401,11 +449,42 @@ public class GenericRestResources {
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
-		// Intended for primitive types...
+		Attribute<?, ?> blobAttrib = manager.getAttribute(clazz, jpqlAttribute);
+		if (!(blobAttrib.getJavaType().isAssignableFrom(Blob.class))) {
+			throw new BadRequestException("Property " + property + " is not uploadable/downloadable");
+		}
 
-		//TODO
+		Blob blob = (Blob) manager.getAttributeValue(blobAttrib, obj);
 
-		return Response.ok().build();
+		String contentType = null;
+		if (contentTypePropertyName != null) {
+			String jpqlAttribute2 = helper.parseAttribute(contentTypePropertyName);
+			if (jpqlAttribute2 == null)
+				throw new BadRequestException("Cannot parse property: " + contentTypePropertyName);
+
+			try {
+				contentType = BeanUtils.getProperty(obj, jpqlAttribute2);
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+				throw new NotFoundException("Entity " + entity + " has no property " + contentTypePropertyName);
+			}
+		}
+		if (contentType == null)
+			contentType = MediaType.APPLICATION_OCTET_STREAM;
+
+		if (blob == null) {
+			return Response.ok(Status.NO_CONTENT).type(contentType).build();
+		}
+
+		InputStream is;
+		try {
+			is = blob.getBinaryStream();
+		} catch (SQLException e) {
+			// TODO use LOG instead
+			e.printStackTrace();
+			throw new InternalServerErrorException();
+		}
+
+		return Response.ok(is).type(contentType).build();
 
 	}
 
