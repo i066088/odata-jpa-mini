@@ -17,6 +17,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -27,6 +28,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -247,7 +249,7 @@ public class GenericRestResources {
 		Object obj = manager.bean2object(clazz, attributes);
 		obj = manager.save(obj);
 
-		return Response.ok(obj).build();
+		return Response.ok(Status.CREATED).entity(obj).build();
 	}
 
 	/**
@@ -325,5 +327,4 @@ public class GenericRestResources {
 		return Response.ok(obj).build();
 
 	}
-
 }
