@@ -6,7 +6,7 @@
 	<artifactId>odata-jpa-mini</artifactId>
 	<version>1.0</version>
 
-	<name>olingo-jpa-mini</name>
+	<name>odata-jpa-mini</name>
 	<description>JPA bindings for a minimal subset of Odata</description>
 	<url>http://maven.apache.org</url>
 
@@ -47,6 +47,21 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>4.5</version>
+				<configuration>
+					<libDirectory>${basedir}/src/main/antlr4/odata/antlr</libDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>antlr4</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
