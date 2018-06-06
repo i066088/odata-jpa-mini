@@ -6,7 +6,9 @@
 package odata.jpa;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.Metamodel;
@@ -71,7 +74,6 @@ public class GenericManager {
 	 * Retrieve (single) identity column.
 	 * 
 	 * @see https://stackoverflow.com/questions/16909236
-	 * @param em
 	 * @param entity
 	 * @return
 	 */
@@ -79,6 +81,54 @@ public class GenericManager {
 		Metamodel m = em.getMetamodel();
 		IdentifiableType<T> type = (IdentifiableType<T>) m.managedType(entity);
 		return type.getId(type.getIdType().getJavaType());
+	}
+
+	/**
+	 * Retrieve a column.
+	 * 
+	 * @param entity
+	 * @param propertyName
+	 * @return
+	 */
+	public <T> Attribute<? super T, ?> getAttribute(Class<T> entity, String propertyName) {
+		Metamodel m = em.getMetamodel();
+		return m.managedType(entity).getAttribute(propertyName);
+	}
+
+	/**
+	 * Retrieve a column.
+	 * 
+	 * @param entity
+	 * @param propertyName
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <U> U getAttributeValue(Attribute<?, U> attribute, Object obj) {
+		U value;
+		if (attribute.getJavaMember() instanceof Field) {
+			Field field = (Field) attribute.getJavaMember();
+			try {
+				value = (U) field.get(obj);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO use LOG instead
+				e.printStackTrace();
+				throw new IllegalStateException();
+			}
+		} else if (attribute.getJavaMember() instanceof Method) {
+			Method getter = (Method) attribute.getJavaMember();
+			try {
+				value = (U) getter.invoke(obj);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				// TODO use LOG instead
+				e.printStackTrace();
+				throw new IllegalStateException();
+			}
+		} else {
+			System.out.println(
+					"Attribute " + attribute + " has unknown java getter: " + attribute.getJavaMember().getClass());
+			throw new IllegalStateException();
+		}
+		return value;
 	}
 
 	/**
@@ -293,7 +343,7 @@ public class GenericManager {
 
 		SingularAttribute<? super T, ?> idAttr = getIdAttribute(entity);
 		if (idAttr == null) {
-			//TODO LOG instead of System.out.println 
+			// TODO LOG instead of System.out.println
 			System.out.println("getIdAttribute() returned null for entity:" + entity);
 			throw new IllegalArgumentException();
 		}
@@ -301,7 +351,7 @@ public class GenericManager {
 		try {
 			PropertyUtils.setSimpleProperty(obj, idAttr.getName(), null);
 		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException exc) {
-			//TODO LOG instead of System.out.println
+			// TODO LOG instead of System.out.println
 			System.out.println("Misconfigured class: " + entity);
 			exc.printStackTrace();
 			throw new IllegalArgumentException("Misconfigured class: " + entity);
