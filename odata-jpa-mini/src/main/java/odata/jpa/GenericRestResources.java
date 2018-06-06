@@ -6,6 +6,7 @@
 package odata.jpa;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Blob;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class GenericRestResources {
 	 * @throws NotFoundException
 	 *             if such entity is not known.
 	 */
-	public Class<?> getEntityOrThrowException(String entity) throws NotFoundException {
+	protected Class<?> getEntityOrThrowException(String entity) throws NotFoundException {
 		Class<?> clazz = manager.getEntityClass(entity);
 		if (clazz == null)
 			throw new NotFoundException("Unknown entity set: " + entity);
@@ -327,4 +328,85 @@ public class GenericRestResources {
 		return Response.ok(obj).build();
 
 	}
+
+	/**
+	 * Upload a Blob field.
+	 * 
+	 * For small images you may guess to use BINARY OData fields (not implemented
+	 * yet), however for large images this is a bad solution.
+	 * 
+	 * There is no OData standard for this operation, AFAIK.
+	 * 
+	 * This is something like an OData Action, however uses a multipart/form-data
+	 * input.
+	 * 
+	 * @throws NotFoundException
+	 */
+	@POST
+	@Path("{entity}({id})/{property}/Upload")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public <T> Response upload(@PathParam("entity") String entity, @PathParam("id") Long id,
+			@PathParam("property") String property,
+			@FormParam("contentTypePropertyName") String contentTypePropertyName) throws NotFoundException {
+
+		Class<?> clazz = getEntityOrThrowException(entity);
+
+		if (id == null)
+			throw new BadRequestException("Missing id");
+
+		Object obj = manager.findById(clazz, id);
+		if (obj == null)
+			throw new NotFoundException("");
+
+		String jpqlAttribute = helper.parseAttribute(property);
+		if (jpqlAttribute == null)
+			throw new BadRequestException("Cannot parse property: " + property);
+
+		//TODO
+
+		return Response.ok(Status.CREATED).build();
+
+	}
+
+	/**
+	 * Download from a Blob field.
+	 * 
+	 * For small images you may guess to use BINARY OData fields (not implemented
+	 * yet), however for large images this is a bad solution.
+	 * 
+	 * There is no OData standard for this operation, AFAIK.
+	 * 
+	 * This is an example of OData Function.
+	 * 
+	 * @return
+	 * @throws NotFoundException
+	 */
+	@GET
+	@Path("{entity}({id})/{property}/Download")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+	public <T> Response download(@PathParam("entity") String entity, @PathParam("id") Long id,
+			@PathParam("property") String property,
+			@FormParam("contentTypePropertyName") String contentTypePropertyName) throws NotFoundException {
+
+		Class<?> clazz = getEntityOrThrowException(entity);
+
+		if (id == null)
+			throw new BadRequestException("Missing id");
+
+		Object obj = manager.findById(clazz, id);
+		if (obj == null)
+			throw new NotFoundException("");
+
+		String jpqlAttribute = helper.parseAttribute(property);
+		if (jpqlAttribute == null)
+			throw new BadRequestException("Cannot parse property: " + property);
+
+		// Intended for primitive types...
+
+		//TODO
+
+		return Response.ok().build();
+
+	}
+
 }
