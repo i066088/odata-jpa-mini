@@ -49,8 +49,7 @@ import odata.jpa.beans.ODataValueBean;
  * this is assumed by JPA too). This service assumes all entities have a primary
  * key of type Long, called Id.
  * 
- * REST syntax is inspired to OData. For handling parameters, we follow this
- * pattern: @see https://api.stackexchange.com/docs/users
+ * REST syntax is inspired to OData.
  * 
  * @author Luca Vercelli 2017-2018
  * @see http://www.odata.org/getting-started/basic-tutorial/
@@ -60,12 +59,6 @@ import odata.jpa.beans.ODataValueBean;
 // TODO @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Produces(MediaType.APPLICATION_JSON)
 public class GenericRestResources {
-
-	// FIXME alla prima request viene sempre risposto un errore:
-	// javax.servlet.ServletException:
-	// org.glassfish.jersey.server.ContainerException:
-	// java.lang.NoClassDefFoundError:
-	// com/fasterxml/jackson/module/jaxb/JaxbAnnotationIntrospector
 
 	public static final Integer ZERO = 0;
 
@@ -89,9 +82,12 @@ public class GenericRestResources {
 		return clazz;
 	}
 
+	/**
+	 * Give an error for any unknown $-keyword
+	 */
 	@GET
 	@Path("${anything}")
-	public void unsupported(@PathParam("anything") String anything) {
+	public Response unsupported(@PathParam("anything") String anything) {
 		throw new BadRequestException("Unknown keyword $" + anything + ".");
 	}
 
@@ -127,18 +123,27 @@ public class GenericRestResources {
 
 	}
 
+	/**
+	 * Replace a whole collection: not supported (yet?)
+	 */
 	@PUT
 	@Path("{entity}")
 	public void replaceAll() {
 		throw new ForbiddenException("Replacing the whole collection is not supported (yet?)");
 	}
 
+	/**
+	 * Delete a whole collection: not supported (yet?)
+	 */
 	@DELETE
 	@Path("{entity}")
 	public void deleteAll() {
 		throw new ForbiddenException("Deleting the whole collection is not supported (yet?)");
 	}
 
+	/**
+	 * Return collection count as plain text
+	 */
 	@GET
 	@Path("{entity}/$count")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -290,8 +295,6 @@ public class GenericRestResources {
 	public <T> Response update(@PathParam("entity") String entity, @PathParam("id") Long id,
 			Map<String, String> attributes) throws NotFoundException {
 
-		// FIXME: right way?
-
 		@SuppressWarnings("unchecked")
 		Class<T> clazz = (Class<T>) getEntityOrThrowException(entity);
 
@@ -406,6 +409,14 @@ public class GenericRestResources {
 
 	}
 
+	/**
+	 * Copy streams.
+	 * 
+	 * @see https://stackoverflow.com/questions/43157
+	 * @param in
+	 * @param out
+	 * @throws IOException
+	 */
 	private void copy(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024];
 		int len;
