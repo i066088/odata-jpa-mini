@@ -49,6 +49,9 @@ public class OdataJPAHelper {
 		if (filter == null)
 			return null;
 
+		ExpressionVisitor ev = new ExpressionVisitor ();
+		
+		
 		// TODO
 		return filter;
 	}
