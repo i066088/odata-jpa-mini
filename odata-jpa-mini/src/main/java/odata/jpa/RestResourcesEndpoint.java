@@ -58,7 +58,7 @@ import odata.jpa.beans.ODataValueBean;
 @Path("/")
 // TODO @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Produces(MediaType.APPLICATION_JSON)
-public class GenericRestResources {
+public class RestResourcesEndpoint {
 
 	public static final Integer ZERO = 0;
 
