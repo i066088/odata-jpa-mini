@@ -154,9 +154,25 @@
   </tr>
   
   <tr>
-  <td>Upload binary data<br/> <input type="file" name="file1"></td>
+  <td>Upload binary data<br/> 
+  	
+  	</td>
   <td>TODO</td>
-  <td><a href="resources.svc/Foo" onclick="insert_with_binary();return false;">resources.svc/Foo</a></td>
+  <td><form
+  		action="resources.svc/Foo(1)/Image/Upload"
+  		method="POST">
+  			<!-- should be target=_none -->
+  			<input type="file" name="file">
+	  		<input type="submit" value="resources.svc/Foo(1)/Image/Upload"/>
+  	</form></td>
+  </tr>
+  
+  <tr>
+  <td>Download binary data<br/> 
+  	
+  	</td>
+  <td>TODO</td>
+  <td><a target="_blank"  href="resources.svc/Foo(1)/Image/Download" >resources.svc/Foo(1)/Image/Download</a></td>
   </tr>
   
   </table>
@@ -192,7 +208,8 @@ function update() {
 	var mydata = {
 		name : "Mickey" + Math.round(Math.random()*10000),
 		address : "Somewhere 44",
-		age :  Math.random()*100
+		age :  Math.random()*100,
+		nice: "MAYBE"
 	};
 	
 	alert("Going to update record 1 with " + mydata.name);
@@ -212,6 +229,7 @@ function update() {
 		}
 		});
 }
+
 </script>
 </body>
 </html>

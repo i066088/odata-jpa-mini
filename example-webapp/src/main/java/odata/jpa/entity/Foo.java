@@ -5,6 +5,7 @@
 */
 package odata.jpa.entity;
 
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,8 @@ public class Foo {
 	private String address;
 	private Double age;
 	private Date birthday;
+	private Blob image;
+	private String imageFileName;
 	private Boolean3 nice; // EnumType
 	private Bar favouriteBar; // Navigation
 	private List<Bar> bars = new ArrayList<>(); // Navigation to Collection
@@ -95,6 +98,24 @@ public class Foo {
 
 	public void setBirthday(Date birthday) {
 		this.birthday = birthday;
+	}
+
+	@Column(name = "IMAGE")
+	public Blob getImage() {
+		return image;
+	}
+
+	public void setImage(Blob image) {
+		this.image = image;
+	}
+
+	@Column(name = "IMAGE_FILE_NAME")
+	public String getImageFileName() {
+		return imageFileName;
+	}
+
+	public void setImageFileName(String imageFileName) {
+		this.imageFileName = imageFileName;
 	}
 
 	@Column(name = "NICE")

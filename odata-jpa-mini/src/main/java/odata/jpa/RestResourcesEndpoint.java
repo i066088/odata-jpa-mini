@@ -23,7 +23,6 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
@@ -38,7 +37,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import odata.jpa.beans.ODataValueBean;
@@ -61,6 +59,8 @@ import odata.jpa.beans.ODataValueBean;
 public class RestResourcesEndpoint {
 
 	public static final Integer ZERO = 0;
+
+	private static final String FILENAME_PROPERTY_SUFFIX = "FileName";
 
 	@Inject
 	GenericManager manager;
@@ -349,7 +349,7 @@ public class RestResourcesEndpoint {
 	 * There is no OData standard for this operation, AFAIK.
 	 * 
 	 * This is something like an OData Action, however uses a multipart/form-data
-	 * input.
+	 * input. We assume the object has a String field for storing filename.
 	 * 
 	 * @throws NotFoundException
 	 */
@@ -358,9 +358,10 @@ public class RestResourcesEndpoint {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public <T> Response upload(@PathParam("entity") String entity, @PathParam("id") Long id,
 			@PathParam("property") String property,
-			@FormDataParam("contentTypePropertyName") String contentTypePropertyName,
-			@FormDataParam("file") InputStream uploadedInputStream, @FormDataParam("file") final FormDataBodyPart body)
-			throws NotFoundException {
+			@FormDataParam("file") InputStream uploadedInputStream /*
+																	 * , @FormDataParam("file") final FormDataBodyPart
+																	 * body
+																	 */) throws NotFoundException {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -390,18 +391,17 @@ public class RestResourcesEndpoint {
 		}
 
 		// Now, handle content type
-		if (contentTypePropertyName != null) {
-			String contentType = body.getMediaType().toString();
-			if (contentType == null)
-				contentType = MediaType.APPLICATION_OCTET_STREAM;
-			String jpqlAttribute2 = helper.parseAttribute(contentTypePropertyName);
+		String filenamePropertyName = property + FILENAME_PROPERTY_SUFFIX;
+		if (filenamePropertyName != null) {
+			String filename = null; // TODO
+			String jpqlAttribute2 = helper.parseAttribute(filenamePropertyName);
 			if (jpqlAttribute2 == null)
-				throw new BadRequestException("Cannot parse property: " + contentTypePropertyName);
+				throw new BadRequestException("Cannot parse property: " + filenamePropertyName);
 
 			try {
-				BeanUtils.setProperty(obj, jpqlAttribute2, contentType);
+				BeanUtils.setProperty(obj, jpqlAttribute2, filename);
 			} catch (IllegalAccessException | InvocationTargetException e) {
-				throw new NotFoundException("Entity " + entity + " has no property " + contentTypePropertyName);
+				throw new NotFoundException("Entity " + entity + " has no property " + filenamePropertyName);
 			}
 		}
 
@@ -441,10 +441,9 @@ public class RestResourcesEndpoint {
 	 */
 	@GET
 	@Path("{entity}({id})/{property}/Download")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+	@Consumes({ MediaType.APPLICATION_JSON })
 	public <T> Response download(@PathParam("entity") String entity, @PathParam("id") Long id,
-			@PathParam("property") String property,
-			@FormParam("contentTypePropertyName") String contentTypePropertyName) throws NotFoundException {
+			@PathParam("property") String property) throws NotFoundException {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -466,24 +465,26 @@ public class RestResourcesEndpoint {
 
 		Blob blob = (Blob) manager.getAttributeValue(blobAttrib, obj);
 
-		String contentType = null;
-		if (contentTypePropertyName != null) {
-			String jpqlAttribute2 = helper.parseAttribute(contentTypePropertyName);
-			if (jpqlAttribute2 == null)
-				throw new BadRequestException("Cannot parse property: " + contentTypePropertyName);
-
-			try {
-				contentType = BeanUtils.getProperty(obj, jpqlAttribute2);
-			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				throw new NotFoundException("Entity " + entity + " has no property " + contentTypePropertyName);
-			}
-		}
-		if (contentType == null)
-			contentType = MediaType.APPLICATION_OCTET_STREAM;
-
 		if (blob == null) {
-			return Response.ok(Status.NO_CONTENT).type(contentType).build();
+			return Response.ok(Status.NO_CONTENT).build();
 		}
+
+		String filenamePropertyName = property + FILENAME_PROPERTY_SUFFIX;
+		String filename = null;
+		String jpqlAttribute2 = helper.parseAttribute(filenamePropertyName);
+		if (jpqlAttribute2 == null)
+			throw new BadRequestException("Cannot parse property: " + filenamePropertyName);
+
+		try {
+			filename = BeanUtils.getProperty(obj, jpqlAttribute2);
+		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			throw new NotFoundException("Entity " + entity + " has no property " + filenamePropertyName);
+		}
+		String contentDisposition = (filename == null) ? "attachment"
+				: "attachment; filename=\"" + filename.replaceAll("\"", "") + "\"";
+
+		// TODO: mapping file extension to content type
+		String contentType = MediaType.APPLICATION_OCTET_STREAM;
 
 		InputStream is;
 		try {
@@ -494,7 +495,7 @@ public class RestResourcesEndpoint {
 			throw new InternalServerErrorException();
 		}
 
-		return Response.ok(is).type(contentType).build();
+		return Response.ok(is).header("Content-Disposition", contentDisposition).type(contentType).build();
 
 	}
 
