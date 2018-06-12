@@ -5,7 +5,6 @@
 */
 package odata.jpa.entity;
 
-import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,12 +18,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name = "FOO")
@@ -37,7 +38,7 @@ public class Foo {
 	private String address;
 	private Double age;
 	private Date birthday;
-	private Blob image;
+	private byte[] image;
 	private String imageFileName;
 	private Boolean3 nice; // EnumType
 	private Bar favouriteBar; // Navigation
@@ -100,12 +101,14 @@ public class Foo {
 		this.birthday = birthday;
 	}
 
+	@Lob
 	@Column(name = "IMAGE")
-	public Blob getImage() {
+	@XmlTransient // should get BASE64
+	public byte[] getImage() {
 		return image;
 	}
 
-	public void setImage(Blob image) {
+	public void setImage(byte[] image) {
 		this.image = image;
 	}
 

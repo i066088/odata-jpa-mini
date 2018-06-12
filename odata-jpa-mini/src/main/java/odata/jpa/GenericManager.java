@@ -208,6 +208,7 @@ public class GenericManager {
 	 * Count number of rows in given table.
 	 */
 	public Long countEntities(Class<?> entity) {
+		//FIXME! Missing filter parameter!
 		return em.createQuery("select count(*) from " + entity.getName(), Long.class).getSingleResult();
 	}
 

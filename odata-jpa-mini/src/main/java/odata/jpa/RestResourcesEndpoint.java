@@ -5,12 +5,13 @@
 */
 package odata.jpa;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
-import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -37,6 +37,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import odata.jpa.beans.ODataValueBean;
@@ -149,6 +150,7 @@ public class RestResourcesEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public Long count(@PathParam("entity") String entity) throws NotFoundException {
 		Class<?> clazz = getEntityOrThrowException(entity);
+		// FIXME! Missing $filter parameter!
 		return manager.countEntities(clazz);
 	}
 
@@ -263,7 +265,7 @@ public class RestResourcesEndpoint {
 		Object obj = manager.bean2object(clazz, attributes);
 		obj = manager.save(obj);
 
-		return Response.ok(Status.CREATED).entity(obj).build();
+		return Response.status(Status.CREATED).entity(obj).build();
 	}
 
 	/**
@@ -352,16 +354,17 @@ public class RestResourcesEndpoint {
 	 * input. We assume the object has a String field for storing filename.
 	 * 
 	 * @throws NotFoundException
+	 * @throws IOException
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
 	 */
 	@POST
 	@Path("{entity}({id})/{property}/Upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public <T> Response upload(@PathParam("entity") String entity, @PathParam("id") Long id,
-			@PathParam("property") String property,
-			@FormDataParam("file") InputStream uploadedInputStream /*
-																	 * , @FormDataParam("file") final FormDataBodyPart
-																	 * body
-																	 */) throws NotFoundException {
+			@PathParam("property") String property, @FormDataParam("file") File uploadedFile,
+			@FormDataParam("file") FormDataContentDisposition contentDisposition)
+			throws NotFoundException, IOException, IllegalAccessException, InvocationTargetException {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -377,23 +380,29 @@ public class RestResourcesEndpoint {
 			throw new BadRequestException("Cannot parse property: " + property);
 
 		Attribute<?, ?> blobAttrib = manager.getAttribute(clazz, jpqlAttribute);
-		if (!(blobAttrib.getJavaType().isAssignableFrom(Blob.class))) {
+		if (!(blobAttrib.getJavaType().isAssignableFrom(byte[].class))) {
 			throw new BadRequestException("Property " + property + " is not uploadable/downloadable");
 		}
 
-		Blob blob = (Blob) manager.getAttributeValue(blobAttrib, obj);
-		try {
-			copy(uploadedInputStream, blob.setBinaryStream(0));
-		} catch (SQLException | IOException e) {
-			// TODO use LOG instead
-			e.printStackTrace();
-			throw new InternalServerErrorException();
-		}
+		// JPA does not support Blobs as streams ?!?
+		// and also, JPA does not allow accessing Connection.createBlob()
+
+		// DEBUG
+		if (uploadedFile == null)
+			System.out.println("ERROR - null file");
+		System.out.println("Uploading file: " + uploadedFile.getAbsolutePath() + " " + uploadedFile.length());
+		
+		//FIXME only work if input file is 1 line long ?!?
+		
+		byte[] blob;
+		blob = file2array(uploadedFile);
+
+		BeanUtils.setProperty(obj, jpqlAttribute, blob);
 
 		// Now, handle content type
 		String filenamePropertyName = property + FILENAME_PROPERTY_SUFFIX;
-		if (filenamePropertyName != null) {
-			String filename = null; // TODO
+		String filename = contentDisposition.getFileName();
+		if (filenamePropertyName != null && filename != null) {
 			String jpqlAttribute2 = helper.parseAttribute(filenamePropertyName);
 			if (jpqlAttribute2 == null)
 				throw new BadRequestException("Cannot parse property: " + filenamePropertyName);
@@ -405,7 +414,10 @@ public class RestResourcesEndpoint {
 			}
 		}
 
-		return Response.ok(Status.CREATED).build();
+		// DEBUG
+		System.out.println("Just uploaded " + blob.length + " bytes");
+
+		return Response.status(Status.CREATED).build();
 
 	}
 
@@ -423,6 +435,20 @@ public class RestResourcesEndpoint {
 		while ((len = in.read(buffer)) != -1) {
 			out.write(buffer, 0, len);
 		}
+	}
+
+	/**
+	 * Copy file in memory.
+	 * 
+	 * @throws IOException
+	 * @see https://stackoverflow.com/questions/1264709
+	 */
+	private byte[] file2array(File f) throws IOException {
+		RandomAccessFile raf = new RandomAccessFile(f, "r");
+		byte[] data = new byte[(int) raf.length()];
+		raf.readFully(data);
+		raf.close();
+		return data;
 	}
 
 	/**
@@ -459,15 +485,20 @@ public class RestResourcesEndpoint {
 			throw new BadRequestException("Cannot parse property: " + property);
 
 		Attribute<?, ?> blobAttrib = manager.getAttribute(clazz, jpqlAttribute);
-		if (!(blobAttrib.getJavaType().isAssignableFrom(Blob.class))) {
+		if (!(blobAttrib.getJavaType().isAssignableFrom(byte[].class))) {
 			throw new BadRequestException("Property " + property + " is not uploadable/downloadable");
 		}
 
-		Blob blob = (Blob) manager.getAttributeValue(blobAttrib, obj);
+		byte[] blob = (byte[]) manager.getAttributeValue(blobAttrib, obj);
 
-		if (blob == null) {
-			return Response.ok(Status.NO_CONTENT).build();
+		if (blob == null || blob.length == 0) {
+			// DEBUG
+			System.out.println("Download: NO CONTENT");
+			return Response.status(Status.NO_CONTENT).build();
 		}
+
+		// DEBUG
+		System.out.println("Going to download " + blob.length + " bytes");
 
 		String filenamePropertyName = property + FILENAME_PROPERTY_SUFFIX;
 		String filename = null;
@@ -487,13 +518,7 @@ public class RestResourcesEndpoint {
 		String contentType = MediaType.APPLICATION_OCTET_STREAM;
 
 		InputStream is;
-		try {
-			is = blob.getBinaryStream();
-		} catch (SQLException e) {
-			// TODO use LOG instead
-			e.printStackTrace();
-			throw new InternalServerErrorException();
-		}
+		is = new ByteArrayInputStream(blob);
 
 		return Response.ok(is).header("Content-Disposition", contentDisposition).type(contentType).build();
 

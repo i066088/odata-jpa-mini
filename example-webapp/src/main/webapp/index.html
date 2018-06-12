@@ -143,7 +143,7 @@
   
   <tr>
   <td>UPDATE (PUT, not PATCH).</td>
-  <td>OK.</td>
+  <td>OK. UPDATE ENUM FAILS!</td>
   <td><a href="resources.svc/Foo" onclick="update();return false;">resources.svc/Foo(1)</a></td>
   </tr>
   
@@ -160,7 +160,9 @@
   <td>TODO</td>
   <td><form
   		action="resources.svc/Foo(1)/Image/Upload"
-  		method="POST">
+  		enctype="multipart/form-data"
+  		method="POST"
+  		target="_blank">
   			<!-- should be target=_none -->
   			<input type="file" name="file">
 	  		<input type="submit" value="resources.svc/Foo(1)/Image/Upload"/>
