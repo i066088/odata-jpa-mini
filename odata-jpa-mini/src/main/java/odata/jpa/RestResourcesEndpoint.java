@@ -148,10 +148,9 @@ public class RestResourcesEndpoint {
 	@GET
 	@Path("{entity}/$count")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Long count(@PathParam("entity") String entity) throws NotFoundException {
+	public Long count(@PathParam("entity") String entity, @QueryParam("$filter") String filter) throws NotFoundException {
 		Class<?> clazz = getEntityOrThrowException(entity);
-		// FIXME! Missing $filter parameter!
-		return manager.countEntities(clazz);
+		return manager.countEntities(clazz, helper.parseFilterClause(filter));
 	}
 
 	/**
