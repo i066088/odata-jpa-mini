@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -493,12 +495,13 @@ public class RestResourcesEndpoint {
 	 * @see https://stackoverflow.com/questions/1076972
 	 * @return
 	 * @throws NotFoundException
+	 * @throws IOException
 	 */
 	@GET
 	@Path("{entity}({id})/{property}/Download")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	public <T> Response download(@PathParam("entity") String entity, @PathParam("id") Long id,
-			@PathParam("property") String property) throws NotFoundException {
+			@PathParam("property") String property) throws NotFoundException, IOException {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -543,8 +546,17 @@ public class RestResourcesEndpoint {
 		String contentDisposition = (filename == null) ? "attachment"
 				: "attachment; filename=\"" + filename.replaceAll("\"", "") + "\"";
 
-		// TODO: mapping file extension to content type
+		// map file extension to content type
 		String contentType = MediaType.APPLICATION_OCTET_STREAM;
+		if (filename != null) {
+			String guessContentType = Files.probeContentType(Paths.get(filename));
+			if (guessContentType == null) {
+				// probeContentType() is known to be buggy
+				System.out.println("probeContentType failed for " + filename);
+			} else {
+				contentType = guessContentType;
+			}
+		}
 
 		InputStream is;
 		is = new ByteArrayInputStream(blob);
