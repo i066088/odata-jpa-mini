@@ -208,8 +208,22 @@ public class GenericManager {
 	 * Count number of rows in given table.
 	 */
 	public Long countEntities(Class<?> entity) {
-		//FIXME! Missing filter parameter!
-		return em.createQuery("select count(*) from " + entity.getName(), Long.class).getSingleResult();
+		return countEntities(entity, null);
+	}
+
+	/**
+	 * Count number of rows in given table.
+	 * 
+	 * @param where
+	 *            JPQL WHERE clause, without "WHERE".
+	 */
+	public Long countEntities(Class<?> entity, String where) {
+		String whereCondition = "";
+		if (where != null && !where.trim().isEmpty()) {
+			whereCondition = " WHERE " + where;
+		}
+		return em.createQuery("select count(*) from " + entity.getName() + whereCondition, Long.class)
+				.getSingleResult();
 	}
 
 	/**
