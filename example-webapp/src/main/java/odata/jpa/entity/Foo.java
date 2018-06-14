@@ -38,6 +38,7 @@ public class Foo {
 	private String address;
 	private Double age;
 	private Date birthday;
+	private Date fullBirthHour;
 	private byte[] image;
 	private String imageFileName;
 	private Boolean3 nice; // EnumType
@@ -96,9 +97,19 @@ public class Foo {
 	public Date getBirthday() {
 		return birthday;
 	}
-
+	
 	public void setBirthday(Date birthday) {
 		this.birthday = birthday;
+	}
+
+	@Column(name = "FULL_BIRTH_HOUR")
+	@Temporal(value = TemporalType.TIMESTAMP)
+	public Date getFullBirthHour() {
+		return fullBirthHour;
+	}
+
+	public void setFullBirthHour(Date fullBirthHour) {
+		this.fullBirthHour = fullBirthHour;
 	}
 
 	@Lob
@@ -116,12 +127,13 @@ public class Foo {
 	public String getImageFileName() {
 		return imageFileName;
 	}
-
+	
 	public void setImageFileName(String imageFileName) {
 		this.imageFileName = imageFileName;
 	}
 
 	@Column(name = "NICE")
+	//By default, Hibernate sets an ugly type: "VARCHAR(255) FOR BIT DATA"
 	@Enumerated(EnumType.STRING)
 	public Boolean3 getNice() {
 		return nice;
@@ -153,7 +165,7 @@ public class Foo {
 
 	@Override
 	public String toString() {
-		return "Foo " + getName();
+		return "Foo name=" + getName() + " id=" + getId() + " nice=" + getNice();
 	}
 
 	@Override

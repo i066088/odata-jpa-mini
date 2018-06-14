@@ -130,7 +130,7 @@
   <td>Numbers: 1234<br/>
   	Strings: 'abc'<br/>
   	Booleans: True<br/>
-  	Dates: 2012-05-29T09:13:28<br/>
+  	Dates: 2012-05-29<br/>
   	Timestamps: 2018-01-10T09:24:54Z<br/>
   </td>
   </tr>
@@ -211,8 +211,8 @@ function update() {
 		id : 1,	//redundant, better to leave it
 		name : "Mickey" + Math.round(Math.random()*10000),
 		address : "Somewhere 44",
-		age :  Math.random()*100,
-		nice: "MAYBE"
+		age :  Math.random()*100
+		//,nice: "MAYBE"
 	};
 	
 	alert("Going to update record 1 with " + mydata.name);

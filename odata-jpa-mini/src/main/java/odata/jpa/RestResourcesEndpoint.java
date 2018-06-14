@@ -40,6 +40,9 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
+
 import odata.jpa.beans.ODataValueBean;
 
 /**
@@ -102,6 +105,7 @@ public class RestResourcesEndpoint {
 	 */
 	@GET
 	@Path("{entity}")
+	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS })
 	public Map<String, Object> find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
 			@QueryParam("$top") Integer top, @QueryParam("$filter") String filter,
 			@QueryParam("$orderby") String orderby, @QueryParam("$count") Boolean count) throws NotFoundException {
@@ -116,7 +120,7 @@ public class RestResourcesEndpoint {
 		map.put("data", list);
 
 		if (count != null && count) {
-			Long numItems = manager.countEntities(clazz);
+			Long numItems = manager.countEntities(clazz, filter);
 			map.put("count", numItems);
 		}
 
@@ -148,7 +152,8 @@ public class RestResourcesEndpoint {
 	@GET
 	@Path("{entity}/$count")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Long count(@PathParam("entity") String entity, @QueryParam("$filter") String filter) throws NotFoundException {
+	public Long count(@PathParam("entity") String entity, @QueryParam("$filter") String filter)
+			throws NotFoundException {
 		Class<?> clazz = getEntityOrThrowException(entity);
 		return manager.countEntities(clazz, helper.parseFilterClause(filter));
 	}
@@ -163,6 +168,7 @@ public class RestResourcesEndpoint {
 	 */
 	@GET
 	@Path("{entity}({id})")
+	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS }) // FIXME not working !?!
 	public Response findById(@PathParam("entity") String entity, @PathParam("id") Long id) throws NotFoundException {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
@@ -293,6 +299,7 @@ public class RestResourcesEndpoint {
 	@PUT
 	// @PATCH does not exist!
 	@Path("{entity}({id})")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public <T> Response update(@PathParam("entity") String entity, @PathParam("id") Long id,
 			Map<String, String> attributes) throws NotFoundException {
 
@@ -308,8 +315,31 @@ public class RestResourcesEndpoint {
 
 		T obj = manager.bean2object(clazz, attributes);
 		obj = manager.save(obj);
+
 		return Response.ok(obj).build();
 	}
+
+	/*
+	 * public <T> Response update(@PathParam("entity") String
+	 * entity, @PathParam("id") Long id, String json ) throws NotFoundException {
+	 * 
+	 * @SuppressWarnings("unchecked") Class<T> clazz = (Class<T>)
+	 * getEntityOrThrowException(entity);
+	 * 
+	 * if (id == null) throw new BadRequestException(
+	 * "Missing id. Creating an object with given id is not recommended nor supported."
+	 * );
+	 * 
+	 * // SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(clazz); //
+	 * attributes.put(idAttr.getName(), id.toString()); // T obj =
+	 * manager.bean2object(clazz, attributes);
+	 * 
+	 * T obj; try { obj = new ObjectMapper().readValue(json, clazz);
+	 * System.out.println("Here obj=" + obj); // Qui mi aspetto l'ID già settato }
+	 * catch (IOException e) { throw new InternalServerErrorException(e); } obj =
+	 * manager.save(obj); System.out.println("Now obj=" + obj); return
+	 * Response.ok(obj).build(); }
+	 */
 
 	/**
 	 * Duplicate and return (via JSON) a single object by id. The new object is not
@@ -390,9 +420,9 @@ public class RestResourcesEndpoint {
 		if (uploadedFile == null)
 			System.out.println("ERROR - null file");
 		System.out.println("Uploading file: " + uploadedFile.getAbsolutePath() + " " + uploadedFile.length());
-		
-		//FIXME only work if input file is 1 line long ?!?
-		
+
+		// FIXME only work if input file is 1 line long ?!?
+
 		byte[] blob;
 		blob = file2array(uploadedFile);
 
