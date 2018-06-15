@@ -42,7 +42,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
@@ -454,22 +453,6 @@ public class RestResourcesEndpoint {
 
 		return Response.status(Status.CREATED).build();
 
-	}
-
-	/**
-	 * Copy streams.
-	 * 
-	 * @see https://stackoverflow.com/questions/43157
-	 * @param in
-	 * @param out
-	 * @throws IOException
-	 */
-	private void copy(InputStream in, OutputStream out) throws IOException {
-		byte[] buffer = new byte[1024];
-		int len;
-		while ((len = in.read(buffer)) != -1) {
-			out.write(buffer, 0, len);
-		}
 	}
 
 	/**
