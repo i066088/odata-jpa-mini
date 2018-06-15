@@ -138,13 +138,13 @@
   <tr>
   <td>INSERT (POST).</td>
   <td>OK.</td>
-  <td><a href="resources.svc/Foo" onclick="insert();return false;">resources.svc/Foo</a></td>
+  <td><a href="#" onclick="insert();return false;">resources.svc/Foo</a></td>
   </tr>
   
   <tr>
   <td>UPDATE (PUT, not PATCH).</td>
   <td>OK. UPDATE ENUM FAILS!</td>
-  <td><a href="resources.svc/Foo" onclick="update();return false;">resources.svc/Foo(1)</a></td>
+  <td><a href="#" onclick="update();return false;">resources.svc/Foo(1)</a></td>
   </tr>
   
   <tr>
@@ -157,23 +157,23 @@
   <td>Upload binary data<br/> 
   	
   	</td>
-  <td>TODO</td>
+  <td>OK</td>
   <td><form
   		action="resources.svc/Foo(1)/Image/Upload"
   		enctype="multipart/form-data"
-  		method="POST"
-  		target="_blank">
-  			<!-- should be target=_none -->
-  			<input type="file" name="file">
-	  		<input type="submit" value="resources.svc/Foo(1)/Image/Upload"/>
-  	</form></td>
+  		method="POST">
+  		<!-- This outer form is actually useless -->
+  			<input type="file" name="file" id="file">
+  	</form>
+  	<a href="#" onclick="upload();return false;" >resources.svc/Foo(1)/Image/Upload</a>
+  	</td>
   </tr>
   
   <tr>
   <td>Download binary data<br/> 
   	
   	</td>
-  <td>TODO</td>
+  <td>OK</td>
   <td><a target="_blank"  href="resources.svc/Foo(1)/Image/Download" >resources.svc/Foo(1)/Image/Download</a></td>
   </tr>
   
@@ -225,6 +225,31 @@ function update() {
 		data: JSON.stringify(mydata),
 		success: function(data) {
 			alert('Load was performed. data='+JSON.stringify(data));
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			alert('Error while loading: ' + errorThrown);
+			console.log('OData error was: ' + jqXHR.responseJSON.error.value);
+		}
+		});
+}
+
+function upload() {
+
+	alert("Going to upload your file...");
+
+	var mydata = new FormData();
+	mydata.append('file', $('#file')[0].files[0]);
+
+	$.ajax({
+		url: 'resources.svc/Foo(1)/Image/Upload',
+		type: 'POST',
+		method: 'POST',
+		cache: false,
+	    contentType: false,
+	    processData: false,
+		data: mydata,
+		success: function(data) {
+			alert('Done.');
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			alert('Error while loading: ' + errorThrown);
