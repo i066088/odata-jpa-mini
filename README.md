@@ -3,7 +3,7 @@
 Best 60-70% of OData protocol.
  
 Use case:
-* You want to serve some JPA data via OData protocol.
+* You want to serve some JPA data via REST/OData protocol.
 * You are in a Java EE context, so you can use JAX-RS and CDI
 * You don't really need to be 100% OData compliant
 
