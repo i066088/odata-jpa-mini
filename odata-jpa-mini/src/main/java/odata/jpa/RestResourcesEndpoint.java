@@ -46,6 +46,8 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 
+import odata.jpa.beans.ODataDataBean;
+import odata.jpa.beans.ODataDataCountBean;
 import odata.jpa.beans.ODataValueBean;
 
 /**
@@ -109,25 +111,27 @@ public class RestResourcesEndpoint {
 	@GET
 	@Path("{entity}")
 	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS })
-	public Map<String, Object> find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
+	public ODataDataBean find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
 			@QueryParam("$top") Integer top, @QueryParam("$filter") String filter,
 			@QueryParam("$orderby") String orderby, @QueryParam("$count") Boolean count) throws NotFoundException {
 
 		Class<?> clazz = getEntityOrThrowException(entity); // this is Class<T>
 
+		ODataDataBean resultBean;
+
 		List<?> list; // this is List<T>
 
 		list = manager.find(clazz, top, skip, helper.parseFilterClause(filter), helper.parseOrderByClause(orderby));
 
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("data", list);
-
 		if (count != null && count) {
 			Long numItems = manager.countEntities(clazz, filter);
-			map.put("count", numItems);
+			// Please notice numItems can be larger than list.size() 
+			resultBean = new ODataDataCountBean(list, numItems);
+		} else {
+			resultBean = new ODataDataBean(list);
 		}
 
-		return map;
+		return resultBean;
 
 	}
 
@@ -396,9 +400,9 @@ public class RestResourcesEndpoint {
 	public <T> Response upload(@PathParam("entity") String entity, @PathParam("id") Long id,
 			@PathParam("property") String property, FormDataMultiPart form)
 			throws NotFoundException, IOException, IllegalAccessException, InvocationTargetException {
-		
+
 		// @FormDataParam("file") is not working properly here
-		FormDataBodyPart bodyPart = form.getField("file");		
+		FormDataBodyPart bodyPart = form.getField("file");
 		FormDataContentDisposition contentDisposition = bodyPart.getFormDataContentDisposition();
 		File uploadedFile = bodyPart.getValueAs(File.class);
 

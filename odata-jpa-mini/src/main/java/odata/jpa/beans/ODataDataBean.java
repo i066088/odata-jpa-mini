@@ -7,8 +7,8 @@ public class ODataDataBean {
 	public ODataDataBean() {
 	}
 
-	public ODataDataBean(Object value) {
-		this.data = value;
+	public ODataDataBean(Object data) {
+		this.data = data;
 	}
 
 	public Object getData() {
