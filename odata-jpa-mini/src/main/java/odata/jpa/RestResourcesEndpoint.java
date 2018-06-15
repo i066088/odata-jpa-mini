@@ -39,7 +39,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -393,9 +395,13 @@ public class RestResourcesEndpoint {
 	@Path("{entity}({id})/{property}/Upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public <T> Response upload(@PathParam("entity") String entity, @PathParam("id") Long id,
-			@PathParam("property") String property, @FormDataParam("file") File uploadedFile,
-			@FormDataParam("file") FormDataContentDisposition contentDisposition)
+			@PathParam("property") String property, FormDataMultiPart form)
 			throws NotFoundException, IOException, IllegalAccessException, InvocationTargetException {
+		
+		// @FormDataParam("file") is not working properly here
+		FormDataBodyPart bodyPart = form.getField("file");		
+		FormDataContentDisposition contentDisposition = bodyPart.getFormDataContentDisposition();
+		File uploadedFile = bodyPart.getValueAs(File.class);
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -422,8 +428,6 @@ public class RestResourcesEndpoint {
 		if (uploadedFile == null)
 			System.out.println("ERROR - null file");
 		System.out.println("Uploading file: " + uploadedFile.getAbsolutePath() + " " + uploadedFile.length());
-
-		// FIXME only work if input file is 1 line long ?!?
 
 		byte[] blob;
 		blob = file2array(uploadedFile);
