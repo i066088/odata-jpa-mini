@@ -80,4 +80,24 @@ public class TestOdataJPAHelper {
 		assertNull(str2);
 	}
 
+	@Test
+	public void filters1() {
+		String filter = "1 eq 2";
+		String jpql = helper.parseFilterClause(filter);
+		assertEquals("1 = 2", jpql);
+	}
+
+	@Test
+	public void filters2() {
+		String filter = "Obj/Prop lt 57.0";
+		String jpql = helper.parseFilterClause(filter);
+		assertEquals("obj.prop <= 57.0", jpql);
+	}
+
+	@Test
+	public void filters3() {
+		String filter = "((Pluto add Pippo)gt 7)and(Pluto ne 33)";
+		String jpql = helper.parseFilterClause(filter);
+		assertEquals("((pluto + pippo)< 7)and(pluto <> 33)", jpql);
+	}
 }
