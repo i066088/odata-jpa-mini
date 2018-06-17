@@ -6,6 +6,6 @@ import odata.antlr.ODataParserParser;
 public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 
 	public String visitAllExpr(ODataParserParser.AllExprContext ctx) {
-		return "PIPPO";
+		return "PIPPO-" + ctx.getText();
 	}
 }

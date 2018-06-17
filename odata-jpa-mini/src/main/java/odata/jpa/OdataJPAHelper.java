@@ -2,6 +2,13 @@ package odata.jpa;
 
 import javax.ejb.Stateless;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import odata.antlr.ODataParserLexer;
+import odata.antlr.ODataParserParser;
+
 @Stateless
 public class OdataJPAHelper {
 
@@ -49,11 +56,25 @@ public class OdataJPAHelper {
 		if (filter == null)
 			return null;
 
-		ExpressionVisitor ev = new ExpressionVisitor ();
-		
-		
-		// TODO
-		return filter;
+		// Init lexer
+		ODataParserLexer lexer = new ODataParserLexer(CharStreams.fromString(filter));
+
+		// Get a list of matched tokens
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+
+		// Init parser with got tokens
+		ODataParserParser parser = new ODataParserParser(tokens);
+
+		// Get the context
+		ParseTree tree = parser.allExpr();
+
+		// Run the Visitor
+		ExpressionVisitor visitor = new ExpressionVisitor();
+		String jpql = visitor.visit(tree);
+
+		System.out.println("HERE DEBUG jpql=" + jpql);
+
+		return jpql;
 	}
 
 	/**
