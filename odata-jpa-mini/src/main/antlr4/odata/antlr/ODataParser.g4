@@ -77,7 +77,7 @@ resourcePath : ( containerQualifier )? entitySetName ( collectionNavigation )?
 collectionNavigation : ( SLASH qualifiedEntityTypeName )?
                        ( keyPredicate ( singleNavigation )?
                        | collectionPath
-                       | EmptyString     // for restricting to a derived entity type
+// lv commented                       | EmptyString     // for restricting to a derived entity type
                        );
 
 keyPredicate     : simpleKey | compoundKey;

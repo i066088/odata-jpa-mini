@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
-			<version>4.7.1</version>
+			<version>4.5</version>
 		</dependency>
 
 		<dependency>
@@ -62,11 +62,12 @@
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
-				<version>4.7</version>
+				<version>4.5</version>
 				<configuration>
 					<libDirectory>${basedir}/src/main/antlr4/odata/antlr</libDirectory>
 					<listener>false</listener>
 					<visitor>true</visitor>
+					<excludes>**/*Search.g4</excludes>
 				</configuration>
 				<executions>
 					<execution>

@@ -2,7 +2,7 @@ package odata.jpa;
 
 import javax.ejb.Stateless;
 
-import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -57,7 +57,7 @@ public class OdataJPAHelper {
 			return null;
 
 		// Init lexer
-		ODataParserLexer lexer = new ODataParserLexer(CharStreams.fromString(filter));
+		ODataParserLexer lexer = new ODataParserLexer(new ANTLRInputStream(filter));
 
 		// Get a list of matched tokens
 		CommonTokenStream tokens = new CommonTokenStream(lexer);

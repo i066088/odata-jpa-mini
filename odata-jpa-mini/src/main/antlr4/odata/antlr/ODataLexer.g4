@@ -282,7 +282,7 @@ Infinity_LUC : 'INF' ;
 NullToken : 'null' ;
 TrueToken : 'true' ;
 FalseToken : 'false' ;
-EmptyString : '' ; // danger will robinson ! FIXME
+// EmptyString : '' ; // danger will robinson ! FIXME
 
 // refactor below: 
 
