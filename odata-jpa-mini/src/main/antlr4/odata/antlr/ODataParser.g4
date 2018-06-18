@@ -97,7 +97,6 @@ singleNavigation : ( SLASH qualifiedEntityTypeName )?
                          | streamProperty 
                          )
                    | boundOperation 
-                   | ''     // for casting after key access
                    );
 
 collectionPath : count | boundOperation;
@@ -187,10 +186,11 @@ aggregateClause   : aggregateList ( XWS ODataSignal_GROUPBY XWS groupbyList )?
                   | ODataSignal_GROUPBY XWS groupbyList;
 // COMMENT_ANTLR4: $groupby had DQS and SQS. Why?
 aggregateList     : aggregateItem *( COMMA aggregateItem );
-aggregateItem     : property ( XWS As_LLC XWS dynamicProperty )?
-                  | aggregateFunction OP property CP ( XWS As_LLC XWS dynamicProperty )?
-                  | 'count' OP ( property | navigationProperty )?  CP XWS As_LLC XWS dynamicProperty
-                  | 'countDistinct' OP ( property | navigationProperty ) CP XWS As_LLC XWS dynamicProperty
+aggregateItem     : property ( XWS AsToken XWS dynamicProperty )?
+                  | aggregateFunction OP property CP ( XWS AsToken XWS dynamicProperty )?
+// TODO
+//                  | 'count' OP ( property | navigationProperty )?  CP XWS AsToken XWS dynamicProperty
+//                  | 'countDistinct' OP ( property | navigationProperty ) CP XWS AsToken XWS dynamicProperty
                   | ( navigationProperty SLASH )* OP aggregateList CP
                   | ( navigationProperty SLASH )* property
                   | ( navigationProperty SLASH )* aggregateFunction OP property CP; 
@@ -200,7 +200,7 @@ groupbyItem       : property
                   | navigationProperty SLASH OP groupbyList CP
                   | navigationProperty SLASH groupbyItem ; 
 dynamicProperty   : odataIdentifier ;
-aggregateFunction : Sum_LLC | Min_LLC | Max_LLC | Average_LLC ;
+aggregateFunction : SumToken | MinToken | MaxToken | AverageToken ;
 
 expand       : ODataSignal_EXPAND EQ expandItem ( COMMA expandItem )* ;
 expandItem   : ( qualifiedEntityTypeName SLASH )? navigationProperty 
@@ -214,25 +214,25 @@ expandOption : filter
              | expand
              | levels;
              
-levels : ODataSignal_LEVELS EQ ( ( Digit )+ | Max_LLC );
+levels : ODataSignal_LEVELS EQ ( ( Digit )+ | MaxToken );
 
-filter : ODataSignal_FILTER EQ boolCommonExpr;
+filter : ODataSignal_FILTER EQ clause;
 
 orderby     : ODataSignal_ORDERBY EQ orderbyItem ( COMMA orderbyItem )*;
-orderbyItem : commonExpr ( XWS ( Asc_LLC | Desc_LLC ) )?;
+orderbyItem : expression ( XWS ( AscToken | DescToken ) )?;
 
 skip : ODataSignal_SKIP EQ ( Digit )+;
 top  : ODataSignal_TOP  EQ ( Digit )+;
 
 format : ODataSignal_FORMAT EQ
-         ( Atom_LLC
-         | Json_LLC 
-         | Xml_LLC
+         ( AtomToken
+         | JsonToken 
+         | XmlToken
          | ( pChar | SLASH )+ // <a data service specific value indicating a
          ) ;                  // format specific to the specific data service> or
                               // <An IANA-defined [IANA-MMT] content type>
                           
-inlinecount : ODataSignal_INLINECOUNT EQ ( AllPages_LLC | None_LLC ) ;
+inlinecount : ODataSignal_INLINECOUNT EQ ( AllPagesToken | NoneToken ) ;
 
 select     : ODataSignal_SELECT EQ selectItem ( COMMA selectItem )* ;
 selectItem : STAR  
@@ -286,37 +286,42 @@ customValue       : ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON | AT_S
  * ----------------------------------------------------------------------------
  */
 
-// TODO: is a boolCommonExpr also a commonExpr? To e.g. sort by Boolean?
-commonExpr : ( primitiveLiteral
+// TODO: is a clause also a expression? To e.g. sort by Boolean?
+expression : ( primitiveLiteral
              | parameterAlias
              | firstMemberExpr
              | functionExpr
              | negateExpr 
              | methodCallExpr 
-             | parenExpr 
+             | parenthesisExpr 
              | castExpr 
              ) 
-             ( addExpr 
+             binaryExpr?;  
+
+binaryExpr : ( addExpr 
              | subExpr 
              | mulExpr 
              | divExpr 
              | modExpr
-             )?;  
+             );
 
-boolCommonExpr : ( isofExpr 
-                 | boolMethodCallExpr 
-                 | notExpr  
-                 | commonExpr
-                   ( eqExpr 
-                   | neExpr 
-                   | ltExpr  
-                   | leExpr  
-                   | gtExpr 
-                   | geExpr 
-                   | hasExpr 
-                   )?
-                 | boolParenExpr
-                 ) ( andExpr | orExpr )?; 
+clause : ( isofExpr 
+         | boolMethodCallExpr 
+         | notClause  
+         | expression binaryOperatorClause 
+         | parenthesisClause 
+         ) binaryClause?; 
+
+binaryOperatorClause : ( eqClause 
+                   | neClause 
+                   | ltClause  
+                   | leClause  
+                   | gtClause 
+                   | geClause 
+                   | hasClause 
+                   );
+
+binaryClause : ( andClause | orClause );
 
 firstMemberExpr : ( lambdaPredicatePrefixExpr )?  // only allowed inside a lambdaPredicateExpr
                   memberExpr;
@@ -376,9 +381,9 @@ functionExpr : namespace DOT
 functionExprParameters : OP ( functionExprParameter ( COMMA functionExprParameter )* )? CP ;
 functionExprParameter  : functionParameterName EQ ( parameterValue | firstMemberExpr ) ;
 
-anyExpr : Any_LLC OP ( XWS )* ( lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr )?  ( XWS )* CP ;
-allExpr : All_LLC OP  ( XWS )*   lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr    ( XWS )* CP ;
-lambdaPredicateExpr : boolCommonExpr ; // containing at least one lambdaPredicatePrefixExpr
+anyExpr : AnyToken OP ( XWS )* ( lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr )?  ( XWS )* CP ;
+allExpr : AllToken OP  ( XWS )*   lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr    ( XWS )* CP ;
+lambdaPredicateExpr : clause ; // containing at least one lambdaPredicatePrefixExpr
 
 methodCallExpr : indexOfMethodCallExpr 
                | toLowerMethodCallExpr 
@@ -414,71 +419,71 @@ boolMethodCallExpr : endsWithMethodCallExpr
                    | substringOfMethodCallExpr                                          
                    | intersectsMethodCallExpr; 
 
-substringOfMethodCallExpr : SubStringOf_LLC OP  ( XWS )* commonExpr  ( XWS )* COMMA  ( XWS )* commonExpr  ( XWS )* CP;
-startsWithMethodCallExpr  : StartsWith_LLC  OP  ( XWS )* commonExpr  ( XWS )* COMMA  ( XWS )* commonExpr  ( XWS )* CP;
-endsWithMethodCallExpr    : EndsWith_LLC    OP  ( XWS )* commonExpr  ( XWS )* COMMA  ( XWS )* commonExpr  ( XWS )* CP;
-lengthMethodCallExpr      : Length_LLC      OP  ( XWS )* commonExpr  ( XWS )* CP;
-indexOfMethodCallExpr     : IndexOf_LLC     OP  ( XWS )* commonExpr  ( XWS )* COMMA  ( XWS )* commonExpr  ( XWS )* CP;
-substringMethodCallExpr   : Substring_LLC   OP  ( XWS )* commonExpr  ( XWS )* COMMA  ( XWS )* commonExpr (  ( XWS )* COMMA  ( XWS )* commonExpr  ( XWS )* )? CP;
-toLowerMethodCallExpr     : ToLower_LLC     OP  ( XWS )* commonExpr  ( XWS )* CP ;
-toUpperMethodCallExpr     : ToUpper_LLC     OP  ( XWS )* commonExpr  ( XWS )* CP ;
-trimMethodCallExpr        : Trim_LLC        OP  ( XWS )* commonExpr  ( XWS )* CP ;
-concatMethodCallExpr      : Concat_LLC      OP  ( XWS )* commonExpr  ( XWS )* COMMA  ( XWS )* commonExpr  ( XWS )* CP;
+substringOfMethodCallExpr : SubStringOfToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+startsWithMethodCallExpr  : StartsWithToken  OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+endsWithMethodCallExpr    : EndsWithToken    OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+lengthMethodCallExpr      : LengthToken      OP  ( XWS )* expression  ( XWS )* CP;
+indexOfMethodCallExpr     : IndexOfToken     OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+substringMethodCallExpr   : SubstringToken   OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression (  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* )? CP;
+toLowerMethodCallExpr     : ToLowerToken     OP  ( XWS )* expression  ( XWS )* CP ;
+toUpperMethodCallExpr     : ToUpperToken     OP  ( XWS )* expression  ( XWS )* CP ;
+trimMethodCallExpr        : TrimToken        OP  ( XWS )* expression  ( XWS )* CP ;
+concatMethodCallExpr      : ConcatToken      OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
 
-yearMethodCallExpr        : Year_LLC        OP  ( XWS )* commonExpr  ( XWS )* CP ;
-monthMethodCallExpr       : Month_LLC       OP  ( XWS )* commonExpr  ( XWS )* CP ;
-dayMethodCallExpr         : Day_LLC         OP  ( XWS )* commonExpr  ( XWS )* CP ;
-daysMethodCallExpr        : Days_LLC        OP  ( XWS )* commonExpr  ( XWS )* CP ;
-hourMethodCallExpr        : Hour_LLC        OP  ( XWS )* commonExpr  ( XWS )* CP ;
-hoursMethodCallExpr       : Hours_LLC       OP  ( XWS )* commonExpr  ( XWS )* CP ;
-minuteMethodCallExpr      : Minute_LLC      OP  ( XWS )* commonExpr  ( XWS )* CP ;
-minutesMethodCallExpr     : Minutes_LLC     OP  ( XWS )* commonExpr  ( XWS )* CP ;
-secondMethodCallExpr      : Second_LLC      OP  ( XWS )* commonExpr  ( XWS )* CP ;
-secondsMethodCallExpr     : Seconds_LLC     OP  ( XWS )* commonExpr  ( XWS )* CP ;
-timeMethodCallExpr        : Time_LLC        OP  ( XWS )* commonExpr  ( XWS )* CP ;
-dateMethodCallExpr        : Date_LLC        OP  ( XWS )* commonExpr  ( XWS )* CP ;
+yearMethodCallExpr        : YearToken        OP  ( XWS )* expression  ( XWS )* CP ;
+monthMethodCallExpr       : MonthToken       OP  ( XWS )* expression  ( XWS )* CP ;
+dayMethodCallExpr         : DayToken         OP  ( XWS )* expression  ( XWS )* CP ;
+daysMethodCallExpr        : DaysToken        OP  ( XWS )* expression  ( XWS )* CP ;
+hourMethodCallExpr        : HourToken        OP  ( XWS )* expression  ( XWS )* CP ;
+hoursMethodCallExpr       : HoursToken       OP  ( XWS )* expression  ( XWS )* CP ;
+minuteMethodCallExpr      : MinuteToken      OP  ( XWS )* expression  ( XWS )* CP ;
+minutesMethodCallExpr     : MinutesToken     OP  ( XWS )* expression  ( XWS )* CP ;
+secondMethodCallExpr      : SecondToken      OP  ( XWS )* expression  ( XWS )* CP ;
+secondsMethodCallExpr     : SecondsToken     OP  ( XWS )* expression  ( XWS )* CP ;
+timeMethodCallExpr        : TimeToken        OP  ( XWS )* expression  ( XWS )* CP ;
+dateMethodCallExpr        : DateToken        OP  ( XWS )* expression  ( XWS )* CP ;
 
-roundMethodCallExpr       : Round_LLC       OP  ( XWS )* commonExpr  ( XWS )* CP ;
-floorMethodCallExpr       : Floor_LLC       OP  ( XWS )* commonExpr  ( XWS )* CP ;
-ceilingMethodCallExpr     : Ceiling_LLC     OP  ( XWS )* commonExpr  ( XWS )* CP ;
+roundMethodCallExpr       : RoundToken       OP  ( XWS )* expression  ( XWS )* CP ;
+floorMethodCallExpr       : FloorToken       OP  ( XWS )* expression  ( XWS )* CP ;
+ceilingMethodCallExpr     : CeilingToken     OP  ( XWS )* expression  ( XWS )* CP ;
 
-getTotalOffsetMinutesExpr : GetTotalOffsetMinutes_LLC OP  ( XWS )* commonExpr  ( XWS )* CP ; 
+getTotalOffsetMinutesExpr : GetTotalOffsetMinutesToken OP  ( XWS )* expression  ( XWS )* CP ; 
 
-distanceMethodCallExpr    : GeoDotDistance_LLC   OP  ( XWS )* commonExpr  ( XWS )* COMMA  ( XWS )* commonExpr  ( XWS )* CP;
-geoLengthMethodCallExpr   : GeoLength_LLC     OP  ( XWS )* commonExpr  ( XWS )* CP;
-intersectsMethodCallExpr  : GeoDotIntersects_LLC OP  ( XWS )* commonExpr  ( XWS )* COMMA  ( XWS )* commonExpr  ( XWS )* CP;
+distanceMethodCallExpr    : GeoDotDistanceToken   OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+geoLengthMethodCallExpr   : GeoLengthToken     OP  ( XWS )* expression  ( XWS )* CP;
+intersectsMethodCallExpr  : GeoDotIntersectsToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
 
-minDateTimeExpr : MinDateTime_LLC OP  ( XWS )* CP ;
-maxDateTimeExpr : MaxDateTime_LLC OP  ( XWS )* CP ;
-nowDateTimeExpr : Now_LLC OP  ( XWS )* CP ;
+minDateTimeExpr : MinDateTimeToken OP  ( XWS )* CP ;
+maxDateTimeExpr : MaxDateTimeToken OP  ( XWS )* CP ;
+nowDateTimeExpr : NowToken OP  ( XWS )* CP ;
 
-boolParenExpr : OP  ( XWS )* boolCommonExpr  ( XWS )* CP ;
-parenExpr     : OP  ( XWS )* commonExpr      ( XWS )* CP ;
+parenthesisClause : OP  ( XWS )* clause  ( XWS )* CP ;
+parenthesisExpr   : OP  ( XWS )* expression      ( XWS )* CP ;
 
-andExpr : XWS And_LLC XWS boolCommonExpr ;
-orExpr  : XWS Or_LLC  XWS boolCommonExpr ;
+andClause : XWS AndToken XWS clause ;
+orClause  : XWS OrToken  XWS clause ;
 
-eqExpr : XWS Eq_LLC XWS commonExpr ;     
-neExpr : XWS Ne_LLC XWS commonExpr ;
-ltExpr : XWS Lt_LLC XWS commonExpr ;
-leExpr : XWS Le_LLC XWS commonExpr ;
-gtExpr : XWS Gt_LLC XWS commonExpr ;
-geExpr : XWS Ge_LLC XWS commonExpr ;
+eqClause : XWS EqToken XWS expression ;     
+neClause : XWS NeToken XWS expression ;
+ltClause : XWS LtToken XWS expression ;
+leClause : XWS LeToken XWS expression ;
+gtClause : XWS GtToken XWS expression ;
+geClause : XWS GeToken XWS expression ;
 
-hasExpr : XWS Has_LLC XWS commonExpr ;
+hasClause : XWS HasToken XWS expression ;
 
-addExpr : XWS Add_LLC XWS commonExpr ;
-subExpr : XWS Sub_LLC XWS commonExpr ;
-mulExpr : XWS Mul_LLC XWS commonExpr ;
-divExpr : XWS Div_LLC XWS commonExpr ;
-modExpr : XWS Mod_LLC XWS commonExpr ;
+addExpr : XWS AddToken XWS expression ;
+subExpr : XWS SubToken XWS expression ;
+mulExpr : XWS MulToken XWS expression ;
+divExpr : XWS DivToken XWS expression ;
+modExpr : XWS ModToken XWS expression ;
 
-negateExpr : MINUS  ( XWS )* commonExpr ;
+negateExpr : MINUS  ( XWS )* expression ;
 
-notExpr : Not_LLC XWS boolCommonExpr ;
+notClause : NotToken XWS clause ;
 
-isofExpr : IsOf_LLC OP  ( XWS )* ( commonExpr  ( XWS )* COMMA  ( XWS )* )? qualifiedTypeName  ( XWS )* CP ;
-castExpr : Cast_LLC OP  ( XWS )* ( commonExpr  ( XWS )* COMMA  ( XWS )* )? qualifiedTypeName  ( XWS )* CP ;
+isofExpr : IsOfToken OP  ( XWS )* ( expression  ( XWS )* COMMA  ( XWS )* )? qualifiedTypeName  ( XWS )* CP ;
+castExpr : CastToken OP  ( XWS )* ( expression  ( XWS )* COMMA  ( XWS )* )? qualifiedTypeName  ( XWS )* CP ;
 /* ----------------------------------------------------------------------------
  * 4. JSON format for function and action parameters
  * ----------------------------------------------------------------------------
@@ -554,9 +559,9 @@ ValueSeparator :  ( XWS )* COMMA  ( XWS )*;
 
 primitiveLiteralInJSON : stringInJSON
                        | numberInJSON
-                       | True_LLC 
-                       | False_LLC
-                       | Null_LLC;
+                       | TrueToken 
+                       | FalseToken
+                       | NullToken;
 
 stringInJSON : QuotationMark charInJSON* QuotationMark;
 charInJSON   : pChar | SLASH | QUESTION    // only these are allowed in the query part of a URL
@@ -564,12 +569,12 @@ charInJSON   : pChar | SLASH | QUESTION    // only these are allowed in the quer
              | ESCAPE ( DQ 
                       | ESCAPE
                       | SLASH         // solidus         U+002F
-                      | B_LLC         // backspace       U+0008                
-                      | F_LLC         // form feed       U+000C
-                      | N_LLC         // line feed       U+000A
-                      | R_LLC         // carriage return U+000D
-                      | T_LLC         // tab             U+0009
-                      | U_LLC HEXDIG4 //                 U+XXXX
+                      | BToken         // backspace       U+0008                
+                      | FToken         // form feed       U+000C
+                      | NToken         // line feed       U+000A
+                      | RToken         // carriage return U+000D
+                      | TToken         // tab             U+0009
+                      | UToken HEXDIG4 //                 U+XXXX
                       );
 escape       : ESCAPE;                // reverse solidus U+005C
 
@@ -741,12 +746,12 @@ primitiveLiteral : null_symbol
                  | geometryPoint 
                  | geometryPolygon;
 
-null_symbol : Null_LLC ( SQ qualifiedTypeName SQ )?;
+null_symbol : NullToken ( SQ qualifiedTypeName SQ )?;
        // The optional qualifiedTypeName is used to specify what type this null value should be considered. 
        // Knowing the type is useful for function overload resolution purposes 
                                                 
 binary  : (X_LUC|Binary_LAC) SQ (HEXDIG1 HEXDIG1)* SQ; // Note: 'X' is case sensitive, "binary" is not
-boolean_symbol : (True_LLC|ONE) | (False_LLC|ZERO);
+boolean_symbol : (TrueToken|ONE) | (FalseToken|ZERO);
 
 decimal     : decimalBody ( M )?;
 decimalBody : (SIGN)? ( Digit )+ (DOT ( Digit )+)?;
@@ -893,7 +898,7 @@ geometryPrefix  : Geometry_LAC SQ;
 host          : IPLiteral | IPv4address | regName;
 port          : ( Digit )*;
 IPLiteral    : OB ( IPv6address | IPvFuture  ) CB;
-IPvFuture     : V_LLC ( HEXDIG1 )+ DOT ( Unreserved | SubDelims | COLON )+;
+IPvFuture     : VToken ( HEXDIG1 )+ DOT ( Unreserved | SubDelims | COLON )+;
 IPv6address   :   ( H16Col )+ ( H16Col )+ ( H16Col )+ ( H16Col )+ ( H16Col )+ ( H16Col )+ Ls32
                  |                      ColCol ( H16Col )+ ( H16Col )+ ( H16Col )+ ( H16Col )+ ( H16Col )+  Ls32
                  | (               H16 )? ColCol ( H16Col )+ ( H16Col )+ ( H16Col )+ ( H16Col )+  Ls32

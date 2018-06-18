@@ -47,7 +47,7 @@ StringLiteral
 
 fragment
 EscapeSequence
-    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+    :   '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\')
     |   UnicodeEscape
     |   OctalEscape
     ;
@@ -181,80 +181,80 @@ ODataSignal_INLINECOUNT : DOLLAR 'inlinecount' ;
 
 ODataSignal_SELECT : DOLLAR 'select' ;
 
-Atom_LLC : 'atom' ;
-Json_LLC : 'json' ;
-Xml_LLC : 'xml' ;
-All_LLC : 'all' ;
-AllPages_LLC : All_LLC 'pages' ;
-None_LLC : 'none' ;
-Asc_LLC : 'asc' ;
-Desc_LLC : 'desc' ;
-Sum_LLC : 'sum' ;
-Min_LLC : 'min' ;
-Max_LLC : 'max' ;
-Average_LLC : 'average' ;
-Any_LLC: 'any' ;
-As_LLC : 'as' ;
+AtomToken : 'atom' ;
+JsonToken : 'json' ;
+XmlToken : 'xml' ;
+AllToken : 'all' ;
+AllPagesToken : AllToken 'pages' ;
+NoneToken : 'none' ;
+AscToken : 'asc' ;
+DescToken : 'desc' ;
+SumToken : 'sum' ;
+MinToken : 'min' ;
+MaxToken : 'max' ;
+AverageToken : 'average' ;
+AnyToken: 'any' ;
+AsToken : 'as' ;
 
-SubStringOf_LLC : 'substringof' ;
-StartsWith_LLC  : 'startswith' ;
-EndsWith_LLC    : 'endswith' ;
-Length_LLC      : 'length' ;
-IndexOf_LLC : 'indexof' ;
-Substring_LLC : 'substring' ;
-ToLower_LLC : 'tolower' ;
-ToUpper_LLC : 'toupper' ;
-Trim_LLC : 'trim' ;
-Concat_LLC : 'concat' ;
-Year_LLC : 'year' ;
-Month_LLC : 'month' ;
-Day_LLC : 'day' ;
-Days_LLC : 'days' ;
-Hour_LLC : 'hour' ;
-Hours_LLC : Hour_LLC 's' ;
-Minute_LLC : 'minute' ;
-Minutes_LLC : Minute_LLC 's' ;
-Second_LLC : 'second' ;
-Seconds_LLC : Second_LLC 's' ;
-Date_LLC : 'date' ;
-Time_LLC : 'time' ;
-Round_LLC : 'round' ;
-Floor_LLC : 'floor' ;
-Ceiling_LLC : 'ceiling' ;
+SubStringOfToken : 'substringof' ;
+StartsWithToken  : 'startswith' ;
+EndsWithToken    : 'endswith' ;
+LengthToken      : 'length' ;
+IndexOfToken : 'indexof' ;
+SubstringToken : 'substring' ;
+ToLowerToken : 'tolower' ;
+ToUpperToken : 'toupper' ;
+TrimToken : 'trim' ;
+ConcatToken : 'concat' ;
+YearToken : 'year' ;
+MonthToken : 'month' ;
+DayToken : 'day' ;
+DaysToken : 'days' ;
+HourToken : 'hour' ;
+HoursToken : HourToken 's' ;
+MinuteToken : 'minute' ;
+MinutesToken : MinuteToken 's' ;
+SecondToken : 'second' ;
+SecondsToken : SecondToken 's' ;
+DateToken : 'date' ;
+TimeToken : 'time' ;
+RoundToken : 'round' ;
+FloorToken : 'floor' ;
+CeilingToken : 'ceiling' ;
 
-GetTotalOffsetMinutes_LLC : 'gettotaloffsetminutes' ; 
+GetTotalOffsetMinutesToken : 'gettotaloffsetminutes' ; 
 
-GeoDotDistance_LLC : 'geo.distance' ;
-GeoLength_LLC : 'geo.length' ;
-GeoDotIntersects_LLC  : 'geo.intersects' ;
+GeoDotDistanceToken : 'geo.distance' ;
+GeoLengthToken : 'geo.length' ;
+GeoDotIntersectsToken  : 'geo.intersects' ;
 
-MinDateTime_LLC : 'mindatetime' ;
-MaxDateTime_LLC : 'maxdatetime' ;
-Now_LLC : 'now' ;
+MinDateTimeToken : 'mindatetime' ;
+MaxDateTimeToken : 'maxdatetime' ;
+NowToken : 'now' ;
 
 // --
-And_LLC : 'and' ;
-Or_LLC  : 'or'  ;
+AndToken : 'and' ;
+OrToken  : 'or'  ;
 
-Eq_LLC : 'eq' ;     
-Ne_LLC : 'ne' ;
-Lt_LLC : 'lt' ;
-Le_LLC : 'le' ;
-Gt_LLC : 'gt' ;
-Ge_LLC : 'ge' ;
+EqToken : 'eq' ;     
+NeToken : 'ne' ;
+LtToken : 'lt' ;
+LeToken : 'le' ;
+GtToken : 'gt' ;
+GeToken : 'ge' ;
 
-Has_LLC : 'has' ;
+HasToken : 'has' ;
 
-Add_LLC : 'add' ;
-Sub_LLC : 'sub' ;
-Mul_LLC : 'mul' ;
-Div_LLC : 'div' ;
-Mod_LLC : 'mod' ;
+AddToken : 'add' ;
+SubToken : 'sub' ;
+MulToken : 'mul' ;
+DivToken : 'div' ;
+ModToken : 'mod' ;
 
-Not_LLC : 'not' ;
+NotToken : 'not' ;
 
-IsOf_LLC : 'isof' ;
-Cast_LLC : 'cast' ;
+IsOfToken : 'isof' ;
+CastToken : 'cast' ;
 
 // --
 
@@ -269,19 +269,19 @@ T_LUC : 'T';
 X_LUC : 'X';
 Z_LUC : 'Z';
 
-B_LLC :  'b';                
-F_LLC :  'f';
-N_LLC :  'n';
-R_LLC :  'r';
-T_LLC :  't';
-V_LLC :  'v';
-U_LLC :  'u';
+BToken :  'b';                
+FToken :  'f';
+NToken :  'n';
+RToken :  'r';
+TToken :  't';
+VToken :  'v';
+UToken :  'u';
 
 NotANumber_LXC : 'NaN' ;
 Infinity_LUC : 'INF' ;
-Null_LLC : 'null' ;
-True_LLC : 'true' ;
-False_LLC : 'false' ;
+NullToken : 'null' ;
+TrueToken : 'true' ;
+FalseToken : 'false' ;
 EmptyString : '' ; // danger will robinson ! FIXME
 
 // refactor below: 

@@ -66,7 +66,7 @@ public class OdataJPAHelper {
 		ODataParserParser parser = new ODataParserParser(tokens);
 
 		// Get the context
-		ParseTree tree = parser.allExpr();
+		ParseTree tree = parser.clause();
 
 		// Run the Visitor
 		ExpressionVisitor visitor = new ExpressionVisitor();
