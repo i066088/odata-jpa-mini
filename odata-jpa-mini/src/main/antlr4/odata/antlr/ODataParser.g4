@@ -630,7 +630,7 @@ complexTypeName     : odataIdentifier;
 enumerationTypeName : odataIdentifier;
 enumerationMember   : odataIdentifier;
 
-odataIdentifier             : identifierLeadingCharacter ODATA_ID_CHAR478*;
+odataIdentifier             : identifierLeadingCharacter identifierCharacter*;
 identifierLeadingCharacter  : Alpha | UNDERSCORE ;          // TODO: Any character from the Unicode classes L or Nl
 identifierCharacter         : Alpha | ( Digit ) | UNDERSCORE;    // TODO: Any character from the Unicode classes L, Nl, Nd, Mn, Mc, Pc or Cf
 

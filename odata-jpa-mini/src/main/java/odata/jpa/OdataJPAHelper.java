@@ -67,7 +67,8 @@ public class OdataJPAHelper {
 
 		// Get the context
 		ParseTree tree = parser.clause();
-
+		// here, the input has already been read and parsed
+		
 		// Run the Visitor
 		ExpressionVisitor visitor = new ExpressionVisitor();
 		String jpql = visitor.visit(tree);
