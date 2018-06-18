@@ -111,7 +111,8 @@ public class RestResourcesEndpoint {
 	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS })
 	public ODataDataBean find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
 			@QueryParam("$top") Integer top, @QueryParam("$filter") String filter,
-			@QueryParam("$orderby") String orderby, @QueryParam("$count") Boolean count) throws NotFoundException {
+			@QueryParam("$orderby") String orderby, @QueryParam("$inlinecount") String inlinecount)
+			throws NotFoundException {
 
 		Class<?> clazz = getEntityOrThrowException(entity); // this is Class<T>
 
@@ -121,10 +122,14 @@ public class RestResourcesEndpoint {
 
 		list = manager.find(clazz, top, skip, helper.parseFilterClause(filter), helper.parseOrderByClause(orderby));
 
-		if (count != null && count) {
+		if (inlinecount != null && !inlinecount.equals("none")) {
+			if (!inlinecount.equals("allpages"))
+				throw new BadRequestException("$inlinecount must be either 'none' or 'allpages'");
+
 			Long numItems = manager.countEntities(clazz, filter);
-			// Please notice numItems can be larger than list.size() 
+			// Please notice numItems can be larger than list.size()
 			resultBean = new ODataDataCountBean(list, numItems);
+
 		} else {
 			resultBean = new ODataDataBean(list);
 		}
