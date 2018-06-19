@@ -1,3 +1,11 @@
+
+/*
+Based on https://tools.oasis-open.org/version-control/browse/wsvn/odata/trunk/spec/grammar/ANTLR/ODataParser.g4?sc=1
+
+*/
+
+
+
 /* ----------------------------------------------------------------------------
  * odata-v4.0-abnf for URI conventions transformed into ANTLRv4 syntax from 
  * https://tools.oasis-open.org/version-control/svn/odata/ in there
@@ -50,6 +58,7 @@
 grammar ODataParser;
 import ODataLexer;
 
+/*
 odataUri : Protocol ColSlaSla host ( COLON port )?
            serviceRoot
            ( ODataSignal_METADATA | ODataSignal_BATCH | odataRelativeUri )? EOF ;
@@ -60,10 +69,13 @@ serviceRoot : SLASH ( segmentNZ SLASH )*;
 
 odataRelativeUri : resourcePath ( QUESTION queryOptions )?;
 
+*/
+
 /* ----------------------------------------------------------------------------
  * 1. Resource Path
  * ----------------------------------------------------------------------------
  */
+ 
 resourcePath : ( containerQualifier )? entitySetName ( collectionNavigation )? 
              | ( containerQualifier )? namedEntity   ( singleNavigation )?
              | actionImportCall 
@@ -77,7 +89,6 @@ resourcePath : ( containerQualifier )? entitySetName ( collectionNavigation )?
 collectionNavigation : ( SLASH qualifiedEntityTypeName )?
                        ( keyPredicate ( singleNavigation )?
                        | collectionPath
-// lv commented                       | EmptyString     // for restricting to a derived entity type
                        );
 
 keyPredicate     : simpleKey | compoundKey;
@@ -150,9 +161,9 @@ primitiveFunctionImportCall    : ( containerQualifier )? primitiveFunctionImport
 primitiveColFunctionImportCall : ( containerQualifier )? primitiveColFunctionImport functionParameters ;
 
 functionParameters    : OP ( functionParameter ( COMMA functionParameter )* )? CP ;
-functionParameter     : functionParameterName EQ ( parameterAlias | primitiveLiteral ) ;
-functionParameterName : odataIdentifier ;
-parameterAlias        : AT_SIGN odataIdentifier ;
+functionParameter     : functionParameterName EQ ( ParameterAlias | primitiveLiteral ) ;
+functionParameterName : OdataIdentifier ;
+//ParameterAlias        : AT_SIGN OdataIdentifier ;
 
 containerQualifier : namespace DOT entityContainer DOT ;
 
@@ -160,6 +171,8 @@ containerQualifier : namespace DOT entityContainer DOT ;
  * 2. Query Options
  * ----------------------------------------------------------------------------
  */
+
+/*
 
 queryOptions : queryOption ( AMPERSAND queryOption )*;        
 queryOption  : systemQueryOption  
@@ -199,7 +212,7 @@ groupbyList       : groupbyItem ( COMMA groupbyItem )* ;
 groupbyItem       : property
                   | navigationProperty SLASH OP groupbyList CP
                   | navigationProperty SLASH groupbyItem ; 
-dynamicProperty   : odataIdentifier ;
+dynamicProperty   : OdataIdentifier ;
 aggregateFunction : SumToken | MinToken | MaxToken | AverageToken ;
 
 expand       : ODataSignal_EXPAND EQ expandItem ( COMMA expandItem )* ;
@@ -262,7 +275,7 @@ parameterTypeName  : qualifiedTypeName ;
 skiptoken : ODataSignal_SKIPTOKEN EQ 
             ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON | AT_SIGN | DOLLAR | EQ )+; // everything except "&" and ";"
 
-aliasAndValue         : parameterAlias        EQ parameterValue;
+aliasAndValue         : ParameterAlias        EQ parameterValue;
 parameterNameAndValue : functionParameterName EQ parameterValue;
 
 parameterValue : complexInUri  
@@ -281,6 +294,9 @@ customQueryOption : customName ( EQ customValue )?;
 customName        :  ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON )                   // MUST NOT start with "$" or "@"
                     ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON | AT_SIGN | DOLLAR )*;       // MUST NOT contain "="
 customValue       : ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON | AT_SIGN | DOLLAR | EQ )*; // everything except "&" and ";"
+
+*/
+
 /* ----------------------------------------------------------------------------
  * 3. Expressions
  * ----------------------------------------------------------------------------
@@ -288,7 +304,7 @@ customValue       : ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON | AT_S
 
 // TODO: is a clause also a expression? To e.g. sort by Boolean?
 expression : ( primitiveLiteral
-             | parameterAlias
+             | ParameterAlias
              | firstMemberExpr
              | functionExpr
              | negateExpr 
@@ -341,7 +357,7 @@ lambdaPredicatePrefixExpr : inscopeVariableExpr SLASH;
 inscopeVariableExpr       : implicitVariableExpr | lambdaVariableExpr;
 implicitVariableExpr      : DOLLAR 'it' ; // references the unnamed outer variable of the query
 // COMMENT_ANTLR: Was any case $it. Why?
-lambdaVariableExpr        : odataIdentifier;
+lambdaVariableExpr        : OdataIdentifier;
 
 collectionNavigationExpr : count
                          | SLASH ( qualifiedEntityTypeName SLASH )? 
@@ -379,7 +395,9 @@ functionExpr : namespace DOT
              ;
 
 functionExprParameters : OP ( functionExprParameter ( COMMA functionExprParameter )* )? CP ;
-functionExprParameter  : functionParameterName EQ ( parameterValue | firstMemberExpr ) ;
+functionExprParameter  : functionParameterName EQ firstMemberExpr ;
+//WAS:
+//functionExprParameter  : functionParameterName EQ ( parameterValue | firstMemberExpr ) ;
 
 anyExpr : AnyToken OP ( XWS )* ( lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr )?  ( XWS )* CP ;
 allExpr : AllToken OP  ( XWS )*   lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr    ( XWS )* CP ;
@@ -484,6 +502,8 @@ notClause : NotToken XWS clause ;
 
 isofExpr : IsOfToken OP  ( XWS )* ( expression  ( XWS )* COMMA  ( XWS )* )? qualifiedTypeName  ( XWS )* CP ;
 castExpr : CastToken OP  ( XWS )* ( expression  ( XWS )* COMMA  ( XWS )* )? qualifiedTypeName  ( XWS )* CP ;
+
+
 /* ----------------------------------------------------------------------------
  * 4. JSON format for function and action parameters
  * ----------------------------------------------------------------------------
@@ -491,6 +511,7 @@ castExpr : CastToken OP  ( XWS )* ( expression  ( XWS )* COMMA  ( XWS )* )? qual
  *       applying these rules, see comment at the top of this file
  */
 
+/*
 complexColInUri : BeginArray 
                   ( complexInUri ( ValueSeparator complexInUri )* )? 
                   EndArray
@@ -591,13 +612,15 @@ actionRequestBody    :  ( VWS )* BeginObject  ( VWS )*
                        actionParameter ( ValueSeparator  ( VWS )* actionParameter )* 
                         ( VWS )* EndObject  ( VWS )*; 
 actionParameter      : actionParameterName NameSeparator actionParameterValue; 
-actionParameterName  : QuotationMark odataIdentifier QuotationMark; 
+actionParameterName  : QuotationMark OdataIdentifier QuotationMark; 
 actionParameterValue : complexInUri  
                      | complexColInUri
                      | entityRefInJSON
                      | entityRefColInUri
                      | primitiveLiteralInJSON
                      | primitiveColInUri;
+
+*/
 
 /* ----------------------------------------------------------------------------
  * 5. Names and identifiers
@@ -621,18 +644,14 @@ qualifiedEnumerationTypeName : namespace DOT enumerationTypeName;
 
 // an alias is just a single-part namespace
 namespace     : namespacePart ( DOT namespacePart )*;
-namespacePart : odataIdentifier;
+namespacePart : OdataIdentifier;
 
-entitySetName       : odataIdentifier;
-namedEntity         : odataIdentifier;         
-entityTypeName      : odataIdentifier;
-complexTypeName     : odataIdentifier; 
-enumerationTypeName : odataIdentifier;
-enumerationMember   : odataIdentifier;
-
-odataIdentifier             : identifierLeadingCharacter identifierCharacter*;
-identifierLeadingCharacter  : Alpha | UNDERSCORE ;          // TODO: Any character from the Unicode classes L or Nl
-identifierCharacter         : Alpha | ( Digit ) | UNDERSCORE;    // TODO: Any character from the Unicode classes L, Nl, Nd, Mn, Mc, Pc or Cf
+entitySetName       : OdataIdentifier;
+namedEntity         : OdataIdentifier;         
+entityTypeName      : OdataIdentifier;
+complexTypeName     : OdataIdentifier; 
+enumerationTypeName : OdataIdentifier;
+enumerationMember   : OdataIdentifier;
 
 PrimitiveTypeName : ('Edm' DOT)? ( 'Binary'
                              | 'Boolean'
@@ -670,21 +689,21 @@ property : primitiveProperty
          | streamProperty;
 
 primitiveProperty       : primitiveKeyProperty | primitiveNonKeyProperty;
-primitiveKeyProperty    : odataIdentifier;
-primitiveNonKeyProperty : odataIdentifier;
-primitiveColProperty    : odataIdentifier;
-complexProperty         : odataIdentifier;
-complexColProperty      : odataIdentifier;
-streamProperty          : odataIdentifier;
+primitiveKeyProperty    : OdataIdentifier;
+primitiveNonKeyProperty : OdataIdentifier;
+primitiveColProperty    : OdataIdentifier;
+complexProperty         : OdataIdentifier;
+complexColProperty      : OdataIdentifier;
+streamProperty          : OdataIdentifier;
 
 navigationProperty          : entityNavigationProperty | entityColNavigationProperty;
-entityNavigationProperty    : odataIdentifier;
-entityColNavigationProperty : odataIdentifier;
+entityNavigationProperty    : OdataIdentifier;
+entityColNavigationProperty : OdataIdentifier;
 
-entityContainer : odataIdentifier;
+entityContainer : OdataIdentifier;
 
-action : odataIdentifier ;
-actionImport : odataIdentifier ;
+action : OdataIdentifier ;
+actionImport : OdataIdentifier ;
 
 function : entityFunction 
          | entityColFunction 
@@ -694,24 +713,33 @@ function : entityFunction
          | primitiveColFunction
          ;
          
-entityFunction       : odataIdentifier ;
-entityColFunction    : odataIdentifier ;
-complexFunction      : odataIdentifier ;
-complexColFunction   : odataIdentifier ;
-primitiveFunction    : odataIdentifier ;
-primitiveColFunction : odataIdentifier ;
+entityFunction       : OdataIdentifier ;
+entityColFunction    : OdataIdentifier ;
+complexFunction      : OdataIdentifier ;
+complexColFunction   : OdataIdentifier ;
+primitiveFunction    : OdataIdentifier ;
+primitiveColFunction : OdataIdentifier ;
 
-entityFunctionImport       : odataIdentifier ;
-entityColFunctionImport    : odataIdentifier ;
-complexFunctionImport      : odataIdentifier ;
-complexColFunctionImport   : odataIdentifier ;
-primitiveFunctionImport    : odataIdentifier ;
-primitiveColFunctionImport : odataIdentifier ;
+entityFunctionImport       : OdataIdentifier ;
+entityColFunctionImport    : OdataIdentifier ;
+complexFunctionImport      : OdataIdentifier ;
+complexColFunctionImport   : OdataIdentifier ;
+primitiveFunctionImport    : OdataIdentifier ;
+primitiveColFunctionImport : OdataIdentifier ;
 
 /* ----------------------------------------------------------------------------
  * 6. Literal Data Values
  * ----------------------------------------------------------------------------
  */
+
+primitiveLiteral : HexLiteral
+                 | DecimalLiteral
+                 | OctalLiteral
+                 | FloatingPointLiteral
+                 | CharacterLiteral
+                 | StringLiteral ;
+
+/*
 
 primitiveLiteral : null_symbol 
                  | decimal 
@@ -753,13 +781,12 @@ null_symbol : NullToken ( SQ qualifiedTypeName SQ )?;
 binary  : (X_LUC|Binary_LAC) SQ (HEXDIG1 HEXDIG1)* SQ; // Note: 'X' is case sensitive, "binary" is not
 boolean_symbol : (TrueToken|ONE) | (FalseToken|ZERO);
 
-decimal     : decimalBody ( M )?;
-decimalBody : (SIGN)? ( Digit )+ (DOT ( Digit )+)?;
+decimal     : Integer ( M )?;
 double_symbol      : doubleBody ( D )?;
-doubleBody  : decimalBody ( E (SIGN)? ( Digit )+ )? // TODO: restrict range
+doubleBody  : FloatingPoint // TODO: restrict range
             | nanInfinity;
 single      : singleBody ( F )?;
-singleBody  : decimalBody ( E (SIGN)? ( Digit )+ )? // TODO: restrict range
+singleBody  : FloatingPoint // TODO: restrict range
             | nanInfinity;
 nanInfinity : NotANumber_LXC | MINUS Infinity_LUC | Infinity_LUC;
 
@@ -890,11 +917,17 @@ geometryPolygon         : geometryPrefix fullPolygonLiteral SQ;
 
 geographyPrefix : Geography_LAC SQ;
 geometryPrefix  : Geometry_LAC SQ;
+
+*/
+
 /*
  * ----------------------------------------------------------------------------
  * A. URI syntax [RFC3986]
  * ----------------------------------------------------------------------------
  */
+ 
+/*
+
 host          : IPLiteral | IPv4address | regName;
 port          : ( Digit )*;
 IPLiteral    : OB ( IPv6address | IPvFuture  ) CB;
@@ -923,19 +956,8 @@ Unreserved    : Alpha | Digit | MINUS | DOT | UNDERSCORE | TILDE;
 SubDelims    : DOLLAR | AMPERSAND | EQ | SEMI | SQ | OtherDelims;
 OtherDelims  : EXCLAMATION | OP | CP | STAR | PLUS | COMMA;
 
-/* ----------------------------------------------------------------------------
- * 7. Punctuation
- * ----------------------------------------------------------------------------
- */
-// TODO: SQUOTE ie. SQ must also be normalized before parsing
-// see lexer grammar.
+*/
 
-/* ----------------------------------------------------------------------------
- * B. ABNF core definitions [RFC5234]
- * ----------------------------------------------------------------------------
- */
-
-// see lexer grammar.
 
 /* ----------------------------------------------------------------------------
  * End of ODataGrammar

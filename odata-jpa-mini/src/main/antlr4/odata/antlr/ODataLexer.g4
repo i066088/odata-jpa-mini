@@ -347,3 +347,10 @@ Digit  : [0-9];
 //ODATA_ID_CHAR128 : ODATA_ID_CHAR64 ODATA_ID_CHAR64;
 //ODATA_ID_CHAR256 : ODATA_ID_CHAR128 ODATA_ID_CHAR128;
 //ODATA_ID_CHAR478 : ODATA_ID_CHAR256 ODATA_ID_CHAR128 ODATA_ID_CHAR64 ODATA_ID_CHAR32 ODATA_ID_CHAR16 ODATA_ID_CHAR8 ODATA_ID_CHAR4 ODATA_ID_CHAR2;
+
+Integer : (SIGN)? ( Digit )+ (DOT ( Digit )+)? ;
+FloatingPoint : Integer ( E (SIGN)? ( Digit )+ )? ;
+
+OdataIdentifier             : ( Alpha | UNDERSCORE ) ( Alpha | Digit | UNDERSCORE )*;
+
+ParameterAlias : AT_SIGN ( Alpha | Digit | UNDERSCORE )* ;
