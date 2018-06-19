@@ -2,11 +2,11 @@ package odata.jpa;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import odata.antlr.ODataParserBaseVisitor;
@@ -96,10 +96,32 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	SimpleDateFormat hqlTime = new SimpleDateFormat("''HH:mm:ss''");
 	SimpleDateFormat hqlDateTime = new SimpleDateFormat("''yyyy-MM-dd HH:mm:ss''");
 
+	/**
+	 * DEBUG procedure
+	 * 
+	 * @param tree
+	 */
+	public String printContext(ParseTree tree) {
+		if (tree instanceof ErrorNode) {
+			ErrorNode node = (ErrorNode) tree;
+			return "ErrorNode(" + node.getSymbol() + ")";
+		} else {
+			StringBuffer sb = new StringBuffer(tree.getClass().getSimpleName()).append("(");
+			for (int i = 0; i < tree.getChildCount(); ++i) {
+				ParseTree child = tree.getChild(i);
+				if (i != 0)
+					sb.append(", ");
+				sb.append(printContext(child));
+			}
+			sb.append(")");
+			return sb.toString();
+		}
+	}
+
 	@Override
 	public String visitClause(ODataParserParser.ClauseContext ctx) {
 		System.out.println("0");
-		System.out.println("ctx=" + ctx);
+		System.out.println("ctx=" + printContext(ctx));
 		System.out.println("gettext=" + ctx.getText());
 		System.out.println("children=" + ctx.children);
 		return visitChildren(ctx);
@@ -108,7 +130,7 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	@Override
 	public String visitBinaryOperatorClause(ODataParserParser.BinaryOperatorClauseContext ctx) {
 		System.out.println("1");
-		System.out.println("ctx=" + ctx);
+		System.out.println("ctx=" + printContext(ctx));
 		System.out.println("gettext=" + ctx.getText());
 		System.out.println("children=" + ctx.children);
 		return visitChildren(ctx);
@@ -117,7 +139,7 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	@Override
 	public String visitBinaryExpr(ODataParserParser.BinaryExprContext ctx) {
 		System.out.println("2");
-		System.out.println("ctx=" + ctx);
+		System.out.println("ctx=" + printContext(ctx));
 		System.out.println("gettext=" + ctx.getText());
 		System.out.println("children=" + ctx.children);
 		return visitChildren(ctx);
@@ -126,7 +148,7 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	@Override
 	public String visitEqClause(ODataParserParser.EqClauseContext ctx) {
 		System.out.println("3");
-		System.out.println("ctx=" + ctx);
+		System.out.println("ctx=" + printContext(ctx));
 		System.out.println("gettext=" + ctx.getText());
 		System.out.println("children=" + ctx.children);
 		return visitChildren(ctx);
