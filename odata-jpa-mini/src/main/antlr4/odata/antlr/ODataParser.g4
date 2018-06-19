@@ -339,8 +339,10 @@ binaryOperatorClause : ( eqClause
 
 binaryClause : ( andClause | orClause );
 
-firstMemberExpr : ( lambdaPredicatePrefixExpr )?  // only allowed inside a lambdaPredicateExpr
-                  memberExpr;
+// lambdaPredicatePrefixExpr is not working properly
+//firstMemberExpr : ( lambdaPredicatePrefixExpr )?  // only allowed inside a lambdaPredicateExpr
+//                  memberExpr;
+firstMemberExpr : memberExpr;
 
 memberExpr : ( qualifiedEntityTypeName SLASH )?
              ( entityColNavigationProperty ( collectionNavigationExpr )? 
@@ -478,23 +480,24 @@ nowDateTimeExpr : NowToken OP  ( XWS )* CP ;
 parenthesisClause : OP  ( XWS )* clause  ( XWS )* CP ;
 parenthesisExpr   : OP  ( XWS )* expression      ( XWS )* CP ;
 
-andClause : XWS AndToken XWS clause ;
-orClause  : XWS OrToken  XWS clause ;
+andClause : AndToken clause ;
+orClause  : OrToken  clause ;
 
-eqClause : XWS EqToken XWS expression ;     
-neClause : XWS NeToken XWS expression ;
-ltClause : XWS LtToken XWS expression ;
-leClause : XWS LeToken XWS expression ;
-gtClause : XWS GtToken XWS expression ;
-geClause : XWS GeToken XWS expression ;
+//WAS: eqClause : XWS EqToken XWS expression ;     
+eqClause : EqToken expression ;     
+neClause : NeToken expression ;
+ltClause : LtToken expression ;
+leClause : LeToken expression ;
+gtClause : GtToken expression ;
+geClause : GeToken expression ;
 
-hasClause : XWS HasToken XWS expression ;
+hasClause : HasToken expression ;
 
-addExpr : XWS AddToken XWS expression ;
-subExpr : XWS SubToken XWS expression ;
-mulExpr : XWS MulToken XWS expression ;
-divExpr : XWS DivToken XWS expression ;
-modExpr : XWS ModToken XWS expression ;
+addExpr : AddToken expression ;
+subExpr : SubToken expression ;
+mulExpr : MulToken expression ;
+divExpr : DivToken expression ;
+modExpr : ModToken expression ;
 
 negateExpr : MINUS  ( XWS )* expression ;
 
