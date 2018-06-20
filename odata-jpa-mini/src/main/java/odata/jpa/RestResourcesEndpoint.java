@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -41,7 +42,12 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 
 import odata.jpa.beans.ODataDataBean;
@@ -135,7 +141,6 @@ public class RestResourcesEndpoint {
 		}
 
 		return resultBean;
-
 	}
 
 	/**
@@ -179,7 +184,8 @@ public class RestResourcesEndpoint {
 	@GET
 	@Path("{entity}({id})")
 	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS }) // FIXME not working !?!
-	public Response findById(@PathParam("entity") String entity, @PathParam("id") Long id) throws NotFoundException {
+	public Response findById(@PathParam("entity") String entity, @PathParam("id") Long id,
+			@QueryParam("$select") Set<String> attributes) throws NotFoundException {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -190,6 +196,9 @@ public class RestResourcesEndpoint {
 
 		if (obj == null)
 			throw new NotFoundException("No entity with this Id");
+
+		if (attributes != null && !attributes.isEmpty())
+			obj = selectOnlySomeFields(obj, attributes);
 
 		return Response.ok(obj).build();
 	}
@@ -559,4 +568,25 @@ public class RestResourcesEndpoint {
 
 	}
 
+
+
+	/**
+	 * Serialize give object, considering only attributes from
+	 * <code>attributes</code> argument.
+	 * 
+	 * @param obj
+	 * @param attributes
+	 * @return
+	 */
+	private JsonNode selectOnlySomeFields(Object obj, Set<String> attributes) {
+		
+		//FIXME this is not working
+		
+		SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept(attributes);
+		FilterProvider filters = new SimpleFilterProvider().addFilter("filter1", filter);
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.setFilters(filters);
+		JsonNode node = objectMapper.valueToTree(obj);
+		return node;
+	}
 }
