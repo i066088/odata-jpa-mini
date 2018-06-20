@@ -77,29 +77,14 @@
   <tr>
   <td>Expand sub-items</td>
   <td>NOT SUPPORTED</td>
-  <td><a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita">Foo?$expand=TipiEvento,Entita</a><br/>
+  <td><a target="_blank"  href="resources.svc/Foo?&$expand=Bars">Foo?$expand=Bars</a><br/>
   <a target="_blank"  href="resources.svc/Foo?&$expand=*">Foo?$expand=*</a></td>
   </tr>
   
   <tr>
   <td>WHERE</td>
-  <td>DON'T WORK YET</td>
-  <td><a target="_blank"  href="resources.svc/Entita?&$filter=contains(Codice, 'U7RM0') and contains(Descrizione, 'ESP')">Entita?$filter=contains(Codice, 'U7RM0') and contains(Descrizione, 'ESP')</a><br/>
-  <a target="_blank"  href="resources.svc/Foo?&$filter=(Entita/Acronimo) eq 'U7SC0'">Foo?$filter=(Entita/Acronimo) eq 'U7SC0'</a><br/>
-  <a target="_blank"  href="resources.svc/Entita?&$filter=Acronimo eq 'U7SC0'">Entita?$filter=Acronimo eq'U7SC0'</a> <br/></td>
-  </tr>
-  
-  <tr>
-  <td>Foo Filter</td>
-  <td>DON'T WORK YET</td>
-  <td>
-  <a target="_blank"  href="resources.svc/Foo?&$filter=TipoEvento/IdTipoEvento eq 1">TipoEvento/IdTipoEvento eq 1</a>
-  <br/>
-  <a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita&$filter=Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1">Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1</a>
-  <br/>
-  <a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita&$filter=Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1 and contains(Tag,'EV')">Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1 and contains(Tag,'EV')</a>
- <br/>
-  <a target="_blank"  href="resources.svc/Foo?&$expand=TipoEvento,Entita&$filter=Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1 and contains(Tag,'EV') and TStampEvento gt 2012-05-29T09:13:28Z">Entita/IdEntita eq 6 and TipoEvento/IdTipoEvento eq 1 and contains(Tag,'EV') and TStampEvento gt 2012-05-29T09:13:28Z</a>
+  <td>Something works, something does not</td>
+  <td><a target="_blank"  href="resources.svc/Foo?$filter=Age gt 45">Foo?$filter=Age gt 45</a><br/>
   </td>
   </tr>
   
