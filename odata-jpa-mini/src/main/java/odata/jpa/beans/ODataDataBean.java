@@ -1,21 +1,23 @@
 package odata.jpa.beans;
 
+import java.util.List;
+
 public class ODataDataBean {
 
-	private Object data;
+	private List<?> data;
 
 	public ODataDataBean() {
 	}
 
-	public ODataDataBean(Object data) {
+	public ODataDataBean(List<?> data) {
 		this.data = data;
 	}
 
-	public Object getData() {
+	public List<?> getData() {
 		return data;
 	}
 
-	public void setData(Object data) {
+	public void setData(List<?> data) {
 		this.data = data;
 	}
 }

@@ -1,5 +1,7 @@
 package odata.jpa.beans;
 
+import java.util.List;
+
 public class ODataDataCountBean extends ODataDataBean {
 
 	private Long count;
@@ -7,7 +9,7 @@ public class ODataDataCountBean extends ODataDataBean {
 	public ODataDataCountBean() {
 	}
 
-	public ODataDataCountBean(Object data, Long count) {
+	public ODataDataCountBean(List<?> data, Long count) {
 		super(data);
 		this.count = count;
 	}
