@@ -13,6 +13,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,8 +51,6 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 
-import odata.jpa.beans.ODataDataBean;
-import odata.jpa.beans.ODataDataCountBean;
 import odata.jpa.beans.ODataValueBean;
 
 /**
@@ -115,18 +114,22 @@ public class RestResourcesEndpoint {
 	@GET
 	@Path("{entity}")
 	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS })
-	public ODataDataBean find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
+	public Map<String, Object> find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
 			@QueryParam("$top") Integer top, @QueryParam("$filter") String filter,
 			@QueryParam("$orderby") String orderby, @QueryParam("$inlinecount") String inlinecount)
 			throws NotFoundException {
 
+		// FIXME here, if a return a ODataDataBean, serialization breaks.
+
 		Class<?> clazz = getEntityOrThrowException(entity); // this is Class<T>
 
-		ODataDataBean resultBean;
+		Map<String, Object> resultBean = new HashMap<String, Object>();
 
 		List<?> list; // this is List<T>
 
 		list = manager.find(clazz, top, skip, helper.parseFilterClause(filter), helper.parseOrderByClause(orderby));
+
+		resultBean.put("data", list);
 
 		if (inlinecount != null && !inlinecount.equals("none")) {
 			if (!inlinecount.equals("allpages"))
@@ -134,10 +137,8 @@ public class RestResourcesEndpoint {
 
 			Long numItems = manager.countEntities(clazz, filter);
 			// Please notice numItems can be larger than list.size()
-			resultBean = new ODataDataCountBean(list, numItems);
 
-		} else {
-			resultBean = new ODataDataBean(list);
+			resultBean.put("count", numItems);
 		}
 
 		return resultBean;
@@ -567,8 +568,6 @@ public class RestResourcesEndpoint {
 		return Response.ok(is).header("Content-Disposition", contentDisposition).type(contentType).build();
 
 	}
-
-
 
 	/**
 	 * Serialize give object, considering only attributes from
