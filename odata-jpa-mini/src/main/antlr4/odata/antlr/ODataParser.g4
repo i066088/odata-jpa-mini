@@ -410,79 +410,88 @@ anyExpr : AnyToken OP ( XWS )* ( lambdaVariableExpr  ( XWS )* COLON  ( XWS )* la
 allExpr : AllToken OP  ( XWS )*   lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr    ( XWS )* CP ;
 lambdaPredicateExpr : clause ; // containing at least one lambdaPredicatePrefixExpr
 
-methodCallExpr : indexOfMethodCallExpr 
-               | containsMethodCallExpr 
-               | toLowerMethodCallExpr 
-               | toUpperMethodCallExpr  
-               | trimMethodCallExpr 
-               | substringMethodCallExpr 
-               | concatMethodCallExpr 
-               | lengthMethodCallExpr 
-               | yearMethodCallExpr 
-               | monthMethodCallExpr 
-               | dayMethodCallExpr 
-               | daysMethodCallExpr 
-               | hourMethodCallExpr 
-               | hoursMethodCallExpr 
-               | minuteMethodCallExpr 
-               | minutesMethodCallExpr 
-               | secondMethodCallExpr 
-               | secondsMethodCallExpr
-               | timeMethodCallExpr
-               | dateMethodCallExpr 
-               | roundMethodCallExpr 
-               | floorMethodCallExpr 
-               | ceilingMethodCallExpr 
-               | distanceMethodCallExpr 
-               | geoLengthMethodCallExpr 
-               | getTotalOffsetMinutesExpr
-               | minDateTimeExpr
-               | maxDateTimeExpr
-               | nowDateTimeExpr;
+methodCallExpr : zeroaryMethodCall | unaryMethodCall | binaryMethodCall;
 
-boolMethodCallExpr : endsWithMethodCallExpr 
-                   | startsWithMethodCallExpr 
-                   | substringOfMethodCallExpr                                          
-                   | intersectsMethodCallExpr; 
+boolMethodCallExpr : binaryBoolMethodCall; 
 
-substringOfMethodCallExpr : SubStringOfToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-startsWithMethodCallExpr  : StartsWithToken  OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-endsWithMethodCallExpr    : EndsWithToken    OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-lengthMethodCallExpr      : LengthToken      OP  ( XWS )* expression  ( XWS )* CP;
-indexOfMethodCallExpr     : IndexOfToken     OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+zeroaryMethodCall : zeroaryMethod OP CP;
+unaryMethodCall : unaryMethod OP expression CP;
+binaryMethodCall : binaryMethod OP expression COMMA expression CP;
+binaryBoolMethodCall : binaryBoolMethod OP expression COMMA expression CP;
+
+unaryMethod : LengthToken
+			|ToLowerToken
+			|ToUpperToken
+			|TrimToken
+			|YearToken
+			|MonthToken
+			|DayToken
+			|DaysToken
+			|HourToken
+			|MinuteToken
+			|SecondToken
+			|SecondsToken
+			|TimeToken
+			|DateToken
+			|RoundToken
+			|FloorToken
+			|CeilingToken
+			|GetTotalOffsetMinutesToken
+			|GeoLengthToken;
+
+binaryMethod : IndexOfToken
+			|ConcatToken
+			|GeoDotDistanceToken;
+
+binaryBoolMethod : SubStringOfToken
+			|StartsWithToken
+			|EndsWithToken
+			|GeoDotIntersectsToken;
+
+zeroaryMethod : MinDateTimeToken
+			|MaxDateTimeToken
+			|NowToken;
+
+//contains and substring need separate handling
 containsMethodCallExpr    : ContainsToken    OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
 substringMethodCallExpr   : SubstringToken   OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression (  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* )? CP;
-toLowerMethodCallExpr     : ToLowerToken     OP  ( XWS )* expression  ( XWS )* CP ;
-toUpperMethodCallExpr     : ToUpperToken     OP  ( XWS )* expression  ( XWS )* CP ;
-trimMethodCallExpr        : TrimToken        OP  ( XWS )* expression  ( XWS )* CP ;
-concatMethodCallExpr      : ConcatToken      OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
 
-yearMethodCallExpr        : YearToken        OP  ( XWS )* expression  ( XWS )* CP ;
-monthMethodCallExpr       : MonthToken       OP  ( XWS )* expression  ( XWS )* CP ;
-dayMethodCallExpr         : DayToken         OP  ( XWS )* expression  ( XWS )* CP ;
-daysMethodCallExpr        : DaysToken        OP  ( XWS )* expression  ( XWS )* CP ;
-hourMethodCallExpr        : HourToken        OP  ( XWS )* expression  ( XWS )* CP ;
-hoursMethodCallExpr       : HoursToken       OP  ( XWS )* expression  ( XWS )* CP ;
-minuteMethodCallExpr      : MinuteToken      OP  ( XWS )* expression  ( XWS )* CP ;
-minutesMethodCallExpr     : MinutesToken     OP  ( XWS )* expression  ( XWS )* CP ;
-secondMethodCallExpr      : SecondToken      OP  ( XWS )* expression  ( XWS )* CP ;
-secondsMethodCallExpr     : SecondsToken     OP  ( XWS )* expression  ( XWS )* CP ;
-timeMethodCallExpr        : TimeToken        OP  ( XWS )* expression  ( XWS )* CP ;
-dateMethodCallExpr        : DateToken        OP  ( XWS )* expression  ( XWS )* CP ;
+//substringOfMethodCallExpr : SubStringOfToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+//startsWithMethodCallExpr  : StartsWithToken  OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+//endsWithMethodCallExpr    : EndsWithToken    OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+//indexOfMethodCallExpr     : IndexOfToken     OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+//concatMethodCallExpr      : ConcatToken      OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+//lengthMethodCallExpr      : LengthToken      OP  ( XWS )* expression  ( XWS )* CP;
+//toLowerMethodCallExpr     : ToLowerToken     OP  ( XWS )* expression  ( XWS )* CP ;
+//toUpperMethodCallExpr     : ToUpperToken     OP  ( XWS )* expression  ( XWS )* CP ;
+//trimMethodCallExpr        : TrimToken        OP  ( XWS )* expression  ( XWS )* CP ;
 
-roundMethodCallExpr       : RoundToken       OP  ( XWS )* expression  ( XWS )* CP ;
-floorMethodCallExpr       : FloorToken       OP  ( XWS )* expression  ( XWS )* CP ;
-ceilingMethodCallExpr     : CeilingToken     OP  ( XWS )* expression  ( XWS )* CP ;
+//yearMethodCallExpr        : YearToken        OP  ( XWS )* expression  ( XWS )* CP ;
+//monthMethodCallExpr       : MonthToken       OP  ( XWS )* expression  ( XWS )* CP ;
+//dayMethodCallExpr         : DayToken         OP  ( XWS )* expression  ( XWS )* CP ;
+//daysMethodCallExpr        : DaysToken        OP  ( XWS )* expression  ( XWS )* CP ;
+//hourMethodCallExpr        : HourToken        OP  ( XWS )* expression  ( XWS )* CP ;
+//hoursMethodCallExpr       : HoursToken       OP  ( XWS )* expression  ( XWS )* CP ;
+//minuteMethodCallExpr      : MinuteToken      OP  ( XWS )* expression  ( XWS )* CP ;
+//minutesMethodCallExpr     : MinutesToken     OP  ( XWS )* expression  ( XWS )* CP ;
+//secondMethodCallExpr      : SecondToken      OP  ( XWS )* expression  ( XWS )* CP ;
+//secondsMethodCallExpr     : SecondsToken     OP  ( XWS )* expression  ( XWS )* CP ;
+//timeMethodCallExpr        : TimeToken        OP  ( XWS )* expression  ( XWS )* CP ;
+//dateMethodCallExpr        : DateToken        OP  ( XWS )* expression  ( XWS )* CP ;
 
-getTotalOffsetMinutesExpr : GetTotalOffsetMinutesToken OP  ( XWS )* expression  ( XWS )* CP ; 
+//roundMethodCallExpr       : RoundToken       OP  ( XWS )* expression  ( XWS )* CP ;
+//floorMethodCallExpr       : FloorToken       OP  ( XWS )* expression  ( XWS )* CP ;
+//ceilingMethodCallExpr     : CeilingToken     OP  ( XWS )* expression  ( XWS )* CP ;
 
-distanceMethodCallExpr    : GeoDotDistanceToken   OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-geoLengthMethodCallExpr   : GeoLengthToken     OP  ( XWS )* expression  ( XWS )* CP;
-intersectsMethodCallExpr  : GeoDotIntersectsToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+//getTotalOffsetMinutesExpr : GetTotalOffsetMinutesToken OP  ( XWS )* expression  ( XWS )* CP ; 
 
-minDateTimeExpr : MinDateTimeToken OP  ( XWS )* CP ;
-maxDateTimeExpr : MaxDateTimeToken OP  ( XWS )* CP ;
-nowDateTimeExpr : NowToken OP  ( XWS )* CP ;
+//distanceMethodCallExpr    : GeoDotDistanceToken   OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+//geoLengthMethodCallExpr   : GeoLengthToken     OP  ( XWS )* expression  ( XWS )* CP;
+//intersectsMethodCallExpr  : GeoDotIntersectsToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+
+//minDateTimeExpr : MinDateTimeToken OP  ( XWS )* CP ;
+//maxDateTimeExpr : MaxDateTimeToken OP  ( XWS )* CP ;
+//nowDateTimeExpr : NowToken OP  ( XWS )* CP ;
 
 parenthesisClause : OP  ( XWS )* clause  ( XWS )* CP ;
 parenthesisExpr   : OP  ( XWS )* expression      ( XWS )* CP ;

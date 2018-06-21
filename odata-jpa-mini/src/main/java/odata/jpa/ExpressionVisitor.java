@@ -124,6 +124,22 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	}
 
 	/**
+	 * OData to JPQL symbol conversion
+	 * 
+	 * @param odataSymbol
+	 * @return
+	 */
+	public String convert(ParseTree odataSymbolContext) {
+		if (odataSymbolContext == null)
+			throw new IllegalArgumentException("null argument given");
+		String symbol0 = odataSymbolContext.getText().toUpperCase();
+		String symbol1 = operators.get(symbol0);
+		if (symbol1 == null)
+			throw new IllegalArgumentException("Unknown symbol: " + symbol0);
+		return symbol1;
+	}
+
+	/**
 	 * Aggregates the results of visiting multiple children of a node. After either
 	 * all children are visited or {@link #shouldVisitNextChild} returns
 	 * {@code false}, the aggregate value is returned as the result of
@@ -171,7 +187,7 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 
 	@Override
 	public String visitBinaryClause(ODataParserParser.BinaryClauseContext ctx) {
-		String jpqlConnective = operators.get(ctx.binaryConnective().getText().toUpperCase());
+		String jpqlConnective = convert(ctx.binaryConnective());
 		return " " + jpqlConnective + " " + visit(ctx.clause());
 	};
 
@@ -182,13 +198,13 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 
 	@Override
 	public String visitBinaryOperatorClause(ODataParserParser.BinaryOperatorClauseContext ctx) {
-		String jpqlOperator = operators.get(ctx.binaryBoolOperator().getText().toUpperCase());
+		String jpqlOperator = convert(ctx.binaryBoolOperator());
 		return " " + jpqlOperator + " " + visit(ctx.expression());
 	};
 
 	@Override
 	public String visitBinaryExpr(ODataParserParser.BinaryExprContext ctx) {
-		String jpqlOperator = operators.get(ctx.binaryOperator().getText().toUpperCase());
+		String jpqlOperator = convert(ctx.binaryOperator());
 		return " " + jpqlOperator + " " + visit(ctx.expression());
 	};
 
@@ -196,16 +212,31 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	public String visitNegateExpr(ODataParserParser.NegateExprContext ctx) {
 		return " - " + visit(ctx.expression());
 	};
-	
-	/*
+
 	@Override
-	public String visitMethodCallExpr(ODataParserParser.MethodCallExprContext ctx) {
-		///TODO
-		String jpqlFunction = operators.get(ctx.binaryOperator().getText().toUpperCase());
-		return " - " + visitChildren(arg0);
+	public String visitZeroaryMethodCall(ODataParserParser.ZeroaryMethodCallContext ctx) {
+		String jpqlFunction = convert(ctx.zeroaryMethod());
+		return " " + jpqlFunction; // are () required in jpql?
 	};
-	*/
-	
+
+	@Override
+	public String visitUnaryMethodCall(ODataParserParser.UnaryMethodCallContext ctx) {
+		String jpqlFunction = convert(ctx.unaryMethod());
+		return " " + jpqlFunction + "(" + visit(ctx.expression()) + ")";
+	};
+
+	@Override
+	public String visitBinaryMethodCall(ODataParserParser.BinaryMethodCallContext ctx) {
+		String jpqlFunction = convert(ctx.binaryMethod());
+		return " " + jpqlFunction + "(" + visit(ctx.expression().get(0)) + ", " + visit(ctx.expression().get(1)) + ")";
+	};
+
+	@Override
+	public String visitBinaryBoolMethodCall(ODataParserParser.BinaryBoolMethodCallContext ctx) {
+		String jpqlFunction = convert(ctx.binaryBoolMethod());
+		return " " + jpqlFunction + "(" + visit(ctx.expression().get(0)) + ", " + visit(ctx.expression().get(1)) + ")";
+	};
+
 	@Override
 	public String visitSingleNavigation(ODataParserParser.SingleNavigationContext ctx) {
 		// TODO too many possibilities
