@@ -38,9 +38,16 @@
   </tr>
   
   <tr>
-  <td>ORDER BY</td>
+  <td>ORDER BY clause</td>
   <td>OK</td>
   <td><a target="_blank"  href="resources.svc/Foo?&$orderby=Name asc,Birthday desc">Foo?$orderby=Name asc,Birthday desc</a></td>
+  </tr>
+  
+  <tr>
+  <td>WHERE clause</td>
+  <td>Basics work. Not sure about more complex things.</td>
+  <td><a target="_blank"  href="resources.svc/Foo?$filter=(Height ge 160)and(Age lt 40)">Foo?$filter=(Height ge 160)and(Age lt 40)</a><br/>
+  </td>
   </tr>
   
   <tr>
@@ -79,13 +86,6 @@
   <td>NOT SUPPORTED</td>
   <td><a target="_blank"  href="resources.svc/Foo?&$expand=Bars">Foo?$expand=Bars</a><br/>
   <a target="_blank"  href="resources.svc/Foo?&$expand=*">Foo?$expand=*</a></td>
-  </tr>
-  
-  <tr>
-  <td>WHERE</td>
-  <td>Something works, something does not</td>
-  <td><a target="_blank"  href="resources.svc/Foo?$filter=Age gt 45">Foo?$filter=Age gt 45</a><br/>
-  </td>
   </tr>
   
   <tr>
