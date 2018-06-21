@@ -170,13 +170,9 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	};
 
 	@Override
-	public String visitAndClause(ODataParserParser.AndClauseContext ctx) {
-		return " and " + visit(ctx.clause());
-	};
-
-	@Override
-	public String visitOrClause(ODataParserParser.OrClauseContext ctx) {
-		return " or " + visit(ctx.clause());
+	public String visitBinaryClause(ODataParserParser.BinaryClauseContext ctx) {
+		String jpqlConnective = operators.get(ctx.binaryConnective().getText().toUpperCase());
+		return " " + jpqlConnective + " " + visit(ctx.clause());
 	};
 
 	@Override
@@ -185,68 +181,34 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	};
 
 	@Override
-	public String visitEqClause(ODataParserParser.EqClauseContext ctx) {
-		return " = " + visit(ctx.expression());
+	public String visitBinaryOperatorClause(ODataParserParser.BinaryOperatorClauseContext ctx) {
+		String jpqlOperator = operators.get(ctx.binaryBoolOperator().getText().toUpperCase());
+		return " " + jpqlOperator + " " + visit(ctx.expression());
 	};
 
 	@Override
-	public String visitNeClause(ODataParserParser.NeClauseContext ctx) {
-		return " <> " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitLtClause(ODataParserParser.LtClauseContext ctx) {
-		return " < " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitLeClause(ODataParserParser.LeClauseContext ctx) {
-		return " <= " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitGtClause(ODataParserParser.GtClauseContext ctx) {
-		return " > " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitGeClause(ODataParserParser.GeClauseContext ctx) {
-		return " >= " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitAddExpr(ODataParserParser.AddExprContext ctx) {
-		return " + " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitSubExpr(ODataParserParser.SubExprContext ctx) {
-		return " - " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitMulExpr(ODataParserParser.MulExprContext ctx) {
-		return " * " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitDivExpr(ODataParserParser.DivExprContext ctx) {
-		return " / " + visit(ctx.expression());
-	};
-
-	@Override
-	public String visitModExpr(ODataParserParser.ModExprContext ctx) {
-		return " mod " + visit(ctx.expression());
+	public String visitBinaryExpr(ODataParserParser.BinaryExprContext ctx) {
+		String jpqlOperator = operators.get(ctx.binaryOperator().getText().toUpperCase());
+		return " " + jpqlOperator + " " + visit(ctx.expression());
 	};
 
 	@Override
 	public String visitNegateExpr(ODataParserParser.NegateExprContext ctx) {
 		return " - " + visit(ctx.expression());
 	};
-
+	
+	/*
+	@Override
+	public String visitMethodCallExpr(ODataParserParser.MethodCallExprContext ctx) {
+		///TODO
+		String jpqlFunction = operators.get(ctx.binaryOperator().getText().toUpperCase());
+		return " - " + visitChildren(arg0);
+	};
+	*/
+	
 	@Override
 	public String visitSingleNavigation(ODataParserParser.SingleNavigationContext ctx) {
-		//TODO too many possibilities
+		// TODO too many possibilities
 		return visitChildren(ctx);
 	}
 

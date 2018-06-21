@@ -202,6 +202,7 @@ EndsWithToken    : 'endswith' ;
 LengthToken      : 'length' ;
 IndexOfToken : 'indexof' ;
 SubstringToken : 'substring' ;
+ContainsToken : 'contains' ;
 ToLowerToken : 'tolower' ;
 ToUpperToken : 'toupper' ;
 TrimToken : 'trim' ;

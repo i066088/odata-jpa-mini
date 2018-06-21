@@ -98,6 +98,20 @@ public class TestOdataJPAHelper {
 	public void filters3() {
 		String filter = "((Pluto add Pippo)gt 7)and(Pluto ne 33)";
 		String jpql = helper.parseFilterClause(filter);
-		assertEquals("((pluto + pippo) > 7) and (pluto <> 33)", jpql);
+		assertEquals("((pluto + pippo) > 7) AND (pluto != 33)", jpql);
+	}
+
+	@Test
+	public void filters4() {
+		String filter = "tolower(Pluto)";
+		String jpql = helper.parseFilterClause(filter);
+		assertEquals("lower(pluto)", jpql);
+	}
+
+	@Test
+	public void filters5() {
+		String filter = "contains(Pluto,'somthg')";
+		String jpql = helper.parseFilterClause(filter);
+		assertEquals("pluto like '%somethg%'", jpql);
 	}
 }

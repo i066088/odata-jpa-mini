@@ -314,12 +314,14 @@ expression : ( primitiveLiteral
              ) 
              binaryExpr?;  
 
-binaryExpr : ( addExpr 
-             | subExpr 
-             | mulExpr 
-             | divExpr 
-             | modExpr
-             );
+binaryExpr : binaryOperator expression;
+
+//binaryExpr : ( addExpr 
+//             | subExpr 
+//             | mulExpr 
+//             | divExpr 
+//             | modExpr
+//             );
 
 clause : ( isofExpr 
          | boolMethodCallExpr 
@@ -328,16 +330,19 @@ clause : ( isofExpr
          | parenthesisClause 
          ) binaryClause?; 
 
-binaryOperatorClause : ( eqClause 
-                   | neClause 
-                   | ltClause  
-                   | leClause  
-                   | gtClause 
-                   | geClause 
-                   | hasClause 
-                   );
+//binaryOperatorClause : ( eqClause 
+//                   | neClause 
+//                   | ltClause  
+//                   | leClause  
+//                   | gtClause 
+//                   | geClause 
+//                   | hasClause 
+//                   );
 
-binaryClause : ( andClause | orClause );
+binaryOperatorClause : binaryBoolOperator expression;
+
+//binaryClause : ( andClause | orClause );
+binaryClause : binaryConnective clause;
 
 // lambdaPredicatePrefixExpr is not working properly
 //firstMemberExpr : ( lambdaPredicatePrefixExpr )?  // only allowed inside a lambdaPredicateExpr
@@ -406,6 +411,7 @@ allExpr : AllToken OP  ( XWS )*   lambdaVariableExpr  ( XWS )* COLON  ( XWS )* l
 lambdaPredicateExpr : clause ; // containing at least one lambdaPredicatePrefixExpr
 
 methodCallExpr : indexOfMethodCallExpr 
+               | containsMethodCallExpr 
                | toLowerMethodCallExpr 
                | toUpperMethodCallExpr  
                | trimMethodCallExpr 
@@ -444,6 +450,7 @@ startsWithMethodCallExpr  : StartsWithToken  OP  ( XWS )* expression  ( XWS )* C
 endsWithMethodCallExpr    : EndsWithToken    OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
 lengthMethodCallExpr      : LengthToken      OP  ( XWS )* expression  ( XWS )* CP;
 indexOfMethodCallExpr     : IndexOfToken     OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
+containsMethodCallExpr    : ContainsToken    OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
 substringMethodCallExpr   : SubstringToken   OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression (  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* )? CP;
 toLowerMethodCallExpr     : ToLowerToken     OP  ( XWS )* expression  ( XWS )* CP ;
 toUpperMethodCallExpr     : ToUpperToken     OP  ( XWS )* expression  ( XWS )* CP ;
@@ -480,24 +487,36 @@ nowDateTimeExpr : NowToken OP  ( XWS )* CP ;
 parenthesisClause : OP  ( XWS )* clause  ( XWS )* CP ;
 parenthesisExpr   : OP  ( XWS )* expression      ( XWS )* CP ;
 
-andClause : AndToken clause ;
-orClause  : OrToken  clause ;
+binaryConnective: ( AndToken | OrToken );
+//andClause : AndToken clause ;
+//orClause  : OrToken  clause ;
 
+binaryBoolOperator : (EqToken
+					|NeToken
+					|LtToken
+					|LeToken
+					|GtToken
+					|GeToken);
 //WAS: eqClause : XWS EqToken XWS expression ;     
-eqClause : EqToken expression ;     
-neClause : NeToken expression ;
-ltClause : LtToken expression ;
-leClause : LeToken expression ;
-gtClause : GtToken expression ;
-geClause : GeToken expression ;
+//eqClause : EqToken expression ;     
+//neClause : NeToken expression ;
+//ltClause : LtToken expression ;
+//leClause : LeToken expression ;
+//gtClause : GtToken expression ;
+//geClause : GeToken expression ;
 
 hasClause : HasToken expression ;
 
-addExpr : AddToken expression ;
-subExpr : SubToken expression ;
-mulExpr : MulToken expression ;
-divExpr : DivToken expression ;
-modExpr : ModToken expression ;
+binaryOperator: (AddToken
+				|SubToken
+				|MulToken
+				|DivToken
+				|ModToken);
+//addExpr : AddToken expression ;
+//subExpr : SubToken expression ;
+//mulExpr : MulToken expression ;
+//divExpr : DivToken expression ;
+//modExpr : ModToken expression ;
 
 negateExpr : MINUS  ( XWS )* expression ;
 
