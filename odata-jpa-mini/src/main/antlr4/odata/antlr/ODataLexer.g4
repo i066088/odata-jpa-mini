@@ -37,12 +37,8 @@ Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 fragment
 FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
 
-CharacterLiteral
-    :   '\'' ( EscapeSequence | ~('\''|'\\') ) '\''
-    ;
-
 StringLiteral
-    :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+    :   '\'' ( EscapeSequence | ~('\''|'\\') )* '\''
     ;
 
 fragment

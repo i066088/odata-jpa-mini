@@ -758,7 +758,6 @@ primitiveLiteral : HexLiteral
                  | DecimalLiteral
                  | OctalLiteral
                  | FloatingPointLiteral
-                 | CharacterLiteral
                  | StringLiteral ;
 
 /*

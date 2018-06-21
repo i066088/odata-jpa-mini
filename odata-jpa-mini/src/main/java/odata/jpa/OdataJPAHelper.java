@@ -69,11 +69,13 @@ public class OdataJPAHelper {
 		ParseTree tree = parser.clause();
 		// here, the input has already been read and parsed
 		
+		// FIXME should throw exception if parse was not successful!
+		
 		// Run the Visitor
 		ExpressionVisitor visitor = new ExpressionVisitor();
 		String jpql = visitor.visit(tree);
 
-		System.out.println("HERE DEBUG jpql=" + jpql);
+		System.out.println("DEBUG HERE jpql=" + jpql);
 
 		return jpql;
 	}
