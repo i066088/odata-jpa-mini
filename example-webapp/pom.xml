@@ -68,18 +68,6 @@
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>5.2.3.Final</version>
 		</dependency>
-
-		<!-- This should not be necessary, as it is a dependency of a dependency, 
-			however... -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.jaxrs</groupId>
-			<artifactId>jackson-jaxrs-json-provider</artifactId>
-			<version>2.5.1</version> <!-- Glassfish' version -->
-		</dependency>
-		
-		<!--
-		FIXME  jackson-module-jaxb-annotations is included, however sometimes not found
-		 -->
 		
 		<dependency>
 			<groupId>org.jboss.arquillian.junit</groupId>
