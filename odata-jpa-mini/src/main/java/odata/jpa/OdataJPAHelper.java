@@ -23,6 +23,8 @@ public class OdataJPAHelper {
 		if (orderby == null)
 			return null;
 
+		// TODO use ExpressionVisitor instead
+
 		StringBuilder orderbyCondition = new StringBuilder();
 		if (orderby != null && !orderby.trim().isEmpty()) {
 			String comma = "";
@@ -68,9 +70,9 @@ public class OdataJPAHelper {
 		// Get the context
 		ParseTree tree = parser.clause();
 		// here, the input has already been read and parsed
-		
+
 		// FIXME should throw exception if parse was not successful!
-		
+
 		// Run the Visitor
 		ExpressionVisitor visitor = new ExpressionVisitor();
 		String jpql = visitor.visit(tree);
@@ -90,6 +92,8 @@ public class OdataJPAHelper {
 	public String parseAttribute(String attribute) {
 		if (attribute == null || "".equals(attribute))
 			return null;
+
+		// TODO use ExpressionVisitor instead
 
 		String[] pieces = attribute.split("/");
 		StringBuilder sb = new StringBuilder();
