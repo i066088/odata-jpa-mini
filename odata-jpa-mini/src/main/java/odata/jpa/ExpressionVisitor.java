@@ -14,7 +14,7 @@ import odata.antlr.ODataParserBaseVisitor;
 import odata.antlr.ODataParserParser;
 
 /**
- * ANTLR 4.7 visitor for Expressions. Its purpose is to parse expressions in
+ * ANTLR 4.5 visitor for Expressions. Its purpose is to parse expressions in
  * $filter, $orderby and similar parameters, and not the whole URL.
  * 
  * For security reasons, we do not accept functions we do not know.
