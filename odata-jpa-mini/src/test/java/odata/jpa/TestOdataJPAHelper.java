@@ -105,13 +105,13 @@ public class TestOdataJPAHelper {
 	public void filters4() {
 		String filter = "tolower(Pluto)eq'x'";
 		String jpql = helper.parseFilterClause(filter);
-		assertEquals(" LOWER(pluto) = 'x'", jpql);
+		assertEquals("LOWER(pluto) = 'x'", jpql);
 	}
 
 	@Test
 	public void filters5() {
-		String filter = "contains(Pluto,'somthg')";
+		String filter = "contains(Pluto , 'something')";
 		String jpql = helper.parseFilterClause(filter);
-		assertEquals("pluto LIKE '%somethg%'", jpql);
+		assertEquals("pluto LIKE '%something%'", jpql);
 	}
 }

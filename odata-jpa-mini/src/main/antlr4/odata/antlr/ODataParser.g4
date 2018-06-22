@@ -410,9 +410,13 @@ anyExpr : AnyToken OP ( XWS )* ( lambdaVariableExpr  ( XWS )* COLON  ( XWS )* la
 allExpr : AllToken OP  ( XWS )*   lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr    ( XWS )* CP ;
 lambdaPredicateExpr : clause ; // containing at least one lambdaPredicatePrefixExpr
 
-methodCallExpr : zeroaryMethodCall | unaryMethodCall | binaryMethodCall;
+methodCallExpr : zeroaryMethodCall
+				|unaryMethodCall
+				|binaryMethodCall
+				|substringMethodCall;
 
-boolMethodCallExpr : binaryBoolMethodCall; 
+boolMethodCallExpr : binaryBoolMethodCall
+				|containsMethodCall; 
 
 zeroaryMethodCall : zeroaryMethod OP CP;
 unaryMethodCall : unaryMethod OP expression CP;
@@ -453,8 +457,8 @@ zeroaryMethod : MinDateTimeToken
 			|NowToken;
 
 //contains and substring need separate handling
-containsMethodCallExpr    : ContainsToken    OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-substringMethodCallExpr   : SubstringToken   OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression (  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* )? CP;
+containsMethodCall     : ContainsToken OP expression COMMA expression CP;
+substringMethodCall    : SubstringToken OP expression COMMA expression ( COMMA expression )? CP;
 
 //substringOfMethodCallExpr : SubStringOfToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
 //startsWithMethodCallExpr  : StartsWithToken  OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;

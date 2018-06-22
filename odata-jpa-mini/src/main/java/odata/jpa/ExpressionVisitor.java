@@ -216,26 +216,49 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	@Override
 	public String visitZeroaryMethodCall(ODataParserParser.ZeroaryMethodCallContext ctx) {
 		String jpqlFunction = convert(ctx.zeroaryMethod());
-		return " " + jpqlFunction; // are () required in jpql?
+		return jpqlFunction; // are () required in jpql?
 	};
 
 	@Override
 	public String visitUnaryMethodCall(ODataParserParser.UnaryMethodCallContext ctx) {
 		String jpqlFunction = convert(ctx.unaryMethod());
-		return " " + jpqlFunction + "(" + visit(ctx.expression()) + ")";
+		return jpqlFunction + "(" + visit(ctx.expression()) + ")";
 	};
 
 	@Override
 	public String visitBinaryMethodCall(ODataParserParser.BinaryMethodCallContext ctx) {
 		String jpqlFunction = convert(ctx.binaryMethod());
-		return " " + jpqlFunction + "(" + visit(ctx.expression().get(0)) + ", " + visit(ctx.expression().get(1)) + ")";
+		return jpqlFunction + "(" + visit(ctx.expression().get(0)) + ", " + visit(ctx.expression().get(1)) + ")";
 	};
 
 	@Override
 	public String visitBinaryBoolMethodCall(ODataParserParser.BinaryBoolMethodCallContext ctx) {
 		String jpqlFunction = convert(ctx.binaryBoolMethod());
-		return " " + jpqlFunction + "(" + visit(ctx.expression().get(0)) + ", " + visit(ctx.expression().get(1)) + ")";
+		return jpqlFunction + "(" + visit(ctx.expression().get(0)) + ", " + visit(ctx.expression().get(1)) + ")";
 	};
+
+	@Override
+	public String visitContainsMethodCall(ODataParserParser.ContainsMethodCallContext ctx) {
+		String rightSide = ctx.expression(1).getText();
+		if (rightSide == null)
+			throw new IllegalStateException("'contains' method requires two not null arguments");
+		if (rightSide.startsWith("'") && rightSide.endsWith("'"))
+			rightSide = "'%" + rightSide.substring(1, rightSide.length() - 1) + "%'";
+		else
+			rightSide = "'%'||" + rightSide + "||'%'";
+		return visit(ctx.expression(0)) + " LIKE " + rightSide;
+	}
+
+	@Override
+	public String visitSubstringMethodCall(ODataParserParser.SubstringMethodCallContext ctx) {
+		// substring may have 2 or 3 arguments
+		String jpqlFunction = convert(ctx.SubstringToken());
+		String ret = jpqlFunction + "(" + visit(ctx.expression().get(0)) + ", " + visit(ctx.expression().get(1));
+		if (ctx.expression().size() > 2)
+			ret += ", " + visit(ctx.expression().get(2));
+		ret += ")";
+		return ret;
+	}
 
 	@Override
 	public String visitSingleNavigation(ODataParserParser.SingleNavigationContext ctx) {
