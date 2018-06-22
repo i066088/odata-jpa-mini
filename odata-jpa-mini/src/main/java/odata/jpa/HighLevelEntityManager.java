@@ -35,7 +35,7 @@ import org.apache.commons.beanutils.PropertyUtils;
  *
  */
 @Stateless
-public class GenericManager {
+public class HighLevelEntityManager {
 
 	@PersistenceContext(unitName = "MyPersistenceUnit")
 	private EntityManager em;
@@ -178,7 +178,7 @@ public class GenericManager {
 	 * Save an object to database (using 'merge' instead of 'persist'). This is ok
 	 * for both INSERT and UPDATE.
 	 */
-	public <T> T save(T tosave) {
+	public <T> T merge(T tosave) {
 		return em.merge(tosave);
 	}
 

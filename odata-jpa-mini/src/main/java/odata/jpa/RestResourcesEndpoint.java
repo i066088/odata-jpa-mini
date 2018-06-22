@@ -75,7 +75,7 @@ public class RestResourcesEndpoint {
 	private static final String FILENAME_PROPERTY_SUFFIX = "FileName";
 
 	@Inject
-	GenericManager manager;
+	HighLevelEntityManager manager;
 	@Inject
 	OdataJPAHelper helper;
 
@@ -288,7 +288,7 @@ public class RestResourcesEndpoint {
 		Class<?> clazz = getEntityOrThrowException(entity);
 
 		Object obj = manager.bean2object(clazz, attributes);
-		obj = manager.save(obj);
+		obj = manager.merge(obj);
 
 		return Response.status(Status.CREATED).entity(obj).build();
 	}
@@ -334,7 +334,7 @@ public class RestResourcesEndpoint {
 		attributes.put(idAttr.getName(), id.toString());
 
 		T obj = manager.bean2object(clazz, attributes);
-		obj = manager.save(obj);
+		obj = manager.merge(obj);
 
 		return Response.ok(obj).build();
 	}
