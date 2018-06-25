@@ -427,7 +427,8 @@ unaryMethod : LengthToken
 			|RoundToken
 			|FloorToken
 			|CeilingToken
-			|GetTotalOffsetMinutesToken
+			|FractionalSecondsToken
+			|TotalOffsetMinutesToken
 			|GeoLengthToken;
 
 binaryMethod : IndexOfToken

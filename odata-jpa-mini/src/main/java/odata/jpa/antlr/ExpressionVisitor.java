@@ -82,6 +82,9 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		operators.put("MINUTES", "MINUTE");
 		operators.put("SECOND", "SECOND");
 		operators.put("SECONDS", "SECOND");
+		operators.put("TOTALOFFSETMINUTES", "MINUTES"); //more or less
+		operators.put("MAXDATETIME", "{ts 9999-21-31 23:59:59}"); //more or less
+		operators.put("MINDATETIME", "{ts 0001-01-01 00:00:00}"); //more or less
 		// Types - I don't even know what they mean. TODO
 		operators.put("ISOF", "???");
 		operators.put("CAST", "???");

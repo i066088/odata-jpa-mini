@@ -218,8 +218,10 @@ TimeToken : 'time' ;
 RoundToken : 'round' ;
 FloorToken : 'floor' ;
 CeilingToken : 'ceiling' ;
+FractionalSecondsToken : 'fractionalseconds' ;	//new in v4
 
-GetTotalOffsetMinutesToken : 'gettotaloffsetminutes' ; 
+TotalOffsetMinutesToken : 'gettotaloffsetminutes'
+                       | 'totaloffsetminutes' ; //new in v4
 
 GeoDotDistanceToken : 'geo.distance' ;
 GeoLengthToken : 'geo.length' ;
