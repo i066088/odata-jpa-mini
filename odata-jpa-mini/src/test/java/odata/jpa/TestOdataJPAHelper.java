@@ -121,7 +121,7 @@ public class TestOdataJPAHelper {
 	public void filtersAny() {
 		String filter = "Bars/any(x:x/Description eq 'Roma')";
 		String jpql = helper.parseFilterClause(filter);
-		assertEquals("EXISTS (SELECT x FROM u.bars x WHERE x.description = 'Roma')", jpql);
+		assertEquals(" EXISTS (SELECT x FROM u.bars x WHERE x.description = 'Roma')", jpql);
 	}
 
 }

@@ -354,12 +354,12 @@ implicitVariableExpr      : DOLLAR 'it' ; // references the unnamed outer variab
 // COMMENT_ANTLR: Was any case $it. Why?
 
 
-collectionNavigationExpr : count
-                         | SLASH ( qualifiedEntityTypeName SLASH )? 
-                           ( boundFunctionExpr 
-                           | anyExpr
-                           | allExpr 
-                           );
+collectionNavigationExpr : count ;
+//                         | SLASH ( qualifiedEntityTypeName SLASH )? 
+//                           ( boundFunctionExpr 
+//                           | anyExpr
+//                           | allExpr 
+//                           );
 
 singleNavigationExpr : SLASH memberExpr;
 
