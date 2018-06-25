@@ -122,10 +122,10 @@ ONE : '1' ;
 TWO: '2' ;
 THREE: '3' ;
 
-ColCol : COLON COLON ;
-ColSlaSla : COLON SLASH SLASH ;
+// ColCol : COLON COLON ;
+// ColSlaSla : COLON SLASH SLASH ;
 
-HttpOrHttpsAnyCase : H T T P ( S )? ;
+// HttpOrHttpsAnyCase : H T T P ( S )? ;
 
 Binary_LAC : B I N A R Y ;
 True_LAC : T R U E ;
