@@ -1,4 +1,4 @@
-package odata.jpa;
+package odata.jpa.antlr;
 
 import javax.ejb.Stateless;
 
@@ -68,14 +68,12 @@ public class OdataJPAHelper {
 
 		// Init parser with got tokens
 		ODataParserParser parser = new ODataParserParser(tokens);
-		parser.removeErrorListeners();
-		parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+		//parser.removeErrorListeners();
+		//parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
 		// Get the context
 		ParseTree tree = parser.clause();
 		// here, the input has already been read and parsed
-
-		// FIXME should throw exception if parse was not successful!
 
 		// Run the Visitor
 		ExpressionVisitor visitor = new ExpressionVisitor();

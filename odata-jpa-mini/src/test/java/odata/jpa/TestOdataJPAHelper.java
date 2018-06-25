@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import odata.jpa.antlr.OdataJPAHelper;
+
 public class TestOdataJPAHelper {
 
 	OdataJPAHelper helper = new OdataJPAHelper();
@@ -119,7 +121,7 @@ public class TestOdataJPAHelper {
 	public void filtersAny() {
 		String filter = "Bars/any(x:x/Description eq 'Roma')";
 		String jpql = helper.parseFilterClause(filter);
-		assertEquals("EXISTS (SELECT x FROM u.Bars WHERE description = 'Roma')", jpql);
+		assertEquals("EXISTS (SELECT x FROM u.bars x WHERE x.description = 'Roma')", jpql);
 	}
 
 }

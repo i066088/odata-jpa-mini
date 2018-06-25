@@ -330,24 +330,14 @@ VWS : CR | LF | XWS ; // "bad" vertical whitespace
 // COMMENT_ANTLR4: ( XWS )* is OWS when considered bad (from context) identical as lexer rules so:
 // COMMENT_ANTLR4_CONT: ... OWS (otherwise not referenced has been renamed to BWS
 
-Alpha  : [a-zA-Z];
-Digit  : [0-9];
 
-
-//ODATA_ID_CHAR : Alpha | Digit | UNDERSCORE;
-//ODATA_ID_CHAR2 : ODATA_ID_CHAR ODATA_ID_CHAR;
-//ODATA_ID_CHAR4 : ODATA_ID_CHAR2 ODATA_ID_CHAR2;
-//ODATA_ID_CHAR8 : ODATA_ID_CHAR4 ODATA_ID_CHAR4;
-//ODATA_ID_CHAR16 : ODATA_ID_CHAR8 ODATA_ID_CHAR8;
-//ODATA_ID_CHAR32 : ODATA_ID_CHAR16 ODATA_ID_CHAR16;
-//ODATA_ID_CHAR64 : ODATA_ID_CHAR32 ODATA_ID_CHAR32;
-//ODATA_ID_CHAR128 : ODATA_ID_CHAR64 ODATA_ID_CHAR64;
-//ODATA_ID_CHAR256 : ODATA_ID_CHAR128 ODATA_ID_CHAR128;
-//ODATA_ID_CHAR478 : ODATA_ID_CHAR256 ODATA_ID_CHAR128 ODATA_ID_CHAR64 ODATA_ID_CHAR32 ODATA_ID_CHAR16 ODATA_ID_CHAR8 ODATA_ID_CHAR4 ODATA_ID_CHAR2;
 
 Integer : (SIGN)? ( Digit )+ (DOT ( Digit )+)? ;
 FloatingPoint : Integer ( E (SIGN)? ( Digit )+ )? ;
 
-OdataIdentifier             : ( Alpha | UNDERSCORE ) ( Alpha | Digit | UNDERSCORE )*;
+OdataIdentifier : ( Alpha | UNDERSCORE ) ( Alpha | Digit | UNDERSCORE )*;
 
 ParameterAlias : AT_SIGN ( Alpha | Digit | UNDERSCORE )* ;
+
+Alpha  : [a-zA-Z];
+Digit  : [0-9];

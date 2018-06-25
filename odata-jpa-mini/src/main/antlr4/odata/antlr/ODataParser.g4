@@ -318,9 +318,11 @@ binaryExpr : binaryOperator expression;
 
 clause : ( isofExpr 
          | boolMethodCallExpr 
-         | notClause  
+         | notClause
          | expression binaryOperatorClause 
          | parenthesisClause 
+         | anyClause
+         | allClause
          ) binaryClause?; 
 
 binaryOperatorClause : binaryBoolOperator expression;
@@ -342,11 +344,15 @@ memberExpr : ( qualifiedEntityTypeName SLASH )?
              | streamProperty 
              | boundFunctionExpr 
              );
+
+anyClause : memberExpr  SLASH  anyExpr  ;
+allClause : memberExpr  SLASH  allExpr  ;
                    
 lambdaPredicatePrefixExpr : inscopeVariableExpr SLASH;
 inscopeVariableExpr       : implicitVariableExpr | lambdaVariableExpr;
 implicitVariableExpr      : DOLLAR 'it' ; // references the unnamed outer variable of the query
 // COMMENT_ANTLR: Was any case $it. Why?
+
 
 collectionNavigationExpr : count
                          | SLASH ( qualifiedEntityTypeName SLASH )? 
@@ -358,10 +364,8 @@ collectionNavigationExpr : count
 singleNavigationExpr : SLASH memberExpr;
 
 collectionPathExpr : count 
-                   | SLASH boundFunctionExpr
-                   | SLASH anyExpr
-                   | SLASH allExpr;
- 
+                   | SLASH boundFunctionExpr;
+
 complexPathExpr : SLASH ( qualifiedComplexTypeName SLASH )?
                   ( primitiveProperty ( singlePathExpr )?
                   | complexProperty   ( complexPathExpr )?

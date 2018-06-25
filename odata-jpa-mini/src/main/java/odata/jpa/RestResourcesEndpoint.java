@@ -51,6 +51,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 
+import odata.jpa.antlr.OdataJPAHelper;
 import odata.jpa.beans.ODataValueBean;
 
 /**

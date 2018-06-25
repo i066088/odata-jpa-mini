@@ -1,4 +1,4 @@
-package odata.jpa;
+package odata.jpa.antlr;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -285,6 +285,14 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	@Override
 	public String visitEntityColNavigationProperty(ODataParserParser.EntityColNavigationPropertyContext ctx) {
 		return helper.firstToLower(ctx.getText());
+	}
+
+	@Override
+	public String visitAnyClause(ODataParserParser.AnyClauseContext ctx) {
+		String prop = visit(ctx.memberExpr());
+		String v = ctx.anyExpr().lambdaVariableExpr().getText();
+		String pred = visit(ctx.anyExpr().lambdaPredicateExpr());
+		return " EXISTS (SELECT " + v + " FROM u." + prop + " " + v + " WHERE " + pred + ")";
 	}
 
 	@Override
