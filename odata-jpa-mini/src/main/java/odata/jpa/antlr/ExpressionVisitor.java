@@ -12,7 +12,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import odata.antlr.ODataParserBaseVisitor;
 import odata.antlr.ODataParserParser;
-import odata.antlr.ODataParserParser.LambdaPredicateExprContext;
 
 /**
  * ANTLR 4.5 visitor for Expressions. Its purpose is to parse expressions in
@@ -82,9 +81,9 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		operators.put("MINUTES", "MINUTE");
 		operators.put("SECOND", "SECOND");
 		operators.put("SECONDS", "SECOND");
-		operators.put("TOTALOFFSETMINUTES", "MINUTES"); //more or less
-		operators.put("MAXDATETIME", "{ts 9999-21-31 23:59:59}"); //more or less
-		operators.put("MINDATETIME", "{ts 0001-01-01 00:00:00}"); //more or less
+		operators.put("TOTALOFFSETMINUTES", "MINUTES"); // more or less
+		operators.put("MAXDATETIME", "{ts 9999-21-31 23:59:59}"); // more or less
+		operators.put("MINDATETIME", "{ts 0001-01-01 00:00:00}"); // more or less
 		// Types - I don't even know what they mean. TODO
 		operators.put("ISOF", "???");
 		operators.put("CAST", "???");
@@ -295,7 +294,19 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		String prop = visit(ctx.memberExpr());
 		String v = ctx.anyExpr().lambdaVariableExpr().getText();
 		String pred = visit(ctx.anyExpr().lambdaPredicateExpr());
+		// FIXME this works only at 1st level, because we know that 1st level variable
+		// is "u"
 		return " EXISTS (SELECT " + v + " FROM u." + prop + " " + v + " WHERE " + pred + ")";
+	}
+
+	@Override
+	public String visitAllClause(ODataParserParser.AllClauseContext ctx) {
+		String prop = visit(ctx.memberExpr());
+		String v = ctx.allExpr().lambdaVariableExpr().getText();
+		String pred = visit(ctx.allExpr().lambdaPredicateExpr());
+		// FIXME this works only at 1st level, because we know that 1st level variable
+		// is "u"
+		return " NOT EXISTS (SELECT " + v + " FROM u." + prop + " " + v + " WHERE NOT(" + pred + "))";
 	}
 
 	@Override
