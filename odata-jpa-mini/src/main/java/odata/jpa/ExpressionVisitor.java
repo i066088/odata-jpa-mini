@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import odata.antlr.ODataParserBaseVisitor;
 import odata.antlr.ODataParserParser;
+import odata.antlr.ODataParserParser.LambdaPredicateExprContext;
 
 /**
  * ANTLR 4.5 visitor for Expressions. Its purpose is to parse expressions in
@@ -135,7 +136,7 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		String symbol0 = odataSymbolContext.getText().toUpperCase();
 		String symbol1 = operators.get(symbol0);
 		if (symbol1 == null)
-			throw new IllegalArgumentException("Unknown symbol: " + symbol0);
+			throw new IllegalArgumentException("Unknown symbol: '" + symbol0 + "'");
 		return symbol1;
 	}
 

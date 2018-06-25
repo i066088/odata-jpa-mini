@@ -60,12 +60,16 @@ public class OdataJPAHelper {
 
 		// Init lexer
 		ODataParserLexer lexer = new ODataParserLexer(new ANTLRInputStream(filter));
+		lexer.removeErrorListeners();
+		lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
 
 		// Get a list of matched tokens
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 
 		// Init parser with got tokens
 		ODataParserParser parser = new ODataParserParser(tokens);
+		parser.removeErrorListeners();
+		parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
 		// Get the context
 		ParseTree tree = parser.clause();
