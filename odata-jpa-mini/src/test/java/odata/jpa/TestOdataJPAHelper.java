@@ -81,37 +81,45 @@ public class TestOdataJPAHelper {
 	}
 
 	@Test
-	public void filters1() {
+	public void filtersBasics() {
 		String filter = "1 eq 2";
 		String jpql = helper.parseFilterClause(filter);
 		assertEquals("1 = 2", jpql);
 	}
 
 	@Test
-	public void filters2() {
+	public void filtersProperty() {
 		String filter = "Obj/Prop lt 57.0";
 		String jpql = helper.parseFilterClause(filter);
 		assertEquals("obj.prop < 57.0", jpql);
 	}
 
 	@Test
-	public void filters3() {
+	public void filtersParenthesis() {
 		String filter = "((Pluto add Pippo)gt 7)and(Pluto ne '33')";
 		String jpql = helper.parseFilterClause(filter);
 		assertEquals("((pluto + pippo) > 7) AND (pluto != '33')", jpql);
 	}
 
 	@Test
-	public void filters4() {
+	public void filtersTolower() {
 		String filter = "tolower(Pluto)eq'x'";
 		String jpql = helper.parseFilterClause(filter);
 		assertEquals("LOWER(pluto) = 'x'", jpql);
 	}
 
 	@Test
-	public void filters5() {
+	public void filtersContains() {
 		String filter = "contains(Pluto , 'something')";
 		String jpql = helper.parseFilterClause(filter);
 		assertEquals("pluto LIKE '%something%'", jpql);
 	}
+
+	@Test
+	public void filtersAny() {
+		String filter = "Bars/any(x:x/Description eq 'Roma')";
+		String jpql = helper.parseFilterClause(filter);
+		assertEquals("EXISTS (SELECT x FROM u.Bars WHERE description = 'Roma')", jpql);
+	}
+
 }
