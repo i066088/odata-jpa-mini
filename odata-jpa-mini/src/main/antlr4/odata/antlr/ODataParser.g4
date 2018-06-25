@@ -316,13 +316,6 @@ expression : ( primitiveLiteral
 
 binaryExpr : binaryOperator expression;
 
-//binaryExpr : ( addExpr 
-//             | subExpr 
-//             | mulExpr 
-//             | divExpr 
-//             | modExpr
-//             );
-
 clause : ( isofExpr 
          | boolMethodCallExpr 
          | notClause  
@@ -330,18 +323,8 @@ clause : ( isofExpr
          | parenthesisClause 
          ) binaryClause?; 
 
-//binaryOperatorClause : ( eqClause 
-//                   | neClause 
-//                   | ltClause  
-//                   | leClause  
-//                   | gtClause 
-//                   | geClause 
-//                   | hasClause 
-//                   );
-
 binaryOperatorClause : binaryBoolOperator expression;
 
-//binaryClause : ( andClause | orClause );
 binaryClause : binaryConnective clause;
 
 // lambdaPredicatePrefixExpr is not working properly
@@ -364,7 +347,6 @@ lambdaPredicatePrefixExpr : inscopeVariableExpr SLASH;
 inscopeVariableExpr       : implicitVariableExpr | lambdaVariableExpr;
 implicitVariableExpr      : DOLLAR 'it' ; // references the unnamed outer variable of the query
 // COMMENT_ANTLR: Was any case $it. Why?
-lambdaVariableExpr        : OdataIdentifier;
 
 collectionNavigationExpr : count
                          | SLASH ( qualifiedEntityTypeName SLASH )? 
@@ -406,8 +388,9 @@ functionExprParameter  : functionParameterName EQ firstMemberExpr ;
 //WAS:
 //functionExprParameter  : functionParameterName EQ ( parameterValue | firstMemberExpr ) ;
 
-anyExpr : AnyToken OP ( XWS )* ( lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr )?  ( XWS )* CP ;
-allExpr : AllToken OP  ( XWS )*   lambdaVariableExpr  ( XWS )* COLON  ( XWS )* lambdaPredicateExpr    ( XWS )* CP ;
+anyExpr             : AnyToken OP ( lambdaVariableExpr  COLON  lambdaPredicateExpr )?  CP ;
+allExpr             : AllToken OP   lambdaVariableExpr  COLON  lambdaPredicateExpr     CP ;
+lambdaVariableExpr  : OdataIdentifier;
 lambdaPredicateExpr : clause ; // containing at least one lambdaPredicatePrefixExpr
 
 methodCallExpr : zeroaryMethodCall
@@ -418,9 +401,9 @@ methodCallExpr : zeroaryMethodCall
 boolMethodCallExpr : binaryBoolMethodCall
 				|containsMethodCall; 
 
-zeroaryMethodCall : zeroaryMethod OP CP;
-unaryMethodCall : unaryMethod OP expression CP;
-binaryMethodCall : binaryMethod OP expression COMMA expression CP;
+zeroaryMethodCall    : zeroaryMethod    OP                             CP;
+unaryMethodCall      : unaryMethod      OP expression                  CP;
+binaryMethodCall     : binaryMethod     OP expression COMMA expression CP;
 binaryBoolMethodCall : binaryBoolMethod OP expression COMMA expression CP;
 
 unaryMethod : LengthToken
@@ -460,49 +443,10 @@ zeroaryMethod : MinDateTimeToken
 containsMethodCall     : ContainsToken OP expression COMMA expression CP;
 substringMethodCall    : SubstringToken OP expression COMMA expression ( COMMA expression )? CP;
 
-//substringOfMethodCallExpr : SubStringOfToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-//startsWithMethodCallExpr  : StartsWithToken  OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-//endsWithMethodCallExpr    : EndsWithToken    OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-//indexOfMethodCallExpr     : IndexOfToken     OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-//concatMethodCallExpr      : ConcatToken      OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-//lengthMethodCallExpr      : LengthToken      OP  ( XWS )* expression  ( XWS )* CP;
-//toLowerMethodCallExpr     : ToLowerToken     OP  ( XWS )* expression  ( XWS )* CP ;
-//toUpperMethodCallExpr     : ToUpperToken     OP  ( XWS )* expression  ( XWS )* CP ;
-//trimMethodCallExpr        : TrimToken        OP  ( XWS )* expression  ( XWS )* CP ;
-
-//yearMethodCallExpr        : YearToken        OP  ( XWS )* expression  ( XWS )* CP ;
-//monthMethodCallExpr       : MonthToken       OP  ( XWS )* expression  ( XWS )* CP ;
-//dayMethodCallExpr         : DayToken         OP  ( XWS )* expression  ( XWS )* CP ;
-//daysMethodCallExpr        : DaysToken        OP  ( XWS )* expression  ( XWS )* CP ;
-//hourMethodCallExpr        : HourToken        OP  ( XWS )* expression  ( XWS )* CP ;
-//hoursMethodCallExpr       : HoursToken       OP  ( XWS )* expression  ( XWS )* CP ;
-//minuteMethodCallExpr      : MinuteToken      OP  ( XWS )* expression  ( XWS )* CP ;
-//minutesMethodCallExpr     : MinutesToken     OP  ( XWS )* expression  ( XWS )* CP ;
-//secondMethodCallExpr      : SecondToken      OP  ( XWS )* expression  ( XWS )* CP ;
-//secondsMethodCallExpr     : SecondsToken     OP  ( XWS )* expression  ( XWS )* CP ;
-//timeMethodCallExpr        : TimeToken        OP  ( XWS )* expression  ( XWS )* CP ;
-//dateMethodCallExpr        : DateToken        OP  ( XWS )* expression  ( XWS )* CP ;
-
-//roundMethodCallExpr       : RoundToken       OP  ( XWS )* expression  ( XWS )* CP ;
-//floorMethodCallExpr       : FloorToken       OP  ( XWS )* expression  ( XWS )* CP ;
-//ceilingMethodCallExpr     : CeilingToken     OP  ( XWS )* expression  ( XWS )* CP ;
-
-//getTotalOffsetMinutesExpr : GetTotalOffsetMinutesToken OP  ( XWS )* expression  ( XWS )* CP ; 
-
-//distanceMethodCallExpr    : GeoDotDistanceToken   OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-//geoLengthMethodCallExpr   : GeoLengthToken     OP  ( XWS )* expression  ( XWS )* CP;
-//intersectsMethodCallExpr  : GeoDotIntersectsToken OP  ( XWS )* expression  ( XWS )* COMMA  ( XWS )* expression  ( XWS )* CP;
-
-//minDateTimeExpr : MinDateTimeToken OP  ( XWS )* CP ;
-//maxDateTimeExpr : MaxDateTimeToken OP  ( XWS )* CP ;
-//nowDateTimeExpr : NowToken OP  ( XWS )* CP ;
-
-parenthesisClause : OP  ( XWS )* clause  ( XWS )* CP ;
-parenthesisExpr   : OP  ( XWS )* expression      ( XWS )* CP ;
+parenthesisClause : OP  clause  CP ;
+parenthesisExpr   : OP  expression  CP ;
 
 binaryConnective: ( AndToken | OrToken );
-//andClause : AndToken clause ;
-//orClause  : OrToken  clause ;
 
 binaryBoolOperator : (EqToken
 					|NeToken
@@ -510,13 +454,6 @@ binaryBoolOperator : (EqToken
 					|LeToken
 					|GtToken
 					|GeToken);
-//WAS: eqClause : XWS EqToken XWS expression ;     
-//eqClause : EqToken expression ;     
-//neClause : NeToken expression ;
-//ltClause : LtToken expression ;
-//leClause : LeToken expression ;
-//gtClause : GtToken expression ;
-//geClause : GeToken expression ;
 
 hasClause : HasToken expression ;
 
@@ -525,18 +462,13 @@ binaryOperator: (AddToken
 				|MulToken
 				|DivToken
 				|ModToken);
-//addExpr : AddToken expression ;
-//subExpr : SubToken expression ;
-//mulExpr : MulToken expression ;
-//divExpr : DivToken expression ;
-//modExpr : ModToken expression ;
 
-negateExpr : MINUS  ( XWS )* expression ;
+negateExpr : MINUS expression ;
 
-notClause : NotToken XWS clause ;
+notClause : NotToken clause ;
 
-isofExpr : IsOfToken OP  ( XWS )* ( expression  ( XWS )* COMMA  ( XWS )* )? qualifiedTypeName  ( XWS )* CP ;
-castExpr : CastToken OP  ( XWS )* ( expression  ( XWS )* COMMA  ( XWS )* )? qualifiedTypeName  ( XWS )* CP ;
+isofExpr : IsOfToken OP  ( expression  COMMA  )? qualifiedTypeName  CP ;
+castExpr : CastToken OP  ( expression  COMMA  )? qualifiedTypeName  CP ;
 
 
 /* ----------------------------------------------------------------------------
