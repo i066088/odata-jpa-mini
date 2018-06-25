@@ -90,6 +90,13 @@ public class TestOdataJPAHelper {
 	}
 
 	@Test
+	public void filtersBasics2() {
+		String filter = "Prop le -2";
+		String jpql = helper.parseFilterClause(filter);
+		assertEquals("prop <= -2", jpql);
+	}
+
+	@Test
 	public void filtersProperty() {
 		String filter = "Obj/Prop lt 57.0";
 		String jpql = helper.parseFilterClause(filter);
@@ -98,9 +105,9 @@ public class TestOdataJPAHelper {
 
 	@Test
 	public void filtersParenthesis() {
-		String filter = "((Pluto add Pippo)gt 7)and(Pluto ne '33')";
+		String filter = "((Pluto add Pippo)gt 7)and not(Pluto ne '33')";
 		String jpql = helper.parseFilterClause(filter);
-		assertEquals("((pluto + pippo) > 7) AND (pluto != '33')", jpql);
+		assertEquals("((pluto + pippo) > 7) AND  NOT (pluto != '33')", jpql);
 	}
 
 	@Test
@@ -122,6 +129,13 @@ public class TestOdataJPAHelper {
 		String filter = "Bars/any(x:x/Description eq 'Roma')";
 		String jpql = helper.parseFilterClause(filter);
 		assertEquals(" EXISTS (SELECT x FROM u.bars x WHERE x.description = 'Roma')", jpql);
+	}
+
+	@Test
+	public void filtersDates() {
+		String filter = "BirthDay gt date'2000-01-01'";
+		String jpql = helper.parseFilterClause(filter);
+		assertEquals("birthDay > {d '2000-01-01'}", jpql);
 	}
 
 }

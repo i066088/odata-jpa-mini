@@ -318,7 +318,7 @@ binaryExpr : binaryOperator expression;
 
 clause : ( isofExpr 
          | boolMethodCallExpr 
-         | notClause
+         | unaryClause
          | expression binaryOperatorClause 
          | parenthesisClause 
          | anyClause
@@ -329,6 +329,8 @@ binaryOperatorClause : binaryBoolOperator expression;
 
 binaryClause : binaryConnective clause;
 
+unaryClause : unaryLeftConective clause;
+ 
 // lambdaPredicatePrefixExpr is not working properly
 //firstMemberExpr : ( lambdaPredicatePrefixExpr )?  // only allowed inside a lambdaPredicateExpr
 //                  memberExpr;
@@ -452,6 +454,8 @@ parenthesisClause : OP  clause  CP ;
 parenthesisExpr   : OP  expression  CP ;
 
 binaryConnective: ( AndToken | OrToken );
+
+unaryLeftConective: NotToken;
 
 binaryBoolOperator : (EqToken
 					|NeToken
@@ -708,7 +712,14 @@ primitiveLiteral : HexLiteral
                  | DecimalLiteral
                  | OctalLiteral
                  | FloatingPointLiteral
-                 | StringLiteral ;
+                 | StringLiteral
+                 | dateLiteral
+                 | dateTimeOffsetLiteral
+                 | timeOfDayLiteral ;
+
+dateLiteral             : Date_LAC SQ DateLiteralBody SQ;
+dateTimeOffsetLiteral   : DateTimeOffset_LAC SQ DateTimeOffsetLiteralBody SQ;
+timeOfDayLiteral        : TimeOfDay_LAC SQ TimeOfDayLiteralBody SQ; 
 
 /*
 
@@ -784,39 +795,12 @@ pCharNoSingleQuote  : Unreserved
                     ; // also no percent-encoded single quote
 SingleQuoteEscapedInString : SQ SQ;  // two quotes represent one within string literal
 
-date     : Date_LAC SQ dateBody SQ;
-dateBody : year MINUS month MINUS day;
-
-dateTimeOffset     : DateTimeOffset_LAC SQ dateTimeOffsetBody SQ;
-dateTimeOffsetBody : year MINUS month MINUS day T_LUC hour COLON minute ( COLON second ( DOT fractionalSeconds )? )? ( Z_LUC | SIGN hour COLON minute );
-    // COMMENT_ANTLR: ISO 8601 says T and not [Tt] separating Date and Time in DateTime
-    // COMMENT_ANTLR: ISO 8601 says Z and not [Zz] indicating UTC (Zulu time ie.)
-
 duration     : Duration_LAC SQ durationBody SQ;
 durationBody : ( SIGN )? P_LUC ( ( Digit )+ D_LUC )? ( T_LUC ( ( Digit )+ H_LUC )? ( ( Digit )+ M_LUC )? ( ( Digit )+ ( DOT ( Digit )+ )? S_LUC )? )?;
      // the above is an approximation of the rules for an xml dayTimeDuration.
      // see the lexical representation for dayTimeDuration in http://www.w3.org/TR/xmlschema11-2#dayTimeDuration for more information
      // COMMENT_ANTLR: ISO 8601 also PDTHMS indicators as uppercase
 
-timeOfDay     : TimeOfDay_LAC SQ timeOfDayBody SQ; 
-
-timeOfDayBody : hour COLON minute ( COLON second ( DOT fractionalSeconds )?)?;
- 
-year  : ( Digit ) ( Digit ) ( Digit ) ( Digit );
-
-month : ZERO ONE_TO_NINE
-        | ONE ZERO_TO_TWO;
-
-day   : ZERO_TO_TWO ONE_TO_NINE
-      | THREE ZERO_TO_ONE;
-
-hour   : ZERO_TO_ONE ( Digit )
-       | TWO ONE_TO_THREE; 
-
-minute : ZERO_TO_FIFTY_NINE;
-
-second : ZERO_TO_FIFTY_NINE;       
-fractionalSeconds : ( Digit )+;
 
 enum_symbol      : qualifiedEnumerationTypeName SQ enumBody SQ;
 

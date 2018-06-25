@@ -14,7 +14,7 @@ lexer grammar ODataLexer;
 
 HexLiteral : '0' ('x'|'X') HexDigit+ IntegerTypeSuffix? ;
 
-DecimalLiteral : ('0' | '1'..'9' '0'..'9'*) IntegerTypeSuffix? ;
+DecimalLiteral : (SIGN)? ('0' | '1'..'9' '0'..'9'*) IntegerTypeSuffix? ;
 
 OctalLiteral : '0' ('0'..'7')+ IntegerTypeSuffix? ;
 
@@ -25,10 +25,10 @@ fragment
 IntegerTypeSuffix : ('l'|'L') ;
 
 FloatingPointLiteral
-    :   ('0'..'9')+ '.' ('0'..'9')* Exponent? FloatTypeSuffix?
-    |   '.' ('0'..'9')+ Exponent? FloatTypeSuffix?
-    |   ('0'..'9')+ Exponent FloatTypeSuffix?
-    |   ('0'..'9')+ FloatTypeSuffix
+    :   (SIGN)? ('0'..'9')+ '.' ('0'..'9')* Exponent? FloatTypeSuffix?
+    |   (SIGN)? '.' ('0'..'9')+ Exponent? FloatTypeSuffix?
+    |   (SIGN)? ('0'..'9')+ Exponent FloatTypeSuffix?
+    |   (SIGN)? ('0'..'9')+ FloatTypeSuffix
     ;
 
 fragment
@@ -36,6 +36,9 @@ Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 
 fragment
 FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
+
+//Integer : (SIGN)? ( Digit )+ (DOT ( Digit )+)? ;
+//FloatingPoint : Integer ( E (SIGN)? ( Digit )+ )? ;
 
 StringLiteral
     :   '\'' ( EscapeSequence | ~('\''|'\\') )* '\''
@@ -59,7 +62,43 @@ fragment
 UnicodeEscape
     :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
     ;
-    
+
+//////////////////////////////////////////////////////////////    
+
+DateLiteralBody : Year MINUS Month MINUS Day;
+
+DateTimeOffsetLiteralBody : Year MINUS Month MINUS Day T_LUC Hour COLON Minute ( COLON Second ( DOT FractionalSeconds )? )? ( Z_LUC | SIGN Hour COLON Minute );
+    // COMMENT_ANTLR: ISO 8601 says T and not [Tt] separating Date and Time in DateTime
+    // COMMENT_ANTLR: ISO 8601 says Z and not [Zz] indicating UTC (Zulu time ie.)
+
+TimeOfDayLiteralBody : Hour COLON Minute ( COLON Second ( DOT FractionalSeconds )?)?;
+
+fragment
+Year  : ( Digit ) ( Digit ) ( Digit ) ( Digit );
+
+fragment
+Month : ZERO ONE_TO_NINE
+        | ONE ZERO_TO_TWO;
+
+fragment
+Day   : ZERO_TO_TWO ONE_TO_NINE
+      | THREE ZERO_TO_ONE;
+
+fragment
+Hour   : ZERO_TO_ONE ( Digit )
+       | TWO ONE_TO_THREE; 
+
+fragment
+Minute : ZERO_TO_FIFTY_NINE;
+
+fragment
+Second : ZERO_TO_FIFTY_NINE;       
+
+fragment
+FractionalSeconds : ( Digit )+;
+
+//////////////////////////////////////////////////////////////    
+
 
 WS  :  (' '|'\r'|'\t'|'\u000C'|'\n') -> skip
     ;
@@ -333,9 +372,6 @@ VWS : CR | LF | XWS ; // "bad" vertical whitespace
 // COMMENT_ANTLR4_CONT: ... OWS (otherwise not referenced has been renamed to BWS
 
 
-
-Integer : (SIGN)? ( Digit )+ (DOT ( Digit )+)? ;
-FloatingPoint : Integer ( E (SIGN)? ( Digit )+ )? ;
 
 OdataIdentifier : ( Alpha | UNDERSCORE ) ( Alpha | Digit | UNDERSCORE )*;
 

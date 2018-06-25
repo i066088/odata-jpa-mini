@@ -1,7 +1,9 @@
 package odata.jpa.antlr;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +84,8 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		operators.put("SECOND", "SECOND");
 		operators.put("SECONDS", "SECOND");
 		operators.put("TOTALOFFSETMINUTES", "MINUTES"); // more or less
-		operators.put("MAXDATETIME", "{ts 9999-21-31 23:59:59}"); // more or less
-		operators.put("MINDATETIME", "{ts 0001-01-01 00:00:00}"); // more or less
+		operators.put("MAXDATETIME", "{ts '9999-21-31 23:59:59'}"); // more or less
+		operators.put("MINDATETIME", "{ts '0001-01-01 00:00:00'}"); // more or less
 		// Types - I don't even know what they mean. TODO
 		operators.put("ISOF", "???");
 		operators.put("CAST", "???");
@@ -93,6 +95,7 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	}
 
 	SimpleDateFormat edmDate = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat edmTime = new SimpleDateFormat("HH:mm:ss");
 	SimpleDateFormat edmDateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	SimpleDateFormat jpqlDate = new SimpleDateFormat("{'d' ''yyyy-MM-dd''}");
 	SimpleDateFormat jpqlTime = new SimpleDateFormat("{'t' ''HH:mm:ss''}");
@@ -195,8 +198,9 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	};
 
 	@Override
-	public String visitNotClause(ODataParserParser.NotClauseContext ctx) {
-		return " not " + visit(ctx.clause());
+	public String visitUnaryClause(ODataParserParser.UnaryClauseContext ctx) {
+		String jpqlConnective = convert(ctx.unaryLeftConective());
+		return " " + jpqlConnective + " " + visit(ctx.clause());
 	};
 
 	@Override
@@ -314,7 +318,53 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		if (ctx.getChildCount() != 1)
 			throw new IllegalStateException("A primitive literal should have exactly 1 terminal node as child");
 		// FIXME naive
+
+		if (ctx.dateLiteral() != null) {
+			return visit(ctx.dateLiteral());
+		} else if (ctx.dateTimeOffsetLiteral() != null) {
+			return visit(ctx.dateTimeOffsetLiteral());
+		} else if (ctx.timeOfDayLiteral() != null) {
+			return visit(ctx.timeOfDayLiteral());
+		}
 		return ctx.getChild(0).getText();
 	}
 
+	@Override
+	public String visitDateLiteral(ODataParserParser.DateLiteralContext ctx) {
+		String dateInput = ctx.DateLiteralBody().getText();
+		Date date;
+		try {
+			date = edmDate.parse(dateInput);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Illegal date: " + dateInput);
+		}
+		String dateOutput = jpqlDate.format(date);
+		return dateOutput;
+	}
+
+	@Override
+	public String visitDateTimeOffsetLiteral(ODataParserParser.DateTimeOffsetLiteralContext ctx) {
+		String dateInput = ctx.DateTimeOffsetLiteralBody().getText();
+		Date date;
+		try {
+			date = edmDateTime.parse(dateInput);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Illegal date: " + dateInput);
+		}
+		String dateOutput = jpqlDateTime.format(date);
+		return dateOutput;
+	}
+
+	@Override
+	public String visitTimeOfDayLiteral(ODataParserParser.TimeOfDayLiteralContext ctx) {
+		String dateInput = ctx.TimeOfDayLiteralBody().getText();
+		Date date;
+		try {
+			date = edmTime.parse(dateInput);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Illegal date: " + dateInput);
+		}
+		String dateOutput = jpqlTime.format(date);
+		return dateOutput;
+	}
 }
