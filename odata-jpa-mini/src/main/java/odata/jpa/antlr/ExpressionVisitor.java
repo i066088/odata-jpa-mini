@@ -2,11 +2,13 @@ package odata.jpa.antlr;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -27,7 +29,6 @@ import odata.antlr.ODataParserParser;
 public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 
 	static Map<String, String> operators = new HashMap<String, String>();
-	static List<String> methodsCalledWithFUNCTION;
 	static OdataJPAHelper helper = new OdataJPAHelper();
 
 	static {
@@ -89,9 +90,6 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		// Types - I don't even know what they mean. TODO
 		operators.put("ISOF", "???");
 		operators.put("CAST", "???");
-
-		methodsCalledWithFUNCTION = Arrays.asList(new String[] { "ROUND", "FLOOR", "CEILING", "REPLACE", "YEAR",
-				"MONTH", "DAY", "HOUR", "MINUTE", "SECOND" });
 	}
 
 	SimpleDateFormat edmDate = new SimpleDateFormat("yyyy-MM-dd");
@@ -103,6 +101,14 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	SimpleDateFormat hqlDate = new SimpleDateFormat("''yyyy-MM-dd''");
 	SimpleDateFormat hqlTime = new SimpleDateFormat("''HH:mm:ss''");
 	SimpleDateFormat hqlDateTime = new SimpleDateFormat("''yyyy-MM-dd HH:mm:ss''");
+
+	Queue<String> bindVariables = new ArrayDeque<String>();
+
+	public ExpressionVisitor() {
+		bindVariables.add("u");
+		// we assume the upper level variable is always "u".
+		// @see HighLevelEntityManager.find()
+	}
 
 	/**
 	 * DEBUG procedure
@@ -295,22 +301,33 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 
 	@Override
 	public String visitAnyClause(ODataParserParser.AnyClauseContext ctx) {
-		String prop = visit(ctx.memberExpr());
-		String v = ctx.anyExpr().lambdaVariableExpr().getText();
-		String pred = visit(ctx.anyExpr().lambdaPredicateExpr());
-		// FIXME this works only at 1st level, because we know that 1st level variable
-		// is "u"
-		return " EXISTS (SELECT " + v + " FROM u." + prop + " " + v + " WHERE " + pred + ")";
+		String upperBindVariable = bindVariables.peek();
+		String bindVariable = ctx.anyExpr().lambdaVariableExpr().getText();
+		String upperProperty = visit(ctx.memberExpr());
+
+		if (ctx.anyExpr() == null) {
+			return " EXISTS (SELECT " + bindVariable + " FROM " + upperBindVariable + "." + upperProperty + " "
+					+ bindVariable + ")";
+		} else {
+			bindVariables.add(bindVariable);
+			String predicate = visit(ctx.anyExpr().lambdaPredicateExpr());
+			bindVariables.remove();
+			return " EXISTS (SELECT " + bindVariable + " FROM " + upperBindVariable + "." + upperProperty + " "
+					+ bindVariable + " WHERE " + predicate + ")";
+		}
+
 	}
 
 	@Override
 	public String visitAllClause(ODataParserParser.AllClauseContext ctx) {
-		String prop = visit(ctx.memberExpr());
-		String v = ctx.allExpr().lambdaVariableExpr().getText();
-		String pred = visit(ctx.allExpr().lambdaPredicateExpr());
-		// FIXME this works only at 1st level, because we know that 1st level variable
-		// is "u"
-		return " NOT EXISTS (SELECT " + v + " FROM u." + prop + " " + v + " WHERE NOT(" + pred + "))";
+		String upperBindVariable = bindVariables.peek();
+		String bindVariable = ctx.allExpr().lambdaVariableExpr().getText();
+		String upperProperty = visit(ctx.memberExpr());
+		bindVariables.add(bindVariable);
+		String predicate = visit(ctx.allExpr().lambdaPredicateExpr());
+		bindVariables.remove();
+		return " NOT EXISTS (SELECT " + bindVariable + " FROM " + upperBindVariable + "." + upperProperty + " "
+				+ bindVariable + " WHERE NOT(" + predicate + "))";
 	}
 
 	@Override
