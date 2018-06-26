@@ -61,7 +61,7 @@ import ODataLexer;
 /*
 odataUri : Protocol ColSlaSla host ( COLON port )?
            serviceRoot
-           ( ODataSignal_METADATA | ODataSignal_BATCH | odataRelativeUri )? EOF ;
+           ( DollarMETADATA | DollarBATCH | odataRelativeUri )? EOF ;
 
 Protocol :  HttpOrHttpsAnyCase;
 
@@ -120,9 +120,9 @@ complexPath    : ( SLASH qualifiedComplexTypeName )?
                  | boundOperation
                  );
 
-count : ODataSignal_COUNT;
-links : ODataSignal_LINKS;
-value : ODataSignal_VALUE;
+count : DollarCOUNT;
+links : DollarLINKS;
+value : DollarVALUE;
 
 // boundOperation segments can only be composed if the type of the previous segment 
 // matches the type of the first parameter of the action or function being called.
@@ -191,12 +191,12 @@ systemQueryOption : aggregate
                   | select 
                   | skiptoken;
 
-aggregate         : ODataSignal_AGGREGATE EQ aggregateCommand ( SEMI aggregateCommand )*;
+aggregate         : DollarAGGREGATE EQ aggregateCommand ( SEMI aggregateCommand )*;
 aggregateCommand  : aggregateClause 
                   | filter 
                   | expand; 
-aggregateClause   : aggregateList ( XWS ODataSignal_GROUPBY XWS groupbyList )?
-                  | ODataSignal_GROUPBY XWS groupbyList;
+aggregateClause   : aggregateList ( XWS DollarGROUPBY XWS groupbyList )?
+                  | DollarGROUPBY XWS groupbyList;
 // COMMENT_ANTLR4: $groupby had DQS and SQS. Why?
 aggregateList     : aggregateItem *( COMMA aggregateItem );
 aggregateItem     : property ( XWS AsToken XWS dynamicProperty )?
@@ -215,7 +215,7 @@ groupbyItem       : property
 dynamicProperty   : OdataIdentifier ;
 aggregateFunction : SumToken | MinToken | MaxToken | AverageToken ;
 
-expand       : ODataSignal_EXPAND EQ expandItem ( COMMA expandItem )* ;
+expand       : DollarEXPAND EQ expandItem ( COMMA expandItem )* ;
 expandItem   : ( qualifiedEntityTypeName SLASH )? navigationProperty 
                ( OP expandOption ( SEMI expandOption )* CP )?;
 expandOption : filter
@@ -227,17 +227,17 @@ expandOption : filter
              | expand
              | levels;
              
-levels : ODataSignal_LEVELS EQ ( ( Digit )+ | MaxToken );
+levels : DollarLEVELS EQ ( ( Digit )+ | MaxToken );
 
-filter : ODataSignal_FILTER EQ clause;
+filter : DollarFILTER EQ clause;
 
-orderby     : ODataSignal_ORDERBY EQ orderbyItem ( COMMA orderbyItem )*;
+orderby     : DollarORDERBY EQ orderbyItem ( COMMA orderbyItem )*;
 orderbyItem : expression ( XWS ( AscToken | DescToken ) )?;
 
-skip : ODataSignal_SKIP EQ ( Digit )+;
-top  : ODataSignal_TOP  EQ ( Digit )+;
+skip : DollarSKIP EQ ( Digit )+;
+top  : DollarTOP  EQ ( Digit )+;
 
-format : ODataSignal_FORMAT EQ
+format : DollarFORMAT EQ
          ( AtomToken
          | JsonToken 
          | XmlToken
@@ -245,9 +245,9 @@ format : ODataSignal_FORMAT EQ
          ) ;                  // format specific to the specific data service> or
                               // <An IANA-defined [IANA-MMT] content type>
                           
-inlinecount : ODataSignal_INLINECOUNT EQ ( AllPagesToken | NoneToken ) ;
+inlinecount : DollarINLINECOUNT EQ ( AllPagesToken | NoneToken ) ;
 
-select     : ODataSignal_SELECT EQ selectItem ( COMMA selectItem )* ;
+select     : DollarSELECT EQ selectItem ( COMMA selectItem )* ;
 selectItem : STAR  
            | '$ref'
            | allOperationsInSchema 
@@ -272,7 +272,7 @@ qualifiedFunctionName : namespace '.' function ( OP parameterTypeNames CP )? ;
 parameterTypeNames : ( parameterTypeName ( COMMA parameterTypeName )* )? ;
 parameterTypeName  : qualifiedTypeName ; 
 
-skiptoken : ODataSignal_SKIPTOKEN EQ 
+skiptoken : DollarSKIPTOKEN EQ 
             ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON | AT_SIGN | DOLLAR | EQ )+; // everything except "&" and ";"
 
 aliasAndValue         : ParameterAlias        EQ parameterValue;
@@ -352,8 +352,7 @@ allClause : memberExpr  SLASH  allExpr  ;
                    
 lambdaPredicatePrefixExpr : inscopeVariableExpr SLASH;
 inscopeVariableExpr       : implicitVariableExpr | lambdaVariableExpr;
-implicitVariableExpr      : DOLLAR 'it' ; // references the unnamed outer variable of the query
-// COMMENT_ANTLR: Was any case $it. Why?
+implicitVariableExpr      : DollarIT ; // references the unnamed outer variable of the query
 
 
 collectionNavigationExpr : count ;
@@ -715,11 +714,20 @@ primitiveLiteral : HexLiteral
                  | StringLiteral
                  | dateLiteral
                  | dateTimeOffsetLiteral
-                 | timeOfDayLiteral ;
+                 | timeOfDayLiteral 
+                 | guid 
+                 | binary 
+                 | booleanSymbol ;
 
-dateLiteral             : Date_LAC SQ StringLiteral SQ;
-dateTimeOffsetLiteral   : DateTimeOffset_LAC SQ StringLiteral SQ;
-timeOfDayLiteral        : TimeOfDay_LAC SQ StringLiteral SQ; 
+dateLiteral             : Date_LAC StringLiteral ;
+dateTimeOffsetLiteral   : DateTimeOffset_LAC StringLiteral ;
+timeOfDayLiteral        : TimeOfDay_LAC StringLiteral  ;
+
+guid     : GUID_LAC StringLiteral;
+
+binary  : (X_LUC|Binary_LAC) StringLiteral; // Note: 'X' is case sensitive, "binary" is not
+
+booleanSymbol : (TrueToken|ONE) | (FalseToken|ZERO);
 
 /*
 
@@ -772,8 +780,6 @@ singleBody  : FloatingPoint // TODO: restrict range
             | nanInfinity;
 nanInfinity : NotANumber_LXC | MINUS Infinity_LUC | Infinity_LUC;
 
-guid     : GUID_LAC SQ guidBody SQ;
-guidBody : HEXDIG8 MINUS HEXDIG4 MINUS HEXDIG4 MINUS HEXDIG4 MINUS HEXDIG12; 
 
 byte_symbol  : ( DIGIT3 )+; // numbers in the range from 0 to 255
 sbyte : (SIGN)? ( DIGIT3 )+; // numbers in the range from -128 to 127

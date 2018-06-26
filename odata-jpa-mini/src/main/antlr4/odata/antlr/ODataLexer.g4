@@ -157,29 +157,25 @@ SRID_LAC : S R I D ;
 
 I64_POSTFIX : L;
 
-ODataSignal_METADATA : DOLLAR 'metadata' ;
-ODataSignal_BATCH : DOLLAR 'batch' ;
-ODataSignal_SKIPTOKEN : DOLLAR 'skiptoken' ;
-ODataSignal_COUNT : SLASH DOLLAR 'count' ;
-ODataSignal_LINKS : SLASH DOLLAR 'links' ;
-ODataSignal_VALUE : SLASH DOLLAR 'value' ;
-ODataSignal_AGGREGATE : DOLLAR 'aggregate' ;
-ODataSignal_GROUPBY : DOLLAR 'groupby' ;
-ODataSignal_EXPAND : DOLLAR 'expand' ;
-
-ODataSignal_LEVELS : DOLLAR 'levels' ;
-ODataSignal_FILTER : DOLLAR 'filter' ;
-ODataSignal_ORDERBY : DOLLAR 'orderby' ;
-
-ODataSignal_SKIP : DOLLAR 'skip' ;
-ODataSignal_TOP  : DOLLAR 'top' ;
-ODataSignal_FORMAT : DOLLAR 'format' ;
-
-                          
-ODataSignal_INLINECOUNT : DOLLAR 'inlinecount' ;
-
-
-ODataSignal_SELECT : DOLLAR 'select' ;
+DollarMETADATA : DOLLAR 'metadata' ;
+DollarBATCH : DOLLAR 'batch' ;
+DollarSKIPTOKEN : DOLLAR 'skiptoken' ;
+DollarCOUNT : SLASH DOLLAR 'count' ;
+DollarLINKS : SLASH DOLLAR 'links' ;
+DollarVALUE : SLASH DOLLAR 'value' ;
+DollarREF : DOLLAR 'ref';
+DollarAPPLY : DOLLAR 'apply' ;
+DollarEXPAND : DOLLAR 'expand' ;
+DollarLEVELS : DOLLAR 'levels' ;
+DollarFILTER : DOLLAR 'filter' ;
+DollarORDERBY : DOLLAR 'orderby' ;
+DollarSKIP : DOLLAR 'skip' ;
+DollarTOP  : DOLLAR 'top' ;
+DollarFORMAT : DOLLAR 'format' ;
+DollarINLINECOUNT : DOLLAR 'inlinecount' ;
+DollarSELECT : DOLLAR 'select' ;
+DollarROOT : DOLLAR 'root' ;
+DollarIT : DOLLAR 'it' ;
 
 AtomToken : 'atom' ;
 JsonToken : 'json' ;
@@ -259,9 +255,12 @@ NotToken : 'not' ;
 IsOfToken : 'isof' ;
 CastToken : 'cast' ;
 
+AggregateToken : 'aggregate' ;
+GroupByToken : 'groupby' ;
+
 // --
 
-// _LUC means "uppercase" ?
+// _LUC means "uppercase"
 
 All_LUC : 'ALL' ;
 
