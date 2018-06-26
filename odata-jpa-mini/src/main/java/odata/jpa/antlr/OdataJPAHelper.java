@@ -1,5 +1,8 @@
 package odata.jpa.antlr;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ejb.Stateless;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -106,6 +109,27 @@ public class OdataJPAHelper {
 			dot = ".";
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * attribute must not be "*"
+	 * 
+	 * @param attribute
+	 * @return
+	 */
+	public List<String> parseAttributes(String attribute) {
+		List<String> list = new ArrayList<String>();
+
+		if (attribute == null || "".equals(attribute))
+			return list;
+
+		// TODO use ExpressionVisitor instead
+
+		String[] pieces = attribute.split(",");
+		for (String piece : pieces) {
+			list.add(parseAttribute(piece));
+		}
+		return list;
 	}
 
 	/**

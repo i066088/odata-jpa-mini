@@ -96,7 +96,7 @@ public class HighLevelEntityManager {
 	}
 
 	/**
-	 * Retrieve a column.
+	 * Select a single attribute.
 	 * 
 	 * @param entity
 	 * @param propertyName
@@ -129,6 +129,18 @@ public class HighLevelEntityManager {
 			throw new IllegalStateException();
 		}
 		return value;
+	}
+
+	/**
+	 * Select a single attribute.
+	 * 
+	 * @param entity
+	 * @param attributeName
+	 * @param obj
+	 * @return
+	 */
+	public Object getAttributeValue(Class<?> entity, String attributeName, Object obj) {
+		return getAttributeValue(getAttribute(entity, attributeName), obj);
 	}
 
 	/**

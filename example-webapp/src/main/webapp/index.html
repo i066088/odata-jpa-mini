@@ -79,7 +79,7 @@ The first time you connect, you can see a
   
   <tr>
   <td>Primitive property</td>
-  <td>OK (what about non-primitive?)</td>
+  <td>OK</td>
   <td><a target="_blank"  href="resources.svc/Foo(1)/Address">Foo(1)/Address</a></td>
   </tr>
   
@@ -87,6 +87,14 @@ The first time you connect, you can see a
   <td>Primitive property (RAW)</td>
   <td>OK</td>
   <td><a target="_blank"  href="resources.svc/Foo(1)/Address/$value">Foo(1)/Address/$value</a></td>
+  </tr>
+  
+  <tr>
+  <td>SELECT</td>
+  <td>OK</td>
+  <td><a target="_blank"  href="resources.svc/Foo?$select=Address,Birthday">Foo?$select=Address,Birthday</a><br/>
+  <a target="_blank"  href="resources.svc/Foo(1)?$select=Address,Birthday">Foo(1)?$select=Address,Birthday</a>
+  </td>
   </tr>
   
   <tr>
@@ -101,12 +109,6 @@ The first time you connect, you can see a
   <td>NOT SUPPORTED</td>
   <td><a target="_blank"  href="resources.svc/Foo?&$expand=Bars">Foo?$expand=Bars</a><br/>
   <a target="_blank"  href="resources.svc/Foo?&$expand=*">Foo?$expand=*</a></td>
-  </tr>
-  
-  <tr>
-  <td>SELECT</td>
-  <td>NOT SUPPORTED (OR NOT YET)</td>
-  <td><a target="_blank"  href="resources.svc/Foo?$select=Address">Foo?$select=Address</a></td>
   </tr>
   
   <tr>

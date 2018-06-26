@@ -13,6 +13,8 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,23 +117,38 @@ public class RestResourcesEndpoint {
 	@GET
 	@Path("{entity}")
 	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS })
-	public Map<String, Object> find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
+	public <T> Map<String, Object> find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
 			@QueryParam("$top") Integer top, @QueryParam("$filter") String filter,
-			@QueryParam("$orderby") String orderby, @QueryParam("$inlinecount") String inlinecount)
-			throws NotFoundException {
+			@QueryParam("$orderby") String orderby, @QueryParam("$inlinecount") String inlinecount,
+			@QueryParam("$select") String select, @QueryParam("$expand") String expand,
+			@QueryParam("$apply") String apply, @QueryParam("$search") String search) throws NotFoundException {
 
 		// FIXME here, if a return a ODataDataBean, serialization breaks.
 
-		Class<?> clazz = getEntityOrThrowException(entity); // this is Class<T>
+		if (expand != null && !expand.isEmpty())
+			throw new BadRequestException("$expand not supported");
+		if (apply != null && !apply.isEmpty())
+			throw new BadRequestException("$apply not supported (yet)");
+		if (search != null && !search.isEmpty())
+			throw new BadRequestException("$search not supported (yet)");
+
+		@SuppressWarnings("unchecked")
+		Class<T> clazz = (Class<T>) getEntityOrThrowException(entity);
 
 		Map<String, Object> resultBean = new HashMap<String, Object>();
 
-		List<?> list; // this is List<T>
+		List<T> list; // this is List<T>
 
 		list = manager.find(clazz, top, skip, helper.parseFilterClause(filter), helper.parseOrderByClause(orderby));
 
-		resultBean.put("data", list);
+		if (select != null && !select.isEmpty() && !select.trim().equals("*")) {
+			List<String> jpqlAttributeNames = helper.parseAttributes(select);
+			List<Map<String, Object>> list1 = selectOnlySomeFieldsForAll(clazz, list, jpqlAttributeNames);
+			resultBean.put("data", list1);
+		} else {
 
+			resultBean.put("data", list);
+		}
 		if (inlinecount != null && !inlinecount.equals("none")) {
 			if (!inlinecount.equals("allpages"))
 				throw new BadRequestException("$inlinecount must be either 'none' or 'allpages'");
@@ -187,7 +204,10 @@ public class RestResourcesEndpoint {
 	@Path("{entity}({id})")
 	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS }) // FIXME not working !?!
 	public Response findById(@PathParam("entity") String entity, @PathParam("id") Long id,
-			@QueryParam("$select") Set<String> attributes) throws NotFoundException {
+			@QueryParam("$select") String select, @QueryParam("$expand") String expand) throws NotFoundException {
+
+		if (expand != null && !expand.isEmpty())
+			throw new BadRequestException("$expand not supported");
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -199,8 +219,10 @@ public class RestResourcesEndpoint {
 		if (obj == null)
 			throw new NotFoundException("No entity with this Id");
 
-		if (attributes != null && !attributes.isEmpty())
-			obj = selectOnlySomeFields(obj, attributes);
+		if (select != null && !select.isEmpty() && !select.trim().equals("*")) {
+			List<String> jpqlAttributeNames = helper.parseAttributes(select);
+			obj = selectOnlySomeFields(clazz, obj, jpqlAttributeNames);
+		}
 
 		return Response.ok(obj).build();
 	}
@@ -571,22 +593,60 @@ public class RestResourcesEndpoint {
 	}
 
 	/**
-	 * Serialize give object, considering only attributes from
+	 * Serialize given object, considering only attributes from
 	 * <code>attributes</code> argument.
 	 * 
 	 * @param obj
 	 * @param attributes
+	 *            (in JPQL format)
 	 * @return
 	 */
-	private JsonNode selectOnlySomeFields(Object obj, Set<String> attributes) {
-		
-		//FIXME this is not working
-		
-		SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.filterOutAllExcept(attributes);
-		FilterProvider filters = new SimpleFilterProvider().addFilter("filter1", filter);
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.setFilters(filters);
-		JsonNode node = objectMapper.valueToTree(obj);
-		return node;
+	private Map<String, Object> selectOnlySomeFields(Class<?> entity, Object obj, Collection<String> attributeNames) {
+
+		Map<String, Object> bean = new HashMap<String, Object>();
+		for (String attributeName : attributeNames) {
+			Object value;
+			try {
+				value = manager.getAttributeValue(entity, attributeName, obj);
+			} catch (IllegalArgumentException exc) {
+				throw new BadRequestException(exc.getMessage());
+			}
+			bean.put(attributeName, value);
+		}
+		return bean;
+	}
+
+	/**
+	 * Serialize given objects, considering only attributes from
+	 * <code>attributes</code> argument.
+	 * 
+	 * @param obj
+	 * @param attributes
+	 *            (in JPQL format)
+	 * @return
+	 */
+	private <T> List<Map<String, Object>> selectOnlySomeFieldsForAll(Class<T> entity, List<T> objects,
+			Collection<String> attributeNames) {
+
+		List<Attribute<?, ?>> attributes = new ArrayList<Attribute<?, ?>>();
+		for (String attributeName : attributeNames) {
+			attributes.add(manager.getAttribute(entity, attributeName));
+		}
+
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		for (T obj : objects) {
+			Map<String, Object> bean = new HashMap<String, Object>();
+			for (Attribute<?, ?> attribute : attributes) {
+				Object value;
+				try {
+					value = manager.getAttributeValue(attribute, obj);
+				} catch (IllegalArgumentException exc) {
+					throw new BadRequestException(exc.getMessage());
+				}
+				bean.put(attribute.getName(), value);
+			}
+			list.add(bean);
+		}
+		return list;
 	}
 }
