@@ -717,9 +717,9 @@ primitiveLiteral : HexLiteral
                  | dateTimeOffsetLiteral
                  | timeOfDayLiteral ;
 
-dateLiteral             : Date_LAC SQ DateLiteralBody SQ;
-dateTimeOffsetLiteral   : DateTimeOffset_LAC SQ DateTimeOffsetLiteralBody SQ;
-timeOfDayLiteral        : TimeOfDay_LAC SQ TimeOfDayLiteralBody SQ; 
+dateLiteral             : Date_LAC SQ StringLiteral SQ;
+dateTimeOffsetLiteral   : DateTimeOffset_LAC SQ StringLiteral SQ;
+timeOfDayLiteral        : TimeOfDay_LAC SQ StringLiteral SQ; 
 
 /*
 

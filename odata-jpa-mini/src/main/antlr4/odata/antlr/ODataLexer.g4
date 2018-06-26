@@ -37,33 +37,10 @@ Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 fragment
 FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
 
-//Integer : (SIGN)? ( Digit )+ (DOT ( Digit )+)? ;
-//FloatingPoint : Integer ( E (SIGN)? ( Digit )+ )? ;
-
-StringLiteral
-    :   '\'' ( EscapeSequence | ~('\''|'\\') )* '\''
-    ;
-
-fragment
-EscapeSequence
-    :   '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\')
-    |   UnicodeEscape
-    |   OctalEscape
-    ;
-
-fragment
-OctalEscape
-    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
-    |   '\\' ('0'..'7') ('0'..'7')
-    |   '\\' ('0'..'7')
-    ;
-
-fragment
-UnicodeEscape
-    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
-    ;
-
 //////////////////////////////////////////////////////////////    
+
+/*
+DON'T WORK
 
 DateLiteralBody : Year MINUS Month MINUS Day;
 
@@ -96,6 +73,33 @@ Second : ZERO_TO_FIFTY_NINE;
 
 fragment
 FractionalSeconds : ( Digit )+;
+
+*/
+
+//////////////////////////////////////////////////////////////    
+
+StringLiteral
+    :   '\'' ( EscapeSequence | ~('\''|'\\') )* '\''
+    ;
+
+fragment
+EscapeSequence
+    :   '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\')
+    |   UnicodeEscape
+    |   OctalEscape
+    ;
+
+fragment
+OctalEscape
+    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7')
+    ;
+
+fragment
+UnicodeEscape
+    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
+    ;
 
 //////////////////////////////////////////////////////////////    
 

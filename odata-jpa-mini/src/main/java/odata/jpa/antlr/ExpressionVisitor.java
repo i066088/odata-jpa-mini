@@ -1,5 +1,6 @@
 package odata.jpa.antlr;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
@@ -346,42 +347,35 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		return ctx.getChild(0).getText();
 	}
 
-	@Override
-	public String visitDateLiteral(ODataParserParser.DateLiteralContext ctx) {
-		String dateInput = ctx.DateLiteralBody().getText();
+	private String commonHandleDate(TerminalNode stringLiteral, DateFormat edmDf, DateFormat jpqlDf) {
+		String dateInput = helper.removeFirstAndLast(stringLiteral.getText());
 		Date date;
 		try {
-			date = edmDate.parse(dateInput);
+			date = edmDf.parse(dateInput);
 		} catch (ParseException e) {
-			throw new IllegalArgumentException("Illegal date: " + dateInput);
+			throw new IllegalArgumentException("Illegal date: " + stringLiteral);
+		} catch (NullPointerException e) {
+			throw new IllegalArgumentException("Illegal date: null");
 		}
-		String dateOutput = jpqlDate.format(date);
+		String dateOutput = jpqlDf.format(date);
 		return dateOutput;
+	}
+
+	@Override
+	public String visitDateLiteral(ODataParserParser.DateLiteralContext ctx) {
+
+		return commonHandleDate(ctx.StringLiteral(), edmDate, jpqlDate);
 	}
 
 	@Override
 	public String visitDateTimeOffsetLiteral(ODataParserParser.DateTimeOffsetLiteralContext ctx) {
-		String dateInput = ctx.DateTimeOffsetLiteralBody().getText();
-		Date date;
-		try {
-			date = edmDateTime.parse(dateInput);
-		} catch (ParseException e) {
-			throw new IllegalArgumentException("Illegal date: " + dateInput);
-		}
-		String dateOutput = jpqlDateTime.format(date);
-		return dateOutput;
+
+		return commonHandleDate(ctx.StringLiteral(), edmDateTime, jpqlDateTime);
 	}
 
 	@Override
 	public String visitTimeOfDayLiteral(ODataParserParser.TimeOfDayLiteralContext ctx) {
-		String dateInput = ctx.TimeOfDayLiteralBody().getText();
-		Date date;
-		try {
-			date = edmTime.parse(dateInput);
-		} catch (ParseException e) {
-			throw new IllegalArgumentException("Illegal date: " + dateInput);
-		}
-		String dateOutput = jpqlTime.format(date);
-		return dateOutput;
+
+		return commonHandleDate(ctx.StringLiteral(), edmTime, jpqlTime);
 	}
 }

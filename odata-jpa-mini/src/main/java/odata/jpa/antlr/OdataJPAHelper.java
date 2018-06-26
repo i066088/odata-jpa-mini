@@ -68,14 +68,14 @@ public class OdataJPAHelper {
 
 		// Init parser with got tokens
 		ODataParserParser parser = new ODataParserParser(tokens);
-		//parser.removeErrorListeners();
-		//parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+		// parser.removeErrorListeners();
+		// parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
 		// Get the context
 		ParseTree tree = parser.clause();
 		// here, the input has already been read and parsed
 
-		// Run the Visitor
+		// Run the VisitorStringLiteral
 		ExpressionVisitor visitor = new ExpressionVisitor();
 		String jpql = visitor.visit(tree);
 
@@ -118,5 +118,19 @@ public class OdataJPAHelper {
 		if (s == null || s.length() == 0)
 			return s;
 		return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+	}
+
+	/**
+	 * Remove first and last characters (probably they are apex's)
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public String removeFirstAndLast(String s) {
+		if (s == null)
+			return s;
+		if (s.length() <= 2)
+			return "";
+		return s.substring(1, s.length() - 1);
 	}
 }
