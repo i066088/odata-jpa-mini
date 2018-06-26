@@ -53,6 +53,8 @@ The first time you connect, you can see a
   <td><a target="_blank"  href="resources.svc/Foo?$filter=(Height ge 160)and(Age lt 40)">Foo?$filter=(Height ge 160)and(Age lt 40)</a><br/>
       <a target="_blank"  href="resources.svc/Foo?$filter=Name eq 'Goofy'">Foo?$filter=Name eq 'Goofy'</a><br/>
       <a target="_blank"  href="resources.svc/Foo?$filter=Name eq 'Goofy'">Foo?$filter=contains(Name, 'oo')</a><br/>
+      <a target="_blank"  href="resources.svc/Foo?&$filter=Bars/all(x:x/Description eq 'Roma')">Foo?$filter=Bars/all(x:x/Description eq 'Roma')</a><br/>
+      <a target="_blank"  href="resources.svc/Foo?&$filter=Bars/any(x:x/Description eq 'Roma')">Foo?$filter=Bars/any(x:x/Description eq 'Roma')</a>
   </td>
   </tr>
   
@@ -114,23 +116,13 @@ The first time you connect, you can see a
   </tr>
   
   <tr>
-  <td>LAMBDA: ALL, ANY</td>
-  <td>NOT SUPPORTED</td>
-  <td>
-  
-  <a target="_blank"  href="resources.svc/Foo?&$filter=Bars/all(x:x/Description eq 'Roma')">Foo?$filter=Bars/all(x:x/Description eq 'Roma')</a><br/>
-  <a target="_blank"  href="resources.svc/Foo?&$filter=Bars/any(x:x/Description eq 'Roma')">Foo?$filter=Bars/any(x:x/Description eq 'Roma')</a>
-  </td>
-  </tr>
-  
-  <tr>
   <td>Literals</td>
   <td></td>
   <td>Numbers: 1234<br/>
   	Strings: 'abc'<br/>
   	Booleans: True<br/>
-  	Dates: 2012-05-29<br/>
-  	Timestamps: 2018-01-10T09:24:54Z<br/>
+  	Dates: Date'2012-05-29'<br/>
+  	Timestamps: DateTimeOffset'2018-01-10T09:24:54Z'<br/>
   </td>
   </tr>
   
