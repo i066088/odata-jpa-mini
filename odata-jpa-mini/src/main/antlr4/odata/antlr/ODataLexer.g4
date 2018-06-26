@@ -202,7 +202,7 @@ ContainsToken : 'contains' ;
 ToLowerToken : 'tolower' ;
 ToUpperToken : 'toupper' ;
 TrimToken : 'trim' ;
-ConcatToken : 'concat' ;
+ConcatToken : 'concat' ;   // this is both a function and an aggregate function
 YearToken : 'year' ;
 MonthToken : 'month' ;
 DayToken : 'day' ;
@@ -255,8 +255,20 @@ NotToken : 'not' ;
 IsOfToken : 'isof' ;
 CastToken : 'cast' ;
 
+// Aggregate extension of OData
 AggregateToken : 'aggregate' ;
 GroupByToken : 'groupby' ;
+TopCountToken : 'topcount' ;
+TopSumToken : 'topsum' ;
+TopPercentToken : 'toppercent' ;
+BottomCountToken : 'bottomcount' ;
+BottomSumToken : 'bottomsum' ;
+BottomPercentToken : 'bottompercent' ;
+IdentityToken : 'identity' ;
+FilterToken : 'filter' ;
+ExpandToken : 'expand' ;
+//see ConcatToken
+
 
 // --
 
