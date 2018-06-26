@@ -102,11 +102,18 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	SimpleDateFormat hqlDateTime = new SimpleDateFormat("''yyyy-MM-dd HH:mm:ss''");
 
 	Queue<String> bindVariables = new ArrayDeque<String>();
+	Map<String, String> aliases = new HashMap<String, String>();
 
 	public ExpressionVisitor() {
 		bindVariables.add("u");
 		// we assume the upper level variable is always "u".
 		// @see HighLevelEntityManager.find()
+	}
+
+	public ExpressionVisitor(Map<String, String> aliases) {
+		this();
+		if (aliases != null)
+			this.aliases = aliases;
 	}
 
 	/**
@@ -375,5 +382,11 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	public String visitTimeOfDayLiteral(ODataParserParser.TimeOfDayLiteralContext ctx) {
 
 		return commonVisitDateOrTimeLiteral(ctx.StringLiteral(), edmTime, jpqlTime);
+	}
+
+	@Override
+	public String visitParameterAlias(ODataParserParser.ParameterAliasContext ctx) {
+		String value = aliases.get(ctx.ParameterAlias().getText());
+		return value; // as-is ???
 	}
 }

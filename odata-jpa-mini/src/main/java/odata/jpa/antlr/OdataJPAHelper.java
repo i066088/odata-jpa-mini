@@ -2,6 +2,7 @@ package odata.jpa.antlr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.Stateless;
 
@@ -20,13 +21,15 @@ public class OdataJPAHelper {
 	 * check).
 	 * 
 	 * @param orderby
+	 * @param aliases 
 	 * @return
 	 */
-	public String parseOrderByClause(String orderby) {
+	public String parseOrderByClause(String orderby, Map<String, String> aliases) {
 		if (orderby == null)
 			return null;
 
 		// TODO use ExpressionVisitor instead
+		// FIXME consider aliases
 
 		StringBuilder orderbyCondition = new StringBuilder();
 		if (orderby != null && !orderby.trim().isEmpty()) {
@@ -53,11 +56,12 @@ public class OdataJPAHelper {
 
 	/**
 	 * Convert $filter clause to JPA WHERE clause (without any semantical check).
+	 * @param aliases 
 	 * 
 	 * @param orderby
 	 * @return
 	 */
-	public String parseFilterClause(String filter) {
+	public String parseFilterClause(String filter, Map<String, String> aliases) {
 		if (filter == null)
 			return null;
 
@@ -79,7 +83,7 @@ public class OdataJPAHelper {
 		// here, the input has already been read and parsed
 
 		// Run the VisitorStringLiteral
-		ExpressionVisitor visitor = new ExpressionVisitor();
+		ExpressionVisitor visitor = new ExpressionVisitor(aliases);
 		String jpql = visitor.visit(tree);
 
 		System.out.println("DEBUG HERE jpql=" + jpql);

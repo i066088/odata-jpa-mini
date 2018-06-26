@@ -15,15 +15,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.SingularAttribute;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -36,6 +37,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -45,12 +47,7 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 
 import odata.jpa.antlr.OdataJPAHelper;
@@ -121,7 +118,8 @@ public class RestResourcesEndpoint {
 			@QueryParam("$top") Integer top, @QueryParam("$filter") String filter,
 			@QueryParam("$orderby") String orderby, @QueryParam("$inlinecount") String inlinecount,
 			@QueryParam("$select") String select, @QueryParam("$expand") String expand,
-			@QueryParam("$apply") String apply, @QueryParam("$search") String search) throws NotFoundException {
+			@QueryParam("$apply") String apply, @QueryParam("$search") String search,
+			@Context HttpServletRequest request) throws NotFoundException {
 
 		// FIXME here, if a return a ODataDataBean, serialization breaks.
 
@@ -132,6 +130,8 @@ public class RestResourcesEndpoint {
 		if (search != null && !search.isEmpty())
 			throw new BadRequestException("$search not supported (yet)");
 
+		Map<String, String> aliases = extractAliases(request);
+
 		@SuppressWarnings("unchecked")
 		Class<T> clazz = (Class<T>) getEntityOrThrowException(entity);
 
@@ -139,7 +139,8 @@ public class RestResourcesEndpoint {
 
 		List<T> list; // this is List<T>
 
-		list = manager.find(clazz, top, skip, helper.parseFilterClause(filter), helper.parseOrderByClause(orderby));
+		list = manager.find(clazz, top, skip, helper.parseFilterClause(filter, aliases),
+				helper.parseOrderByClause(orderby, aliases));
 
 		if (select != null && !select.isEmpty() && !select.trim().equals("*")) {
 			List<String> jpqlAttributeNames = helper.parseAttributes(select);
@@ -160,6 +161,25 @@ public class RestResourcesEndpoint {
 		}
 
 		return resultBean;
+	}
+
+	/**
+	 * Extract from request all query parameters starting with "@"
+	 * 
+	 * @param request
+	 * @return
+	 */
+	private Map<String, String> extractAliases(HttpServletRequest request) {
+		Map<String, String> aliases = new HashMap<String, String>();
+
+		Enumeration<String> params = request.getParameterNames();
+		while (params.hasMoreElements()) {
+			String param = params.nextElement();
+			if (param.startsWith("@"))
+				aliases.put(param, request.getParameter(param));
+		}
+
+		return aliases;
 	}
 
 	/**
@@ -186,10 +206,11 @@ public class RestResourcesEndpoint {
 	@GET
 	@Path("{entity}/$count")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Long count(@PathParam("entity") String entity, @QueryParam("$filter") String filter)
-			throws NotFoundException {
+	public Long count(@PathParam("entity") String entity, @QueryParam("$filter") String filter,
+			@Context HttpServletRequest request) throws NotFoundException {
 		Class<?> clazz = getEntityOrThrowException(entity);
-		return manager.countEntities(clazz, helper.parseFilterClause(filter));
+		Map<String, String> aliases = extractAliases(request);
+		return manager.countEntities(clazz, helper.parseFilterClause(filter, aliases));
 	}
 
 	/**

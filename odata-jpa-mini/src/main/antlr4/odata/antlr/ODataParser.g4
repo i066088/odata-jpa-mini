@@ -161,9 +161,9 @@ primitiveFunctionImportCall    : ( containerQualifier )? primitiveFunctionImport
 primitiveColFunctionImportCall : ( containerQualifier )? primitiveColFunctionImport functionParameters ;
 
 functionParameters    : OP ( functionParameter ( COMMA functionParameter )* )? CP ;
-functionParameter     : functionParameterName EQ ( ParameterAlias | primitiveLiteral ) ;
+functionParameter     : functionParameterName EQ ( parameterAlias | primitiveLiteral ) ;
 functionParameterName : OdataIdentifier ;
-//ParameterAlias        : AT_SIGN OdataIdentifier ;
+//parameterAlias        : AT_SIGN OdataIdentifier ;
 
 containerQualifier : namespace DOT entityContainer DOT ;
 
@@ -275,7 +275,7 @@ parameterTypeName  : qualifiedTypeName ;
 skiptoken : DollarSKIPTOKEN EQ 
             ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON | AT_SIGN | DOLLAR | EQ )+; // everything except "&" and ";"
 
-aliasAndValue         : ParameterAlias        EQ parameterValue;
+aliasAndValue         : parameterAlias        EQ parameterValue;
 parameterNameAndValue : functionParameterName EQ parameterValue;
 
 parameterValue : complexInUri  
@@ -304,7 +304,7 @@ customValue       : ( Unreserved | PctEncoded | OtherDelims |  SQ | COLON | AT_S
 
 // TODO: is a clause also a expression? To e.g. sort by Boolean?
 expression : ( primitiveLiteral
-             | ParameterAlias
+             | parameterAlias
              | firstMemberExpr
              | functionExpr
              | negateExpr 
@@ -728,6 +728,8 @@ guid     : GUID_LAC StringLiteral;
 binary  : (X_LUC|Binary_LAC) StringLiteral; // Note: 'X' is case sensitive, "binary" is not
 
 booleanSymbol : (TrueToken|ONE) | (FalseToken|ZERO);
+
+parameterAlias : ParameterAlias;
 
 /*
 

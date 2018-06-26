@@ -62,7 +62,7 @@ public class TestOdataJPAHelper {
 	@Test
 	public void parseOrderByClause1() {
 		String str = "AbcdEfg/HilmNopq desc,Paperino";
-		String str2 = helper.parseOrderByClause(str);
+		String str2 = helper.parseOrderByClause(str, null);
 		assertNotNull(str2);
 		assertEquals("abcdEfg.hilmNopq desc, paperino asc", str2.trim());
 	}
@@ -70,7 +70,7 @@ public class TestOdataJPAHelper {
 	@Test
 	public void parseOrderByClause2() {
 		String str = "AbcdEfg/HilmNopq,Paperino asc";
-		String str2 = helper.parseOrderByClause(str);
+		String str2 = helper.parseOrderByClause(str, null);
 		assertNotNull(str2);
 		assertEquals("abcdEfg.hilmNopq asc, paperino asc", str2.trim());
 	}
@@ -78,63 +78,63 @@ public class TestOdataJPAHelper {
 	@Test
 	public void parseOrderByClause3() {
 		String str = null;
-		String str2 = helper.parseOrderByClause(str);
+		String str2 = helper.parseOrderByClause(str, null);
 		assertNull(str2);
 	}
 
 	@Test
 	public void filtersBasics() {
 		String filter = "1 eq 2";
-		String jpql = helper.parseFilterClause(filter);
+		String jpql = helper.parseFilterClause(filter, null);
 		assertEquals("1 = 2", jpql);
 	}
 
 	@Test
 	public void filtersBasics2() {
 		String filter = "Prop le -2";
-		String jpql = helper.parseFilterClause(filter);
+		String jpql = helper.parseFilterClause(filter, null);
 		assertEquals("prop <= -2", jpql);
 	}
 
 	@Test
 	public void filtersProperty() {
 		String filter = "Obj/Prop lt 57.0";
-		String jpql = helper.parseFilterClause(filter);
+		String jpql = helper.parseFilterClause(filter, null);
 		assertEquals("obj.prop < 57.0", jpql);
 	}
 
 	@Test
 	public void filtersParenthesis() {
 		String filter = "((Pluto add Pippo)gt 7)and not(Pluto ne '33')";
-		String jpql = helper.parseFilterClause(filter);
+		String jpql = helper.parseFilterClause(filter, null);
 		assertEquals("((pluto + pippo) > 7) AND  NOT (pluto != '33')", jpql);
 	}
 
 	@Test
 	public void filtersTolower() {
 		String filter = "tolower(Pluto)eq'x'";
-		String jpql = helper.parseFilterClause(filter);
+		String jpql = helper.parseFilterClause(filter, null);
 		assertEquals("LOWER(pluto) = 'x'", jpql);
 	}
 
 	@Test
 	public void filtersContains() {
 		String filter = "contains(Pluto , 'something')";
-		String jpql = helper.parseFilterClause(filter);
+		String jpql = helper.parseFilterClause(filter, null);
 		assertEquals("pluto LIKE '%something%'", jpql);
 	}
 
 	@Test
 	public void filtersAny() {
 		String filter = "Bars/any(x:x/Description eq 'Roma')";
-		String jpql = helper.parseFilterClause(filter);
+		String jpql = helper.parseFilterClause(filter, null);
 		assertEquals(" EXISTS (SELECT x FROM u.bars x WHERE x.description = 'Roma')", jpql);
 	}
 
 	@Test
 	public void filtersDates() {
 		String filter = "BirthDay gt date'2000-01-01'";
-		String jpql = helper.parseFilterClause(filter);
+		String jpql = helper.parseFilterClause(filter, null);
 		assertEquals("birthDay > {d '2000-01-01'}", jpql);
 	}
 
