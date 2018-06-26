@@ -4,10 +4,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -347,7 +345,7 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 		return ctx.getChild(0).getText();
 	}
 
-	private String commonHandleDate(TerminalNode stringLiteral, DateFormat edmDf, DateFormat jpqlDf) {
+	private String commonVisitDateOrTimeLiteral(TerminalNode stringLiteral, DateFormat edmDf, DateFormat jpqlDf) {
 		String dateInput = helper.removeFirstAndLast(stringLiteral.getText());
 		Date date;
 		try {
@@ -364,18 +362,18 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	@Override
 	public String visitDateLiteral(ODataParserParser.DateLiteralContext ctx) {
 
-		return commonHandleDate(ctx.StringLiteral(), edmDate, jpqlDate);
+		return commonVisitDateOrTimeLiteral(ctx.StringLiteral(), edmDate, jpqlDate);
 	}
 
 	@Override
 	public String visitDateTimeOffsetLiteral(ODataParserParser.DateTimeOffsetLiteralContext ctx) {
 
-		return commonHandleDate(ctx.StringLiteral(), edmDateTime, jpqlDateTime);
+		return commonVisitDateOrTimeLiteral(ctx.StringLiteral(), edmDateTime, jpqlDateTime);
 	}
 
 	@Override
 	public String visitTimeOfDayLiteral(ODataParserParser.TimeOfDayLiteralContext ctx) {
 
-		return commonHandleDate(ctx.StringLiteral(), edmTime, jpqlTime);
+		return commonVisitDateOrTimeLiteral(ctx.StringLiteral(), edmTime, jpqlTime);
 	}
 }

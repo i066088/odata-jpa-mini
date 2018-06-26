@@ -39,45 +39,6 @@ FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
 
 //////////////////////////////////////////////////////////////    
 
-/*
-DON'T WORK
-
-DateLiteralBody : Year MINUS Month MINUS Day;
-
-DateTimeOffsetLiteralBody : Year MINUS Month MINUS Day T_LUC Hour COLON Minute ( COLON Second ( DOT FractionalSeconds )? )? ( Z_LUC | SIGN Hour COLON Minute );
-    // COMMENT_ANTLR: ISO 8601 says T and not [Tt] separating Date and Time in DateTime
-    // COMMENT_ANTLR: ISO 8601 says Z and not [Zz] indicating UTC (Zulu time ie.)
-
-TimeOfDayLiteralBody : Hour COLON Minute ( COLON Second ( DOT FractionalSeconds )?)?;
-
-fragment
-Year  : ( Digit ) ( Digit ) ( Digit ) ( Digit );
-
-fragment
-Month : ZERO ONE_TO_NINE
-        | ONE ZERO_TO_TWO;
-
-fragment
-Day   : ZERO_TO_TWO ONE_TO_NINE
-      | THREE ZERO_TO_ONE;
-
-fragment
-Hour   : ZERO_TO_ONE ( Digit )
-       | TWO ONE_TO_THREE; 
-
-fragment
-Minute : ZERO_TO_FIFTY_NINE;
-
-fragment
-Second : ZERO_TO_FIFTY_NINE;       
-
-fragment
-FractionalSeconds : ( Digit )+;
-
-*/
-
-//////////////////////////////////////////////////////////////    
-
 StringLiteral
     :   '\'' ( EscapeSequence | ~('\''|'\\') )* '\''
     ;
