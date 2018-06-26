@@ -66,11 +66,8 @@ import odata.jpa.beans.ODataValueBean;
  */
 @Stateless
 @Path("/")
-// TODO @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public class RestResourcesEndpoint {
-
-	public static final Integer ZERO = 0;
 
 	private static final String FILENAME_PROPERTY_SUFFIX = "FileName";
 
@@ -114,21 +111,23 @@ public class RestResourcesEndpoint {
 	@GET
 	@Path("{entity}")
 	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS })
-	public <T> Map<String, Object> find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
+	public <T> Response find(@PathParam("entity") String entity, @QueryParam("$skip") Integer skip,
 			@QueryParam("$top") Integer top, @QueryParam("$filter") String filter,
 			@QueryParam("$orderby") String orderby, @QueryParam("$inlinecount") String inlinecount,
 			@QueryParam("$select") String select, @QueryParam("$expand") String expand,
 			@QueryParam("$apply") String apply, @QueryParam("$search") String search,
-			@Context HttpServletRequest request) throws NotFoundException {
+			@QueryParam("$format") String format, @Context HttpServletRequest request) throws NotFoundException {
 
 		// FIXME here, if a return a ODataDataBean, serialization breaks.
 
 		if (expand != null && !expand.isEmpty())
 			throw new BadRequestException("$expand not supported");
 		if (apply != null && !apply.isEmpty())
-			throw new BadRequestException("$apply not supported (yet)");
+			throw new BadRequestException("$apply not supported (or not yet)");
 		if (search != null && !search.isEmpty())
-			throw new BadRequestException("$search not supported (yet)");
+			throw new BadRequestException("$search not supported (or not yet)");
+		if (format != null && !format.isEmpty())
+			throw new BadRequestException("$format not supported (or not yet)");
 
 		Map<String, String> aliases = extractAliases(request);
 
@@ -147,7 +146,6 @@ public class RestResourcesEndpoint {
 			List<Map<String, Object>> list1 = selectOnlySomeFieldsForAll(clazz, list, jpqlAttributeNames);
 			resultBean.put("data", list1);
 		} else {
-
 			resultBean.put("data", list);
 		}
 		if (inlinecount != null && !inlinecount.equals("none")) {
@@ -160,7 +158,25 @@ public class RestResourcesEndpoint {
 			resultBean.put("count", numItems);
 		}
 
-		return resultBean;
+		// Jackson provides JSON only, so this is useless :(
+		String mediaType = convertFormatToMediaType(format);
+
+		return Response.ok(resultBean, mediaType).build();
+	}
+
+	private String convertFormatToMediaType(String format) {
+		String mediaType;
+		if (format == null || format.isEmpty() || "json".equals(format))
+			mediaType = MediaType.APPLICATION_JSON;
+		else if ("xml".equals(format))
+			mediaType = MediaType.APPLICATION_XML;
+		else if ("atom".equals(format))
+			mediaType = MediaType.APPLICATION_ATOM_XML;
+		else if ("verbosejson".equals(format))
+			throw new BadRequestException("verbosejson not supported");
+		else
+			mediaType = format;
+		return mediaType;
 	}
 
 	/**
@@ -214,7 +230,7 @@ public class RestResourcesEndpoint {
 	}
 
 	/**
-	 * Retreive and return (via JSON) a single object by id. We don't know the type
+	 * Retrieve and return (via JSON) a single object by id. We don't know the type
 	 * of returned objects, so we must return a generic "Response".
 	 * 
 	 * @param entity
@@ -225,10 +241,13 @@ public class RestResourcesEndpoint {
 	@Path("{entity}({id})")
 	@JacksonFeatures(serializationDisable = { SerializationFeature.WRITE_DATES_AS_TIMESTAMPS }) // FIXME not working !?!
 	public Response findById(@PathParam("entity") String entity, @PathParam("id") Long id,
-			@QueryParam("$select") String select, @QueryParam("$expand") String expand) throws NotFoundException {
+			@QueryParam("$select") String select, @QueryParam("$expand") String expand,
+			@QueryParam("$format") String format) throws NotFoundException {
 
 		if (expand != null && !expand.isEmpty())
 			throw new BadRequestException("$expand not supported");
+		if (format != null && !format.isEmpty())
+			throw new BadRequestException("$format not supported (or not yet)");
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -245,7 +264,9 @@ public class RestResourcesEndpoint {
 			obj = selectOnlySomeFields(clazz, obj, jpqlAttributeNames);
 		}
 
-		return Response.ok(obj).build();
+		String mediaType = convertFormatToMediaType(format);
+
+		return Response.ok(obj, mediaType).build();
 	}
 
 	@GET
@@ -280,8 +301,14 @@ public class RestResourcesEndpoint {
 
 	@GET
 	@Path("{entity}({id})/{property}")
-	public ODataValueBean getProperty(@PathParam("entity") String entity, @PathParam("id") Long id,
-			@PathParam("property") String property) throws NotFoundException {
+	public Response getProperty(@PathParam("entity") String entity, @PathParam("id") Long id,
+			@PathParam("property") String property, @QueryParam("$expand") String expand,
+			@QueryParam("$format") String format) throws NotFoundException {
+
+		if (expand != null && !expand.isEmpty())
+			throw new BadRequestException("$expand not supported");
+		if (format != null && !format.isEmpty())
+			throw new BadRequestException("$format not supported (or not yet)");
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
@@ -304,9 +331,11 @@ public class RestResourcesEndpoint {
 			throw new NotFoundException("Entity " + entity + " has no property " + property);
 		}
 
-		ODataValueBean response = new ODataValueBean(value);
+		ODataValueBean responseBean = new ODataValueBean(value);
 
-		return response;
+		String mediaType = convertFormatToMediaType(format);
+
+		return Response.ok(responseBean, mediaType).build();
 	}
 
 	@PUT
@@ -382,28 +411,6 @@ public class RestResourcesEndpoint {
 
 		return Response.ok(obj).build();
 	}
-
-	/*
-	 * public <T> Response update(@PathParam("entity") String
-	 * entity, @PathParam("id") Long id, String json ) throws NotFoundException {
-	 * 
-	 * @SuppressWarnings("unchecked") Class<T> clazz = (Class<T>)
-	 * getEntityOrThrowException(entity);
-	 * 
-	 * if (id == null) throw new BadRequestException(
-	 * "Missing id. Creating an object with given id is not recommended nor supported."
-	 * );
-	 * 
-	 * // SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(clazz); //
-	 * attributes.put(idAttr.getName(), id.toString()); // T obj =
-	 * manager.bean2object(clazz, attributes);
-	 * 
-	 * T obj; try { obj = new ObjectMapper().readValue(json, clazz);
-	 * System.out.println("Here obj=" + obj); // Qui mi aspetto l'ID già settato }
-	 * catch (IOException e) { throw new InternalServerErrorException(e); } obj =
-	 * manager.save(obj); System.out.println("Now obj=" + obj); return
-	 * Response.ok(obj).build(); }
-	 */
 
 	/**
 	 * Duplicate and return (via JSON) a single object by id. The new object is not
