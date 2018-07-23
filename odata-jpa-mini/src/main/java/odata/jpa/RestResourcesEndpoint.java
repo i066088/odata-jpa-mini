@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.servlet.http.HttpServletRequest;
@@ -64,17 +64,18 @@ import odata.jpa.beans.ODataValueBean;
  * @author Luca Vercelli 2017-2018
  * @see http://www.odata.org/getting-started/basic-tutorial/
  */
-@Stateless
 @Path("/")
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-public class RestResourcesEndpoint {
+public abstract class RestResourcesEndpoint {
 
 	private static final String FILENAME_PROPERTY_SUFFIX = "FileName";
 
-	@Inject
-	HighLevelEntityManager manager;
+	public abstract EntityManager em();
+
 	@Inject
 	OdataJPAHelper helper;
+	@Inject
+	HighLevelEntityManager manager;
 
 	/**
 	 * Return the Entity Class with given name.
@@ -85,7 +86,7 @@ public class RestResourcesEndpoint {
 	 *             if such entity is not known.
 	 */
 	protected Class<?> getEntityOrThrowException(String entity) throws NotFoundException {
-		Class<?> clazz = manager.getEntityClass(entity);
+		Class<?> clazz = manager.getEntityClass(em(), entity);
 		if (clazz == null)
 			throw new NotFoundException("Unknown entity set: " + entity);
 		return clazz;
@@ -138,7 +139,7 @@ public class RestResourcesEndpoint {
 
 		List<T> list; // this is List<T>
 
-		list = manager.find(clazz, top, skip, helper.parseFilterClause(filter, aliases),
+		list = manager.find(em(), clazz, top, skip, helper.parseFilterClause(filter, aliases),
 				helper.parseOrderByClause(orderby, aliases));
 
 		if (select != null && !select.isEmpty() && !select.trim().equals("*")) {
@@ -152,7 +153,7 @@ public class RestResourcesEndpoint {
 			if (!inlinecount.equals("allpages"))
 				throw new BadRequestException("$inlinecount must be either 'none' or 'allpages'");
 
-			Long numItems = manager.countEntities(clazz, filter);
+			Long numItems = manager.countEntities(em(), clazz, filter);
 			// Please notice numItems can be larger than list.size()
 
 			resultBean.put("count", numItems);
@@ -226,7 +227,7 @@ public class RestResourcesEndpoint {
 			@Context HttpServletRequest request) throws NotFoundException {
 		Class<?> clazz = getEntityOrThrowException(entity);
 		Map<String, String> aliases = extractAliases(request);
-		return manager.countEntities(clazz, helper.parseFilterClause(filter, aliases));
+		return manager.countEntities(em(), clazz, helper.parseFilterClause(filter, aliases));
 	}
 
 	/**
@@ -254,7 +255,7 @@ public class RestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = manager.findById(clazz, id);
+		Object obj = em().find(clazz, id);
 
 		if (obj == null)
 			throw new NotFoundException("No entity with this Id");
@@ -280,7 +281,7 @@ public class RestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = manager.findById(clazz, id);
+		Object obj = em().find(clazz, id);
 		if (obj == null)
 			throw new NotFoundException("");
 
@@ -315,7 +316,7 @@ public class RestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = manager.findById(clazz, id);
+		Object obj = em().find(clazz, id);
 		if (obj == null)
 			throw new NotFoundException("");
 
@@ -361,7 +362,7 @@ public class RestResourcesEndpoint {
 		Class<?> clazz = getEntityOrThrowException(entity);
 
 		Object obj = manager.bean2object(clazz, attributes);
-		obj = manager.merge(obj);
+		obj = em().merge(obj);
 
 		return Response.status(Status.CREATED).entity(obj).build();
 	}
@@ -379,7 +380,7 @@ public class RestResourcesEndpoint {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
-		manager.remove(clazz, id);
+		manager.removeById(em(), clazz, id);
 	}
 
 	/**
@@ -403,11 +404,11 @@ public class RestResourcesEndpoint {
 			throw new BadRequestException(
 					"Missing id. Creating an object with given id is not recommended nor supported.");
 
-		SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(clazz);
+		SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(em(), clazz);
 		attributes.put(idAttr.getName(), id.toString());
 
 		T obj = manager.bean2object(clazz, attributes);
-		obj = manager.merge(obj);
+		obj = em().merge(obj);
 
 		return Response.ok(obj).build();
 	}
@@ -433,7 +434,7 @@ public class RestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		T obj = manager.duplicate(clazz, id);
+		T obj = manager.duplicate(em(), clazz, id);
 
 		if (obj == null)
 			throw new NotFoundException("No entity with this Id");
@@ -475,7 +476,7 @@ public class RestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = manager.findById(clazz, id);
+		Object obj = em().find(clazz, id);
 		if (obj == null)
 			throw new NotFoundException("");
 
@@ -483,7 +484,7 @@ public class RestResourcesEndpoint {
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
-		Attribute<?, ?> blobAttrib = manager.getAttribute(clazz, jpqlAttribute);
+		Attribute<?, ?> blobAttrib = manager.getAttribute(em(), clazz, jpqlAttribute);
 		if (!(blobAttrib.getJavaType().isAssignableFrom(byte[].class))) {
 			throw new BadRequestException("Property " + property + " is not uploadable/downloadable");
 		}
@@ -563,7 +564,7 @@ public class RestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = manager.findById(clazz, id);
+		Object obj = em().find(clazz, id);
 		if (obj == null)
 			throw new NotFoundException("");
 
@@ -571,7 +572,7 @@ public class RestResourcesEndpoint {
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
-		Attribute<?, ?> blobAttrib = manager.getAttribute(clazz, jpqlAttribute);
+		Attribute<?, ?> blobAttrib = manager.getAttribute(em(), clazz, jpqlAttribute);
 		if (!(blobAttrib.getJavaType().isAssignableFrom(byte[].class))) {
 			throw new BadRequestException("Property " + property + " is not uploadable/downloadable");
 		}
@@ -635,7 +636,7 @@ public class RestResourcesEndpoint {
 		for (String attributeName : attributeNames) {
 			Object value;
 			try {
-				value = manager.getAttributeValue(entity, attributeName, obj);
+				value = manager.getAttributeValue(em(), entity, attributeName, obj);
 			} catch (IllegalArgumentException exc) {
 				throw new BadRequestException(exc.getMessage());
 			}
@@ -658,7 +659,7 @@ public class RestResourcesEndpoint {
 
 		List<Attribute<?, ?>> attributes = new ArrayList<Attribute<?, ?>>();
 		for (String attributeName : attributeNames) {
-			attributes.add(manager.getAttribute(entity, attributeName));
+			attributes.add(manager.getAttribute(em(), entity, attributeName));
 		}
 
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
