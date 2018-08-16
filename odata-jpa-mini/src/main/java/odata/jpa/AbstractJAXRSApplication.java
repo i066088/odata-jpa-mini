@@ -8,7 +8,7 @@ import javax.ws.rs.core.Application;
 /**
  * Configures a JAX-RS endpoint.
  * 
- * Moreover, here is where we set correct PersistenceContext.
+ * If you plan to have multiple Application's, you should specify which RestResourcesEndpoint class to use.
  * 
  * Webapps must extend this.
  */

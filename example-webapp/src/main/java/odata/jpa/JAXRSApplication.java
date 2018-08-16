@@ -8,9 +8,10 @@ package odata.jpa;
 import javax.ws.rs.ApplicationPath;
 
 /**
- * Configures a JAX-RS endpoint.
+ * JAX-RS Application: here we specify the path of the application.
  * 
- * Moreover, here is where we set correct PersistenceContext.
+ * If you plan to have multiple Application's, you should specify which RestResourcesEndpoint class to use.
+ * 
  */
 @ApplicationPath("/resources.svc")
 public class JAXRSApplication extends AbstractJAXRSApplication {

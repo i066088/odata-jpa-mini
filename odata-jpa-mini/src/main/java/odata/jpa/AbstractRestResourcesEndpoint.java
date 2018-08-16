@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.servlet.http.HttpServletRequest;
@@ -70,12 +69,16 @@ public abstract class AbstractRestResourcesEndpoint {
 
 	private static final String FILENAME_PROPERTY_SUFFIX = "FileName";
 
-	public abstract EntityManager em();
+	/**
+	 * Subclasses must implement this with the AbstractDataManager corresponding to
+	 * the Persistence Unit they want to use.
+	 * 
+	 * @return
+	 */
+	public abstract AbstractDataManager manager();
 
 	@Inject
-	OdataJPAHelper helper;
-	@Inject
-	HighLevelEntityManager manager;
+	OdataJPAHelper oHelper;
 
 	/**
 	 * Return the Entity Class with given name.
@@ -86,7 +89,7 @@ public abstract class AbstractRestResourcesEndpoint {
 	 *             if such entity is not known.
 	 */
 	protected Class<?> getEntityOrThrowException(String entity) throws NotFoundException {
-		Class<?> clazz = manager.getEntityClass(em(), entity);
+		Class<?> clazz = manager().getEntityClass(entity);
 		if (clazz == null)
 			throw new NotFoundException("Unknown entity set: " + entity);
 		return clazz;
@@ -139,11 +142,11 @@ public abstract class AbstractRestResourcesEndpoint {
 
 		List<T> list; // this is List<T>
 
-		list = manager.find(em(), clazz, top, skip, helper.parseFilterClause(filter, aliases),
-				helper.parseOrderByClause(orderby, aliases));
+		list = manager().find(clazz, top, skip, oHelper.parseFilterClause(filter, aliases),
+				oHelper.parseOrderByClause(orderby, aliases));
 
 		if (select != null && !select.isEmpty() && !select.trim().equals("*")) {
-			List<String> jpqlAttributeNames = helper.parseAttributes(select);
+			List<String> jpqlAttributeNames = oHelper.parseAttributes(select);
 			List<Map<String, Object>> list1 = selectOnlySomeFieldsForAll(clazz, list, jpqlAttributeNames);
 			resultBean.put("data", list1);
 		} else {
@@ -153,7 +156,7 @@ public abstract class AbstractRestResourcesEndpoint {
 			if (!inlinecount.equals("allpages"))
 				throw new BadRequestException("$inlinecount must be either 'none' or 'allpages'");
 
-			Long numItems = manager.countEntities(em(), clazz, filter);
+			Long numItems = manager().countEntities(clazz, filter);
 			// Please notice numItems can be larger than list.size()
 
 			resultBean.put("count", numItems);
@@ -227,7 +230,7 @@ public abstract class AbstractRestResourcesEndpoint {
 			@Context HttpServletRequest request) throws NotFoundException {
 		Class<?> clazz = getEntityOrThrowException(entity);
 		Map<String, String> aliases = extractAliases(request);
-		return manager.countEntities(em(), clazz, helper.parseFilterClause(filter, aliases));
+		return manager().countEntities(clazz, oHelper.parseFilterClause(filter, aliases));
 	}
 
 	/**
@@ -255,13 +258,13 @@ public abstract class AbstractRestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = em().find(clazz, id);
+		Object obj = manager().find(clazz, id);
 
 		if (obj == null)
 			throw new NotFoundException("No entity with this Id");
 
 		if (select != null && !select.isEmpty() && !select.trim().equals("*")) {
-			List<String> jpqlAttributeNames = helper.parseAttributes(select);
+			List<String> jpqlAttributeNames = oHelper.parseAttributes(select);
 			obj = selectOnlySomeFields(clazz, obj, jpqlAttributeNames);
 		}
 
@@ -281,11 +284,11 @@ public abstract class AbstractRestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = em().find(clazz, id);
+		Object obj = manager().find(clazz, id);
 		if (obj == null)
 			throw new NotFoundException("");
 
-		String jpqlAttribute = helper.parseAttribute(property);
+		String jpqlAttribute = oHelper.parseAttribute(property);
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
@@ -316,11 +319,11 @@ public abstract class AbstractRestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = em().find(clazz, id);
+		Object obj = manager().find(clazz, id);
 		if (obj == null)
 			throw new NotFoundException("");
 
-		String jpqlAttribute = helper.parseAttribute(property);
+		String jpqlAttribute = oHelper.parseAttribute(property);
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
@@ -361,8 +364,8 @@ public abstract class AbstractRestResourcesEndpoint {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
-		Object obj = manager.bean2object(clazz, attributes);
-		obj = em().merge(obj);
+		Object obj = manager().bean2object(clazz, attributes);
+		obj = manager().merge(obj);
 
 		return Response.status(Status.CREATED).entity(obj).build();
 	}
@@ -380,7 +383,7 @@ public abstract class AbstractRestResourcesEndpoint {
 
 		Class<?> clazz = getEntityOrThrowException(entity);
 
-		manager.removeById(em(), clazz, id);
+		manager().removeById(clazz, id);
 	}
 
 	/**
@@ -404,11 +407,11 @@ public abstract class AbstractRestResourcesEndpoint {
 			throw new BadRequestException(
 					"Missing id. Creating an object with given id is not recommended nor supported.");
 
-		SingularAttribute<? super T, ?> idAttr = manager.getIdAttribute(em(), clazz);
+		SingularAttribute<? super T, ?> idAttr = manager().getIdAttribute(clazz);
 		attributes.put(idAttr.getName(), id.toString());
 
-		T obj = manager.bean2object(clazz, attributes);
-		obj = em().merge(obj);
+		T obj = manager().bean2object(clazz, attributes);
+		obj = manager().merge(obj);
 
 		return Response.ok(obj).build();
 	}
@@ -434,7 +437,7 @@ public abstract class AbstractRestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		T obj = manager.duplicate(em(), clazz, id);
+		T obj = manager().duplicate(clazz, id);
 
 		if (obj == null)
 			throw new NotFoundException("No entity with this Id");
@@ -476,15 +479,15 @@ public abstract class AbstractRestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = em().find(clazz, id);
+		Object obj = manager().find(clazz, id);
 		if (obj == null)
 			throw new NotFoundException("");
 
-		String jpqlAttribute = helper.parseAttribute(property);
+		String jpqlAttribute = oHelper.parseAttribute(property);
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
-		Attribute<?, ?> blobAttrib = manager.getAttribute(em(), clazz, jpqlAttribute);
+		Attribute<?, ?> blobAttrib = manager().getAttribute(clazz, jpqlAttribute);
 		if (!(blobAttrib.getJavaType().isAssignableFrom(byte[].class))) {
 			throw new BadRequestException("Property " + property + " is not uploadable/downloadable");
 		}
@@ -506,7 +509,7 @@ public abstract class AbstractRestResourcesEndpoint {
 		String filenamePropertyName = property + FILENAME_PROPERTY_SUFFIX;
 		String filename = contentDisposition.getFileName();
 		if (filenamePropertyName != null && filename != null) {
-			String jpqlAttribute2 = helper.parseAttribute(filenamePropertyName);
+			String jpqlAttribute2 = oHelper.parseAttribute(filenamePropertyName);
 			if (jpqlAttribute2 == null)
 				throw new BadRequestException("Cannot parse property: " + filenamePropertyName);
 
@@ -564,20 +567,20 @@ public abstract class AbstractRestResourcesEndpoint {
 		if (id == null)
 			throw new BadRequestException("Missing id");
 
-		Object obj = em().find(clazz, id);
+		Object obj = manager().find(clazz, id);
 		if (obj == null)
 			throw new NotFoundException("");
 
-		String jpqlAttribute = helper.parseAttribute(property);
+		String jpqlAttribute = oHelper.parseAttribute(property);
 		if (jpqlAttribute == null)
 			throw new BadRequestException("Cannot parse property: " + property);
 
-		Attribute<?, ?> blobAttrib = manager.getAttribute(em(), clazz, jpqlAttribute);
+		Attribute<?, ?> blobAttrib = manager().getAttribute(clazz, jpqlAttribute);
 		if (!(blobAttrib.getJavaType().isAssignableFrom(byte[].class))) {
 			throw new BadRequestException("Property " + property + " is not uploadable/downloadable");
 		}
 
-		byte[] blob = (byte[]) manager.getAttributeValue(blobAttrib, obj);
+		byte[] blob = (byte[]) manager().getAttributeValue(blobAttrib, obj);
 
 		if (blob == null || blob.length == 0) {
 			// DEBUG
@@ -590,7 +593,7 @@ public abstract class AbstractRestResourcesEndpoint {
 
 		String filenamePropertyName = property + FILENAME_PROPERTY_SUFFIX;
 		String filename = null;
-		String jpqlAttribute2 = helper.parseAttribute(filenamePropertyName);
+		String jpqlAttribute2 = oHelper.parseAttribute(filenamePropertyName);
 		if (jpqlAttribute2 == null)
 			throw new BadRequestException("Cannot parse property: " + filenamePropertyName);
 
@@ -636,7 +639,7 @@ public abstract class AbstractRestResourcesEndpoint {
 		for (String attributeName : attributeNames) {
 			Object value;
 			try {
-				value = manager.getAttributeValue(em(), entity, attributeName, obj);
+				value = manager().getAttributeValue(entity, attributeName, obj);
 			} catch (IllegalArgumentException exc) {
 				throw new BadRequestException(exc.getMessage());
 			}
@@ -659,7 +662,7 @@ public abstract class AbstractRestResourcesEndpoint {
 
 		List<Attribute<?, ?>> attributes = new ArrayList<Attribute<?, ?>>();
 		for (String attributeName : attributeNames) {
-			attributes.add(manager.getAttribute(em(), entity, attributeName));
+			attributes.add(manager().getAttribute(entity, attributeName));
 		}
 
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -668,7 +671,7 @@ public abstract class AbstractRestResourcesEndpoint {
 			for (Attribute<?, ?> attribute : attributes) {
 				Object value;
 				try {
-					value = manager.getAttributeValue(attribute, obj);
+					value = manager().getAttributeValue(attribute, obj);
 				} catch (IllegalArgumentException exc) {
 					throw new BadRequestException(exc.getMessage());
 				}
