@@ -66,7 +66,7 @@ import odata.jpa.beans.ODataValueBean;
  */
 @Path("/")
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-public abstract class RestResourcesEndpoint {
+public abstract class AbstractRestResourcesEndpoint {
 
 	private static final String FILENAME_PROPERTY_SUFFIX = "FileName";
 

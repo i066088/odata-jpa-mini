@@ -5,7 +5,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Stateless
-public class RestResourcesEndpointImpl extends RestResourcesEndpoint {
+public class RestResourcesEndpoint extends AbstractRestResourcesEndpoint {
 
 	@PersistenceContext
 	EntityManager em;
