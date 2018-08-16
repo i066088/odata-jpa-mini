@@ -53,7 +53,7 @@ import odata.jpa.antlr.OdataJPAHelper;
 import odata.jpa.beans.ODataValueBean;
 
 /**
- * This REST WS handles not just one entity, but all possible entities. Entites
+ * This REST WS handles not just one entity, but all possible entities. Entities
  * can lie in different packages, however their names must be different (I argue
  * this is assumed by JPA too). This service assumes all entities have a primary
  * key of type Long, called Id.
