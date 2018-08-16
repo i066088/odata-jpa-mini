@@ -307,7 +307,7 @@ public class HighLevelEntityManager {
 		if (idAttr == null) {
 			// TODO LOG instead of System.out.println
 			System.out.println("getIdAttribute() returned null for entity:" + entity);
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("getIdAttribute() returned null for entity:" + entity);
 		}
 
 		try {
