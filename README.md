@@ -21,6 +21,7 @@ this means to load a large number of libraries. Moreover Olingo JPA Processor is
 * No OData metadata (is this really a limitation?)
 * No ETag support
 
+See more details within the example webapp: https://github.com/luca-vercelli/odata-jpa-mini/blob/master/example-webapp/src/main/webapp/index.html
 
 ## Comparison between OData and JPA
 
