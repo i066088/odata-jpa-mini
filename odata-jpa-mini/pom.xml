@@ -7,8 +7,28 @@
 	<version>1.0</version>
 
 	<name>odata-jpa-mini</name>
-	<description>JPA bindings for a minimal subset of Odata</description>
-	<url>http://maven.apache.org</url>
+	<description>Best 60-70% of OData protocol, for Java EE/JPA applications</description>
+	<url>https://github.com/luca-vercelli/odata-jpa-mini</url>
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Luca Vercelli</name>
+			<email>luca.vercelli.to@gmail.com</email>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/luca-vercelli/odata-jpa-mini.git</connection>
+		<developerConnection>scm:git:ssh://github.com/luca-vercelli/odata-jpa-mini.git</developerConnection>
+		<url>http://github.com/luca-vercelli/odata-jpa-mini/tree/master</url>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

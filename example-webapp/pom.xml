@@ -7,10 +7,24 @@
 	<version>1.0</version>
 	<packaging>war</packaging>
 
-	<name>olingo-jpa-mini-example</name>
-	<description>JPA bindings for a minimal subset of Odata</description>
-	<url>http://maven.apache.org</url>
+	<name>Example webapp for odata-jpa-mini</name>
+	<description>Example webapp for odata-jpa-mini, to be run under Glassfish 4.1</description>
+	<url>https://github.com/luca-vercelli/odata-jpa-mini</url>
 
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Luca Vercelli</name>
+			<email>luca.vercelli.to@gmail.com</email>
+		</developer>
+	</developers>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<glassfish.version>4.1</glassfish.version>
@@ -68,7 +82,7 @@
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>5.2.3.Final</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.jboss.arquillian.junit</groupId>
 			<artifactId>arquillian-junit-container</artifactId>
