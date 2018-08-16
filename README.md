@@ -4,7 +4,7 @@ Best 60-70% of OData protocol, for Java EE/JPA applications.
  
 Use case:
 * You want to serve some JPA data via REST/OData protocol.
-* You are in a Java EE context, so you can use JAX-RS and CDI
+* You are in a Java EE 7+ context, so you can use JAX-RS and CDI
 * You don't really need to be 100% OData compliant
 
 Currently, the only way to do this is to use Olingo [1] with Olingo JPA Processor [2], however
