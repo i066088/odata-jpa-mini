@@ -255,17 +255,23 @@ public class HighLevelEntityManager {
 	}
 
 	/**
-	 * Load all objects of given entity, such that property=value (null supported).
+	 * Create a Query such as property=value (null supported).
 	 */
-	public <T> List<T> findByProperty(EntityManager em, Class<T> entity, String propertyName, Object value) {
+	private <T> TypedQuery<T> createFindByPropertyQuery(EntityManager em, Class<T> entity, String propertyName, Object value) {
 		if (value != null) {
 			return em
 					.createQuery("select u from " + entity.getName() + " u where " + propertyName + " = :param", entity)
-					.setParameter("param", value).getResultList();
+					.setParameter("param", value);
 		} else {
-			return em.createQuery("select u from " + entity.getName() + " u where " + propertyName + " is null", entity)
-					.getResultList();
+			return em.createQuery("select u from " + entity.getName() + " u where " + propertyName + " is null", entity);
 		}
+	}
+	
+	/**
+	 * Load all objects of given entity, such that property=value (null supported).
+	 */
+	public <T> List<T> findByProperty(EntityManager em, Class<T> entity, String propertyName, Object value) {
+		return createFindByPropertyQuery(em, entity, propertyName, value).getResultList();
 	}
 
 	/**
@@ -276,15 +282,8 @@ public class HighLevelEntityManager {
 	 * @throws NoResultException
 	 */
 	public <T> T findByPropertySingleResult(EntityManager em, Class<T> entity, String propertyName, Object value) {
-		if (value != null) {
-			return em
-					.createQuery("select u from " + entity.getName() + " u where " + propertyName + " = :param", entity)
-					.setParameter("param", value).getSingleResult();
-		} else {
-			return em.createQuery("select u from " + entity.getName() + " u where " + propertyName + " is null", entity)
-					.getSingleResult();
+		return createFindByPropertyQuery(em, entity, propertyName, value).getSingleResult();
 		}
-	}
 
 	/**
 	 * Find (i.e. retrieve) an object from database, by primary key, then detache it
