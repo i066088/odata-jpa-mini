@@ -1,6 +1,6 @@
 # odata-jpa-mini
 
-Best 60-70% of OData protocol.
+Best 60-70% of OData protocol, for Java EE/JPA applications.
  
 Use case:
 * You want to serve some JPA data via REST/OData protocol.
