@@ -14,7 +14,7 @@ import odata.jpa.beans.ODataExceptionBean;
  * manually launched exceptions (which is useless) and not for uncatched
  * exceptions (which is very useful).
  * 
- * Response is returned in JSON. A better implementation would proceduce XML or
+ * Response is returned in JSON. A better implementation would produce XML or
  * JSON according to accepted headers.
  */
 @Provider

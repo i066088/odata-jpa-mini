@@ -17,7 +17,6 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -29,16 +28,16 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 
 /**
- * Not very different from EntityManager. Just a bit more.
+ * Utility methods regarding EntityManager's and beans.
+ * 
+ * This Stateless EJB <b>does not</b> wrap any EntityManager, because more
+ * Persistence Unit could be present in the same environment.
  * 
  * @author Luca Vercelli 2017-2018
  *
  */
 @Stateless
 public class HighLevelEntityManager {
-
-	@PersistenceContext(unitName = "MyPersistenceUnit")
-	private EntityManager em;
 
 	private Map<String, Class<?>> entityCache = new HashMap<String, Class<?>>();
 
@@ -47,7 +46,7 @@ public class HighLevelEntityManager {
 	 * 
 	 * Complex Types are ignored.
 	 */
-	public Class<?> getEntityClass(String entity) {
+	public Class<?> getEntityClass(EntityManager em, String entity) {
 
 		if (entity == null)
 			return null;
@@ -77,7 +76,7 @@ public class HighLevelEntityManager {
 	 * @param entity
 	 * @return
 	 */
-	public <T> SingularAttribute<? super T, ?> getIdAttribute(Class<T> entity) {
+	public <T> SingularAttribute<? super T, ?> getIdAttribute(EntityManager em, Class<T> entity) {
 		Metamodel m = em.getMetamodel();
 		IdentifiableType<T> type = (IdentifiableType<T>) m.managedType(entity);
 		return type.getId(type.getIdType().getJavaType());
@@ -90,7 +89,7 @@ public class HighLevelEntityManager {
 	 * @param propertyName
 	 * @return
 	 */
-	public <T> Attribute<? super T, ?> getAttribute(Class<T> entity, String propertyName) {
+	public <T> Attribute<? super T, ?> getAttribute(EntityManager em, Class<T> entity, String propertyName) {
 		Metamodel m = em.getMetamodel();
 		return m.managedType(entity).getAttribute(propertyName);
 	}
@@ -139,8 +138,8 @@ public class HighLevelEntityManager {
 	 * @param obj
 	 * @return
 	 */
-	public Object getAttributeValue(Class<?> entity, String attributeName, Object obj) {
-		return getAttributeValue(getAttribute(entity, attributeName), obj);
+	public Object getAttributeValue(EntityManager em, Class<?> entity, String attributeName, Object obj) {
+		return getAttributeValue(getAttribute(em, entity, attributeName), obj);
 	}
 
 	/**
@@ -178,49 +177,25 @@ public class HighLevelEntityManager {
 	}
 
 	/**
-	 * Find (i.e. retrieve) an object from database, by primary key.
-	 * 
-	 * @return the found entity instance or null if the entity does not exist
-	 */
-	public <T> T findById(Class<T> entity, Serializable id) {
-		return em.find(entity, id);
-	}
-
-	/**
-	 * Save an object to database (using 'merge' instead of 'persist'). This is ok
-	 * for both INSERT and UPDATE.
-	 */
-	public <T> T merge(T tosave) {
-		return em.merge(tosave);
-	}
-
-	/**
-	 * Delete an object from database.
-	 */
-	public void remove(Object toremove) {
-		em.remove(toremove);
-	}
-
-	/**
 	 * Delete an object from database, by primary key.
 	 */
-	public void remove(Class<?> entity, Serializable id) {
-		Object obj = findById(entity, id);
+	public void removeById(EntityManager em, Class<?> entity, Serializable id) {
+		Object obj = em.find(entity, id);
 		em.remove(obj);
 	}
 
 	/**
 	 * Load all objects of given entity.
 	 */
-	public <T> List<T> findAll(Class<T> entity) {
+	public <T> List<T> findAll(EntityManager em, Class<T> entity) {
 		return em.createQuery("from " + entity.getName(), entity).getResultList();
 	}
 
 	/**
 	 * Count number of rows in given table.
 	 */
-	public Long countEntities(Class<?> entity) {
-		return countEntities(entity, null);
+	public Long countEntities(EntityManager em, Class<?> entity) {
+		return countEntities(em, entity, null);
 	}
 
 	/**
@@ -229,7 +204,7 @@ public class HighLevelEntityManager {
 	 * @param where
 	 *            JPQL WHERE clause, without "WHERE".
 	 */
-	public Long countEntities(Class<?> entity, String where) {
+	public Long countEntities(EntityManager em, Class<?> entity, String where) {
 		String whereCondition = "";
 		if (where != null && !where.trim().isEmpty()) {
 			whereCondition = " WHERE " + where;
@@ -255,7 +230,8 @@ public class HighLevelEntityManager {
 	 * @param orderby
 	 *            ORDER BY JPQL clause, without "ORDER BY" (optional).
 	 */
-	public <T> List<T> find(Class<T> entity, Integer maxResults, Integer firstResult, String where, String orderby) {
+	public <T> List<T> find(EntityManager em, Class<T> entity, Integer maxResults, Integer firstResult, String where,
+			String orderby) {
 
 		String whereCondition = "";
 		String orderbyCondition = "";
@@ -281,12 +257,13 @@ public class HighLevelEntityManager {
 	/**
 	 * Load all objects of given entity, such that property=value (null supported).
 	 */
-	public <T> List<T> findByProperty(Class<T> entity, String propertyName, Object value) {
+	public <T> List<T> findByProperty(EntityManager em, Class<T> entity, String propertyName, Object value) {
 		if (value != null) {
-			return em.createQuery("from " + entity.getName() + " where " + propertyName + " = :param", entity)
+			return em
+					.createQuery("select u from " + entity.getName() + " u where " + propertyName + " = :param", entity)
 					.setParameter("param", value).getResultList();
 		} else {
-			return em.createQuery("from " + entity.getName() + " where " + propertyName + " is null", entity)
+			return em.createQuery("select u from " + entity.getName() + " u where " + propertyName + " is null", entity)
 					.getResultList();
 		}
 	}
@@ -296,58 +273,17 @@ public class HighLevelEntityManager {
 	 * or null if none.
 	 * 
 	 * @throws NonUniqueResultException
+	 * @throws NoResultException
 	 */
-	public <T> T findByPropertySingleResult(Class<T> entity, String propertyName, Object value) {
-		// FIXME non standard JPQL
-		try {
-			if (value != null) {
-				return em.createQuery("FROM " + entity.getName() + " WHERE " + propertyName + " = :param", entity)
-						.setParameter("param", value).getSingleResult();
-			} else {
-				return em.createQuery("FROM " + entity.getName() + " WHERE " + propertyName + " is null", entity)
-						.getSingleResult();
-			}
-		} catch (NoResultException exc) {
-			return null;
+	public <T> T findByPropertySingleResult(EntityManager em, Class<T> entity, String propertyName, Object value) {
+		if (value != null) {
+			return em
+					.createQuery("select u from " + entity.getName() + " u where " + propertyName + " = :param", entity)
+					.setParameter("param", value).getSingleResult();
+		} else {
+			return em.createQuery("select u from " + entity.getName() + " u where " + propertyName + " is null", entity)
+					.getSingleResult();
 		}
-	}
-
-	/**
-	 * Load all objects of given entity, such that property=value (null supported).
-	 */
-	public <T> List<T> findByProperties(Class<T> entity, Map<String, Object> properties) {
-
-		// FIXME non standard JPQL
-		StringBuffer queryStr = new StringBuffer("FROM " + entity.getName());
-
-		if (!properties.keySet().isEmpty()) {
-			queryStr.append(" WHERE ");
-			String and = "";
-			for (String propertyName : properties.keySet()) {
-				queryStr.append(and);
-				queryStr.append(propertyName);
-				if (properties.get(propertyName) == null) {
-					queryStr.append(" IS NULL ");
-				} else {
-					queryStr.append(" = ");
-					queryStr.append(" :propertyName ");
-				}
-
-				and = " and ";
-			}
-		}
-
-		TypedQuery<T> q = em.createQuery(queryStr.toString(), entity);
-
-		for (String propertyName : properties.keySet()) {
-			Object value = properties.get(propertyName);
-			if (value != null) {
-				q.setParameter(propertyName, value);
-			}
-		}
-
-		return q.getResultList();
-
 	}
 
 	/**
@@ -359,7 +295,7 @@ public class HighLevelEntityManager {
 	 * @throws IllegalArgumentException
 	 *             if object does not exists
 	 */
-	public <T> T duplicate(Class<T> entity, Serializable id) {
+	public <T> T duplicate(EntityManager em, Class<T> entity, Serializable id) {
 
 		T obj = em.find(entity, id);
 
@@ -368,7 +304,7 @@ public class HighLevelEntityManager {
 
 		em.detach(obj);
 
-		SingularAttribute<? super T, ?> idAttr = getIdAttribute(entity);
+		SingularAttribute<? super T, ?> idAttr = getIdAttribute(em, entity);
 		if (idAttr == null) {
 			// TODO LOG instead of System.out.println
 			System.out.println("getIdAttribute() returned null for entity:" + entity);
