@@ -7,8 +7,8 @@ Use case:
 * You are in a Java EE 7+ context, so you can use JAX-RS and CDI
 * You don't really need to be 100% OData compliant
 
-Currently, the only way to do this is to use Olingo [1] with Olingo JPA Processor [2], however
-this means to load a large number of libraries. Moreover Olingo JPA Processor is not stable yet for production.
+Currently, the only way to do this is to use Olingo [1] with Olingo JPA Processor [2], with the following possible problems:
+(1) this means to load a large number of libraries, (2) Olingo JPA Processor is not stable yet for production, (3) Olingo JPA Processor requires Java 8.
 
 **Warning: requires Jackson as serializer, MOXy won't work**
 
@@ -16,7 +16,7 @@ this means to load a large number of libraries. Moreover Olingo JPA Processor is
 ## Limitations of this implementation
 * Root and metadata documents are not implemented
 * Navigation is not implemented
-* Several query options are not implemented, such as $select and $expand
+* Several query options are not implemented, such as $search and $expand
 * Entity id's must all be Long! This is quite bad but I don't know how to solve it yet.
 * No OData metadata (is this really a limitation?)
 * No ETag support
