@@ -22,10 +22,10 @@ import odata.antlr.ODataParserParser;
  * 
  * For security reasons, we do not accept functions we do not know.
  * 
- * @author Luca Vercelli 2018
+ * @author Luca Vercelli 2018-2019
  *
  */
-public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
+public class OData2JpqlExpressionVisitor extends ODataParserBaseVisitor<String> {
 
 	static Map<String, String> operators = new HashMap<String, String>();
 	static OdataJPAHelper helper = new OdataJPAHelper();
@@ -104,14 +104,12 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 	Queue<String> bindVariables = new ArrayDeque<String>();
 	Map<String, String> aliases = new HashMap<String, String>();
 
-	public ExpressionVisitor() {
-		bindVariables.add("u");
-		// we assume the upper level variable is always "u".
-		// @see HighLevelEntityManager.find()
+	public OData2JpqlExpressionVisitor(String bindVariableName) {
+		bindVariables.add(bindVariableName);
 	}
 
-	public ExpressionVisitor(Map<String, String> aliases) {
-		this();
+	public OData2JpqlExpressionVisitor(String bindVariableName, Map<String, String> aliases) {
+		this(bindVariableName);
 		if (aliases != null)
 			this.aliases = aliases;
 	}
@@ -302,7 +300,7 @@ public class ExpressionVisitor extends ODataParserBaseVisitor<String> {
 
 	@Override
 	public String visitEntityColNavigationProperty(ODataParserParser.EntityColNavigationPropertyContext ctx) {
-		return helper.firstToLower(ctx.getText());
+		return bindVariables.peek() + "." + helper.firstToLower(ctx.getText());
 	}
 
 	@Override

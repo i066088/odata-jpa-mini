@@ -3,8 +3,9 @@
 
 	<persistence-unit name="MyPersistenceUnit"
 		transaction-type="JTA">
-		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-		<jta-data-source>DerbyEmbedded</jta-data-source>
+<!-- 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider> -->
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<jta-data-source>jdbc/mainDataSource</jta-data-source>
 
 		<!-- Entity classes -->
 		<class>odata.jpa.entity.Bar</class>
@@ -17,6 +18,7 @@
 			<property name="javax.persistence.sql-load-script-source"
 				value="POPULATE-DATABASE.SQL" />
 
+<!-- FIXME missing eclipselink jta platform ? -->
 			<property name="hibernate.transaction.jta.platform"
 				value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform" />
 			<property name="hibernate.show_sql" value="true" />
