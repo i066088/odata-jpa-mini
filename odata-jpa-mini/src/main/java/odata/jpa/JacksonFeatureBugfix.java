@@ -16,10 +16,10 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
  * 
  * AFAIK, Jackson JSON serializer is in the library
  * com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider while the library
- * org.glassfish.jersey.media:jersey-media-json-jackson is just a wrapper, it
+ * org.glassfish.jersey.media:jersey-media-json-jackson is just a wrapper, its
  * main class is the Feature org.glassfish.jersey.jackson.JacksonFeature .
  * 
- * Unluckily, such Feature uses the JacksonJaxbJsonProvider.class instead of
+ * Unluckily, such Feature registers the JacksonJaxbJsonProvider.class instead of
  * JacksonJsonProvider.class, I don't know why. That gives a bad exception the
  * first time you invoke the webservice:
  * 
