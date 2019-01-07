@@ -88,7 +88,7 @@ public class OdataJPAHelper {
 		OData2JpqlExpressionVisitor visitor = new OData2JpqlExpressionVisitor(bindVariable, aliases);
 		String jpql = visitor.visit(tree);
 
-		System.out.println("DEBUG HERE jpql=" + jpql);
+		System.out.println("DEBUG parseFilterClause() jpql=" + jpql);
 
 		return jpql;
 	}

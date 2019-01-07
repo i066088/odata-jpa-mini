@@ -1,6 +1,5 @@
 package odata.jpa.antlr;
 
-import java.nio.CharBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,6 +15,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import odata.antlr.ODataParserBaseVisitor;
 import odata.antlr.ODataParserParser;
+import odata.antlr.ODataParserParser.FirstMemberExprContext;
 
 /**
  * ANTLR 4.5 visitor for Expressions. Its purpose is to parse expressions in
@@ -317,12 +317,18 @@ public class OData2JpqlExpressionVisitor extends ODataParserBaseVisitor<String> 
 
 	@Override
 	public String visitEntityNavigationProperty(ODataParserParser.EntityNavigationPropertyContext ctx) {
-		return helper.firstToLower(ctx.getText());
+		String prefix = "";
+		if (ctx.parent.parent instanceof FirstMemberExprContext)
+			prefix = bindVariables.peek() + ".";
+		return prefix + helper.firstToLower(ctx.getText());
 	}
 
 	@Override
 	public String visitEntityColNavigationProperty(ODataParserParser.EntityColNavigationPropertyContext ctx) {
-		return bindVariables.peek() + "." + helper.firstToLower(ctx.getText());
+		String prefix = "";
+		if (ctx.parent.parent instanceof FirstMemberExprContext)
+			prefix = bindVariables.peek() + ".";
+		return  prefix + helper.firstToLower(ctx.getText());
 	}
 
 	@Override
