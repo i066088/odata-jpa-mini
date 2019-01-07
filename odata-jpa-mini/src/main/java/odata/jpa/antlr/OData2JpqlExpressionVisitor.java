@@ -1,5 +1,6 @@
 package odata.jpa.antlr;
 
+import java.nio.CharBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -117,9 +118,11 @@ public class OData2JpqlExpressionVisitor extends ODataParserBaseVisitor<String> 
 	/**
 	 * DEBUG procedure
 	 * 
-	 * @param tree
+	 * @param tree what to format
+	 * @param graphical if true, text will be formatted on more lines
+	 * @param if graphical, the number of spaces on the left. Usually 0.
 	 */
-	public String printContext(ParseTree tree) {
+	public String printContext(ParseTree tree, boolean graphical, int level) {
 		if (tree instanceof ErrorNode) {
 			ErrorNode node = (ErrorNode) tree;
 			return "ErrorNode(" + node.getSymbol() + ")";
@@ -127,16 +130,35 @@ public class OData2JpqlExpressionVisitor extends ODataParserBaseVisitor<String> 
 			TerminalNode node = (TerminalNode) tree;
 			return "TerminalNode(" + node.getSymbol() + ")";
 		} else {
+			StringBuffer padding = (graphical) ? spaces(level) : new StringBuffer();
 			StringBuffer sb = new StringBuffer(tree.getClass().getSimpleName()).append("(");
 			for (int i = 0; i < tree.getChildCount(); ++i) {
 				ParseTree child = tree.getChild(i);
-				if (i != 0)
+				if (i != 0) {
 					sb.append(", ");
-				sb.append(printContext(child));
+				}
+				if (graphical) {
+					sb.append("\r\n").append(padding);
+				}
+				sb.append(printContext(child, graphical, level + 1));
 			}
 			sb.append(")");
 			return sb.toString();
 		}
+	}
+
+	/**
+	 * Creates a string of spaces that is 'spaces' spaces long.
+	 * @see https://stackoverflow.com/questions/2804827
+	 * 
+	 * @param spaces The number of spaces to add to the string.
+	 */
+	private StringBuffer spaces(int length) {
+		StringBuffer sb = new StringBuffer(length);
+		for (int i = 0; i < length; i++){
+		   sb.append(" ");
+		}
+		return sb;
 	}
 
 	/**
@@ -187,7 +209,7 @@ public class OData2JpqlExpressionVisitor extends ODataParserBaseVisitor<String> 
 	@Override
 	public String visitClause(ODataParserParser.ClauseContext ctx) {
 		// just for debug
-		System.out.println("HERE context = " + printContext(ctx));
+		System.out.println("DEBUG visitClause() context = " + printContext(ctx, true, 0));
 		return visitChildren(ctx);
 	}
 
