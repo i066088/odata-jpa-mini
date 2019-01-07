@@ -317,10 +317,7 @@ public class OData2JpqlExpressionVisitor extends ODataParserBaseVisitor<String> 
 
 	@Override
 	public String visitEntityNavigationProperty(ODataParserParser.EntityNavigationPropertyContext ctx) {
-		String prefix = "";
-		if (ctx.parent.parent instanceof FirstMemberExprContext)
-			prefix = bindVariables.peek() + ".";
-		return prefix + helper.firstToLower(ctx.getText());
+		return helper.firstToLower(ctx.getText());
 	}
 
 	@Override
