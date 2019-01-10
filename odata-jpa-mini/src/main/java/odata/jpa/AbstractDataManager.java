@@ -29,7 +29,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 /**
  * Utility methods for managing persisted entities.
  * 
- * Wraps a JPA EntityManager.
+ * Wraps a JPA EntityManager. Subclasses should be @Stateless.
  * 
  * @author Luca Vercelli 2017-2018
  *
